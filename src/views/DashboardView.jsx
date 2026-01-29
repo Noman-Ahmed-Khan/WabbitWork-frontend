@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { BarChart3, AlertCircle, Clock, Plus } from 'lucide-react'
 import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
 import StatsPanel from '../components/panels/StatsPanel'
@@ -58,6 +59,7 @@ export default function DashboardView() {
       <Shell>
         <Panel>
           <div className="alert alert-error">
+            <AlertCircle size={20} />
             <span>{error}</span>
           </div>
         </Panel>
@@ -74,7 +76,10 @@ export default function DashboardView() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
+            <h1 className="text-3xl font-bold mb-1 flex items-center gap-2">
+              <BarChart3 size={32} />
+              Dashboard
+            </h1>
             <p className="text-base-content/60">Overview of your tasks</p>
           </div>
           <Button
@@ -93,7 +98,7 @@ export default function DashboardView() {
           <Panel>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <span>🚨</span>
+                <AlertCircle size={24} className="text-error" />
                 <span>Overdue Tasks</span>
                 <span className="badge badge-error">{overdueTasks.length}</span>
               </h2>
@@ -117,7 +122,7 @@ export default function DashboardView() {
           <Panel>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <span>⏰</span>
+                <Clock size={24} className="text-warning" />
                 <span>Due Soon</span>
                 <span className="badge badge-warning">{dueSoonTasks.length}</span>
               </h2>
@@ -140,7 +145,7 @@ export default function DashboardView() {
         {overdueTasks.length === 0 && dueSoonTasks.length === 0 && (
           <Panel>
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">✅</div>
+              <CheckSquare size={64} className="mx-auto mb-4 text-success" />
               <h3 className="text-xl font-bold mb-2">All Caught Up!</h3>
               <p className="text-base-content/60 mb-6">
                 No overdue or urgent tasks at the moment.
@@ -157,4 +162,4 @@ export default function DashboardView() {
       </div>
     </Shell>
   )
-}
+}t

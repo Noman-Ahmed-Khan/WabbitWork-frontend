@@ -1,3 +1,4 @@
+import { User, UserMinus, Save } from 'lucide-react'
 import Badge from '../primitives/Badge'
 import Button from '../primitives/Button'
 import Select from '../primitives/Select'
@@ -29,6 +30,9 @@ export default function MemberPanel({
     }
   }
 
+  // Get initials
+  const initials = `${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`
+
   return (
     <div className="card bg-base-100 border border-base-300">
       <div className="card-body p-4">
@@ -36,19 +40,22 @@ export default function MemberPanel({
           {/* Avatar */}
           <div className="avatar placeholder">
             <div className="w-12 rounded-full bg-primary text-primary-content">
-              <span className="text-lg font-bold">
-                {member.first_name?.[0]}{member.last_name?.[0]}
-              </span>
+              <span className="text-lg font-bold">{initials}</span>
             </div>
           </div>
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold truncate">
+            <h3 className="font-semibold truncate flex items-center gap-2">
               {member.first_name} {member.last_name}
-              {isCurrentUser && <span className="text-xs ml-2 text-base-content/60">(You)</span>}
+              {isCurrentUser && (
+                <span className="text-xs text-base-content/60">(You)</span>
+              )}
             </h3>
-            <p className="text-sm text-base-content/60 truncate">{member.email}</p>
+            <p className="text-sm text-base-content/60 truncate flex items-center gap-1">
+              <User size={12} />
+              {member.email}
+            </p>
           </div>
 
           {/* Role */}
@@ -71,7 +78,7 @@ export default function MemberPanel({
                     onClick={handleRoleChange}
                     loading={isUpdating}
                   >
-                    Update
+                    <Save size={14} />
                   </Button>
                 )}
               </div>
@@ -90,6 +97,7 @@ export default function MemberPanel({
               onClick={() => onRemove(member.id)}
               className="text-error hover:bg-error/10"
             >
+              <UserMinus size={16} />
               {isCurrentUser ? 'Leave' : 'Remove'}
             </Button>
           ) : null}

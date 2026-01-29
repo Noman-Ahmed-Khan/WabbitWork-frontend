@@ -1,3 +1,4 @@
+import { Calendar, User, Edit, Trash2 } from 'lucide-react'
 import Badge from '../primitives/Badge'
 import Button from '../primitives/Button'
 import { formatRelativeDate, isOverdue } from '../../utils/formatDate'
@@ -18,7 +19,8 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
               {task.title}
             </h3>
             {showTeam && task.team_name && (
-              <p className="text-xs text-base-content/60 truncate">
+              <p className="text-xs text-base-content/60 truncate flex items-center gap-1">
+                <User size={12} />
                 {task.team_name}
               </p>
             )}
@@ -50,7 +52,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
           {/* Assignee */}
           {task.assignee_first_name && (
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-base-content/60">Assigned to:</span>
+              <User size={12} className="text-base-content/60" />
               <span className="font-medium">
                 {task.assignee_first_name} {task.assignee_last_name}
               </span>
@@ -60,7 +62,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
           {/* Due date */}
           {task.due_date && (
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-base-content/60">Due:</span>
+              <Calendar size={12} className="text-base-content/60" />
               <span
                 className={cx(
                   'font-medium',
@@ -81,6 +83,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
             size="sm"
             onClick={() => onEdit(task)}
           >
+            <Edit size={14} />
             Edit
           </Button>
           <Button
@@ -89,6 +92,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
             onClick={() => onDelete(task.id)}
             className="text-error hover:bg-error/10"
           >
+            <Trash2 size={14} />
             Delete
           </Button>
         </div>

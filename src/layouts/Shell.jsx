@@ -1,3 +1,4 @@
+import { User } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import Dock from '../components/navigation/Dock'
 import config from '../config/env'
@@ -8,6 +9,11 @@ import config from '../config/env'
  */
 export default function Shell({ children }) {
   const user = useAuthStore((state) => state.user)
+
+  // Get user initials
+  const initials = user 
+    ? `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`
+    : 'U'
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -36,9 +42,11 @@ export default function Shell({ children }) {
             </div>
             <div className="avatar placeholder">
               <div className="w-10 rounded-full bg-primary text-primary-content">
-                <span className="text-sm font-bold">
-                  {user?.first_name?.[0]}{user?.last_name?.[0]}
-                </span>
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} />
+                ) : (
+                  <span className="text-sm font-bold">{initials}</span>
+                )}
               </div>
             </div>
           </div>

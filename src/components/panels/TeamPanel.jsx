@@ -1,4 +1,4 @@
-
+import { Users, CheckSquare, Eye, Edit, Trash2, UserCog } from 'lucide-react'
 import Badge from '../primitives/Badge'
 import Button from '../primitives/Button'
 import tokens from '../../theme/tokens'
@@ -27,31 +27,33 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
         {/* Stats */}
         <div className="flex gap-4 mb-4">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-base-content/60">👥</span>
+            <Users size={16} className="text-base-content/60" />
             <span className="font-medium">{team.member_count}</span>
             <span className="text-base-content/60">members</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-base-content/60">✓</span>
+            <CheckSquare size={16} className="text-base-content/60" />
             <span className="font-medium">{team.task_count}</span>
             <span className="text-base-content/60">tasks</span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="card-actions justify-end gap-2">
+        <div className="card-actions justify-end gap-2 flex-wrap">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onView(team)}
           >
-            View Tasks
+            <Eye size={16} />
+            View
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onManageMembers(team)}
           >
+            <UserCog size={16} />
             Members
           </Button>
           {(team.role === 'owner' || team.role === 'admin') && (
@@ -61,6 +63,7 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
                 size="sm"
                 onClick={() => onEdit(team)}
               >
+                <Edit size={16} />
                 Edit
               </Button>
               {team.role === 'owner' && (
@@ -70,6 +73,7 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
                   onClick={() => onDelete(team.id)}
                   className="text-error hover:bg-error/10"
                 >
+                  <Trash2 size={16} />
                   Delete
                 </Button>
               )}

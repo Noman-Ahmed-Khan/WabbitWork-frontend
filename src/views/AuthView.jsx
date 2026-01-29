@@ -1,14 +1,20 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { LogIn, UserPlus } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import Panel from '../layouts/Panel'
 import Input from '../components/primitives/Input'
 import Button from '../components/primitives/Button'
 import config from '../config/env'
 
+/**
+ * Authentication view
+ * Handles login and registration
+ */
 export default function AuthView() {
-  const [mode, setMode] = useState('login') // 'login' or 'register'
+  const [mode, setMode] = useState('login')
   const navigate = useNavigate()
+  
   const { login, register, loading, error, clearError } = useAuthStore()
 
   const [formData, setFormData] = useState({
@@ -150,7 +156,17 @@ export default function AuthView() {
               className="w-full"
               loading={loading}
             >
-              {mode === 'login' ? 'Sign In' : 'Create Account'}
+              {mode === 'login' ? (
+                <>
+                  <LogIn size={18} />
+                  Sign In
+                </>
+              ) : (
+                <>
+                  <UserPlus size={18} />
+                  Create Account
+                </>
+              )}
             </Button>
 
             {/* Toggle mode */}
