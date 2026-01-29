@@ -8,104 +8,53 @@ import Input from '../components/primitives/Input'
 import Select from '../components/primitives/Select'
 import Spinner from '../components/primitives/Spinner'
 import TaskOverlay from '../components/overlays/TaskOverlay'
-import tasksApi from '../api/tasks'
-import teamsApi from '../api/teams'
-import { useUI } from '../state/ui.store'
-import { useAuth } from '../state/auth.store'
+import useTaskStore from '../stores/taskStore'
+import useTeamStore from '../stores/teamStore'
+import useUIStore from '../stores/uiStore'
+import useAuthStore from '../stores/authStore'
 
 export default function TasksView() {
   const location = useLocation()
-  const { user } = useAuth()
-  const { activeOverlay, openOverlay } = useUI()
+  const { user } = useAuthStore()
+  const { activeOverlay, openOverlay } = useUIStore()
 
-  const [tasks, setTasks] = useState([])
-  const [teams, setTeams] = useState([])
-  const [members, setMembers] = useState([])
-  const [loading, setLoading] = useState(true)
-  
-  // Filters
-  const [filters, setFilters] = useState({
-    search: '',
-    team_id: location.state?.teamId || '',
-    status: '',
-    priority: '',
-    assigned_to: '',
-    assigned_to_me: false,
-  })
+  const {
+    tasks,
+    filters,
+    loading,
+    setFilters,
+    resetFilters,
+    loadTasks,
+    deleteTask,
+  } = useTaskStore()
 
+  const { teams, members, loadTeams, loadMembers } = useTeamStore()
+
+  // Initialize filters from navigation state
+  useEffect(() => {
+    if (location.state?.teamId) {
+      setFilters({ team_id: location.state.teamId })
+    }
+  }, [location.state, setFilters])
+
+  // Load teams and tasks
   useEffect(() => {
     loadTeams()
-  }, [])
-
-  useEffect(() => {
     loadTasks()
-  }, [filters])
+  }, [loadTeams, loadTasks])
 
+  // Load members when team filter changes
   useEffect(() => {
     if (filters.team_id) {
       loadMembers(filters.team_id)
-    } else {
-      setMembers([])
     }
-  }, [filters.team_id])
-
-  const loadTeams = async () => {
-    try {
-      const response = await teamsApi.getAll()
-      setTeams(response.data.teams)
-    } catch (err) {
-      console.error('Failed to load teams:', err)
-    }
-  }
-
-  const loadMembers = async (teamId) => {
-    try {
-      const response = await teamsApi.getMembers(teamId)
-      setMembers(response.data.members)
-    } catch (err) {
-      console.error('Failed to load members:', err)
-    }
-  }
-
-  const loadTasks = async () => {
-    try {
-      setLoading(true)
-      
-      // Build query params
-      const params = {}
-      if (filters.search) params.search = filters.search
-      if (filters.team_id) params.team_id = filters.team_id
-      if (filters.status) params.status = filters.status
-      if (filters.priority) params.priority = filters.priority
-      if (filters.assigned_to) params.assigned_to = filters.assigned_to
-      if (filters.assigned_to_me) params.assigned_to_me = true
-
-      const response = await tasksApi.getAll(params)
-      setTasks(response.data.tasks)
-    } catch (err) {
-      alert(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [filters.team_id, loadMembers])
 
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [name]: value,
-      // Reset assignee filter when team changes
-      ...(name === 'team_id' && { assigned_to: '' })
-    }))
-  }
-
-  const handleClearFilters = () => {
     setFilters({
-      search: '',
-      team_id: '',
-      status: '',
-      priority: '',
-      assigned_to: '',
-      assigned_to_me: false,
+      [name]: value,
+      // Reset assignee when team changes
+      ...(name === 'team_id' && { assigned_to: '' })
     })
   }
 
@@ -117,8 +66,7 @@ export default function TasksView() {
     if (!confirm('Delete this task?')) return
 
     try {
-      await tasksApi.delete(taskId)
-      loadTasks()
+      await deleteTask(taskId)
     } catch (err) {
       alert(err.message)
     }
@@ -223,7 +171,7 @@ export default function TasksView() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleClearFilters}
+                  onClick={resetFilters}
                 >
                   Clear Filters ({activeFilterCount})
                 </Button>
@@ -269,7 +217,7 @@ export default function TasksView() {
               ) : (
                 <Button
                   variant="ghost"
-                  onClick={handleClearFilters}
+                  onClick={resetFilters}
                 >
                   Clear Filters
                 </Button>

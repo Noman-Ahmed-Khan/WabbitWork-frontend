@@ -1,6 +1,7 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './state/auth.store'
-import { UIProvider } from './state/ui.store'
+import useAuthStore from './stores/authStore'
+import useUIStore from './stores/uiStore'
 import AuthView from './views/AuthView'
 import DashboardView from './views/DashboardView'
 import TeamsView from './views/TeamsView'
@@ -12,7 +13,7 @@ import Spinner from './components/primitives/Spinner'
  * Redirects to auth if not authenticated
  */
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuthStore()
 
   if (loading) {
     return (
@@ -34,7 +35,7 @@ function ProtectedRoute({ children }) {
  * Redirects to dashboard if already authenticated
  */
 function PublicRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuthStore()
 
   if (loading) {
     return (
@@ -51,6 +52,7 @@ function PublicRoute({ children }) {
   return children
 }
 
+// Application routes
 function AppRoutes() {
   return (
     <Routes>
@@ -97,14 +99,25 @@ function AppRoutes() {
   )
 }
 
+/**
+ * Main App component
+ * Initializes auth and theme
+ */
 export default function App() {
+  const checkAuth = useAuthStore((state) => state.checkAuth)
+  const initializeTheme = useUIStore((state) => state.initializeTheme)
+
+  useEffect(() => {
+    // Initialize theme from localStorage
+    initializeTheme()
+    
+    // Check authentication status on mount
+    checkAuth()
+  }, [checkAuth, initializeTheme])
+
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <UIProvider>
-          <AppRoutes />
-        </UIProvider>
-      </AuthProvider>
+      <AppRoutes />
     </BrowserRouter>
   )
 }

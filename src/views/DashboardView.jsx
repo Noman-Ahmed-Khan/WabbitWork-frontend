@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
@@ -6,31 +6,29 @@ import StatsPanel from '../components/panels/StatsPanel'
 import TaskPanel from '../components/panels/TaskPanel'
 import Button from '../components/primitives/Button'
 import Spinner from '../components/primitives/Spinner'
-import dashboardApi from '../api/dashboard'
-import { useUI } from '../state/ui.store'
+import useTaskStore from '../stores/taskStore'
+import useUIStore from '../stores/uiStore'
+import config from '../config/env'
 
+/**
+ * Dashboard view
+ * Shows task statistics and important tasks
+ */
 export default function DashboardView() {
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { openOverlay } = useUI()
+  const { openOverlay } = useUIStore()
+  
+  const {
+    dashboardStats,
+    loading,
+    error,
+    loadDashboardStats,
+    deleteTask,
+  } = useTaskStore()
 
   useEffect(() => {
-    loadDashboard()
-  }, [])
-
-  const loadDashboard = async () => {
-    try {
-      setLoading(true)
-      const response = await dashboardApi.getStats()
-      setData(response.data)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+    loadDashboardStats()
+  }, [loadDashboardStats])
 
   const handleEditTask = (task) => {
     openOverlay('task', task)
@@ -40,15 +38,14 @@ export default function DashboardView() {
     if (!confirm('Delete this task?')) return
     
     try {
-      const tasksApi = (await import('../api/tasks')).default
-      await tasksApi.delete(taskId)
-      loadDashboard()
+      await deleteTask(taskId)
+      await loadDashboardStats()
     } catch (err) {
       alert(err.message)
     }
   }
 
-  if (loading) {
+  if (loading && !dashboardStats) {
     return (
       <Shell>
         <Spinner />
@@ -68,6 +65,9 @@ export default function DashboardView() {
     )
   }
 
+  const dueSoonTasks = dashboardStats?.due_soon || []
+  const overdueTasks = dashboardStats?.overdue || []
+
   return (
     <Shell>
       <div className="space-y-6 mb-24">
@@ -86,21 +86,21 @@ export default function DashboardView() {
         </div>
 
         {/* Stats */}
-        <StatsPanel stats={data?.stats} loading={false} />
+        <StatsPanel stats={dashboardStats?.stats} loading={loading} />
 
         {/* Overdue tasks */}
-        {data?.overdue && data.overdue.length > 0 && (
+        {config.features.dueDateReminders && overdueTasks.length > 0 && (
           <Panel>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <span>🚨</span>
                 <span>Overdue Tasks</span>
-                <span className="badge badge-error">{data.overdue.length}</span>
+                <span className="badge badge-error">{overdueTasks.length}</span>
               </h2>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {data.overdue.map((task) => (
+              {overdueTasks.map((task) => (
                 <TaskPanel
                   key={task.id}
                   task={task}
@@ -113,18 +113,18 @@ export default function DashboardView() {
         )}
 
         {/* Due soon tasks */}
-        {data?.due_soon && data.due_soon.length > 0 && (
+        {config.features.dueDateReminders && dueSoonTasks.length > 0 && (
           <Panel>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <span>⏰</span>
                 <span>Due Soon</span>
-                <span className="badge badge-warning">{data.due_soon.length}</span>
+                <span className="badge badge-warning">{dueSoonTasks.length}</span>
               </h2>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {data.due_soon.map((task) => (
+              {dueSoonTasks.map((task) => (
                 <TaskPanel
                   key={task.id}
                   task={task}
@@ -137,8 +137,7 @@ export default function DashboardView() {
         )}
 
         {/* Empty state */}
-        {(!data?.overdue || data.overdue.length === 0) &&
-         (!data?.due_soon || data.due_soon.length === 0) && (
+        {overdueTasks.length === 0 && dueSoonTasks.length === 0 && (
           <Panel>
             <div className="text-center py-12">
               <div className="text-6xl mb-4">✅</div>

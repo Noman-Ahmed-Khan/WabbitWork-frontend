@@ -1,18 +1,21 @@
 import { useState } from 'react'
-import { useUI } from '../../state/ui.store'
+import useUIStore from '../../stores/uiStore'
+import useTeamStore from '../../stores/teamStore'
 import Input from '../primitives/Input'
 import Select from '../primitives/Select'
 import Button from '../primitives/Button'
-import teamsApi from '../../api/teams'
 
+/**
+ * Member invitation overlay
+ */
 export default function MemberOverlay({ teamId, onSuccess }) {
-  const { closeOverlay } = useUI()
+  const { closeOverlay } = useUIStore()
+  const { addMember, loading } = useTeamStore()
   
   const [formData, setFormData] = useState({
     email: '',
     role: 'member',
   })
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleChange = (e) => {
@@ -25,17 +28,14 @@ export default function MemberOverlay({ teamId, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     try {
-      await teamsApi.addMember(teamId, formData)
+      await addMember(teamId, formData)
       onSuccess?.()
       closeOverlay()
     } catch (err) {
       setError(err.message)
-    } finally {
-      setLoading(false)
     }
   }
 

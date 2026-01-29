@@ -1,13 +1,13 @@
-import { useAuth } from '../state/auth.store'
+import useAuthStore from '../stores/authStore'
 import Dock from '../components/navigation/Dock'
-import cx from '../utils/cx'
+import config from '../config/env'
 
 /**
  * Main application shell
  * Wraps authenticated views with navigation
  */
 export default function Shell({ children }) {
-  const { user } = useAuth()
+  const user = useAuthStore((state) => state.user)
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -19,8 +19,11 @@ export default function Shell({ children }) {
               T
             </div>
             <div>
-              <h1 className="text-lg font-bold">Team Task Manager</h1>
-              <p className="text-xs text-base-content/60">Manage your team efficiently</p>
+              <h1 className="text-lg font-bold">{config.app.name}</h1>
+              <p className="text-xs text-base-content/60">
+                {config.isDevelopment && '🔧 Development Mode'}
+                {config.isProduction && 'Manage your team efficiently'}
+              </p>
             </div>
           </div>
 

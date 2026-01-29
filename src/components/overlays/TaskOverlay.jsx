@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react'
-import { useUI } from '../../state/ui.store'
+import useUIStore from '../../stores/uiStore'
+import useTaskStore from '../../stores/taskStore'
+import useTeamStore from '../../stores/teamStore'
 import Input from '../primitives/Input'
 import Select from '../primitives/Select'
 import Button from '../primitives/Button'
-import tasksApi from '../../api/tasks'
-import teamsApi from '../../api/teams'
 
+/**
+ * Task create/edit overlay
+ */
 export default function TaskOverlay({ onSuccess }) {
-  const { overlayData, closeOverlay } = useUI()
-  const isEdit = !!overlayData
+  const { overlayData, closeOverlay } = useUIStore()
+  const { createTask, updateTask, loading: taskLoading } = useTaskStore()
+  const { teams, members, loadTeams, loadMembers } = useTeamStore()
   
-  const [teams, setTeams] = useState([])
-  const [members, setMembers] = useState([])
-  const [loadingTeams, setLoadingTeams] = useState(true)
-  const [loadingMembers, setLoadingMembers] = useState(false)
+  const isEdit = !!overlayData
   
   const [formData, setFormData] = useState({
     title: '',
@@ -25,13 +26,20 @@ export default function TaskOverlay({ onSuccess }) {
     due_date: '',
   })
   
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [loadingTeams, setLoadingTeams] = useState(true)
 
   // Load teams on mount
   useEffect(() => {
-    loadTeams()
-  }, [])
+    const initTeams = async () => {
+      try {
+        await loadTeams()
+      } finally {
+        setLoadingTeams(false)
+      }
+    }
+    initTeams()
+  }, [loadTeams])
 
   // Populate form when editing
   useEffect(() => {
@@ -51,39 +59,14 @@ export default function TaskOverlay({ onSuccess }) {
         loadMembers(overlayData.team_id)
       }
     }
-  }, [overlayData])
+  }, [overlayData, loadMembers])
 
   // Load members when team changes
   useEffect(() => {
     if (formData.team_id && !isEdit) {
       loadMembers(formData.team_id)
     }
-  }, [formData.team_id, isEdit])
-
-  const loadTeams = async () => {
-    try {
-      setLoadingTeams(true)
-      const response = await teamsApi.getAll()
-      setTeams(response.data.teams)
-    } catch (err) {
-      console.error('Failed to load teams:', err)
-    } finally {
-      setLoadingTeams(false)
-    }
-  }
-
-  const loadMembers = async (teamId) => {
-    try {
-      setLoadingMembers(true)
-      const response = await teamsApi.getMembers(teamId)
-      setMembers(response.data.members)
-    } catch (err) {
-      console.error('Failed to load members:', err)
-      setMembers([])
-    } finally {
-      setLoadingMembers(false)
-    }
-  }
+  }, [formData.team_id, isEdit, loadMembers])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -98,7 +81,6 @@ export default function TaskOverlay({ onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     try {
@@ -110,17 +92,15 @@ export default function TaskOverlay({ onSuccess }) {
       }
 
       if (isEdit) {
-        await tasksApi.update(overlayData.id, payload)
+        await updateTask(overlayData.id, payload)
       } else {
-        await tasksApi.create(payload)
+        await createTask(payload)
       }
       
       onSuccess?.()
       closeOverlay()
     } catch (err) {
       setError(err.message)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -172,7 +152,7 @@ export default function TaskOverlay({ onSuccess }) {
               }))}
               placeholder="Select team"
               required
-              disabled={isEdit} // Can't change team when editing
+              disabled={isEdit || loadingTeams}
             />
 
             {/* Assigned To */}
@@ -185,8 +165,8 @@ export default function TaskOverlay({ onSuccess }) {
                 value: member.user_id,
                 label: `${member.first_name} ${member.last_name}`
               }))}
-              placeholder={loadingMembers ? 'Loading...' : 'Unassigned'}
-              disabled={!formData.team_id || loadingMembers}
+              placeholder="Unassigned"
+              disabled={!formData.team_id}
             />
           </div>
 
@@ -248,7 +228,7 @@ export default function TaskOverlay({ onSuccess }) {
             <Button
               type="submit"
               variant="primary"
-              loading={loading}
+              loading={taskLoading}
               disabled={loadingTeams}
             >
               {isEdit ? 'Update Task' : 'Create Task'}

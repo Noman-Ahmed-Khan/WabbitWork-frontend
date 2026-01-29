@@ -9,55 +9,38 @@ import Input from '../components/primitives/Input'
 import Spinner from '../components/primitives/Spinner'
 import TeamOverlay from '../components/overlays/TeamOverlay'
 import MemberOverlay from '../components/overlays/MemberOverlay'
-import teamsApi from '../api/teams'
-import { useUI } from '../state/ui.store'
-import { useAuth } from '../state/auth.store'
+import useTeamStore from '../stores/teamStore'
+import useUIStore from '../stores/uiStore'
+import useAuthStore from '../stores/authStore'
 
 export default function TeamsView() {
-  const [teams, setTeams] = useState([])
-  const [selectedTeam, setSelectedTeam] = useState(null)
-  const [members, setMembers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [membersLoading, setMembersLoading] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const { activeOverlay, openOverlay, closeOverlay } = useUI()
-  const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Zustand stores
+  const {
+    teams,
+    selectedTeam,
+    members,
+    loading,
+    loadTeams,
+    selectTeam,
+    loadMembers,
+    deleteTeam,
+    updateMemberRole,
+    removeMember,
+    leaveTeam,
+  } = useTeamStore()
+
+  const { activeOverlay, openOverlay } = useUIStore()
+  const user = useAuthStore((state) => state.user)
 
   useEffect(() => {
     loadTeams()
-  }, [])
-
-  const loadTeams = async () => {
-    try {
-      setLoading(true)
-      const response = await teamsApi.getAll()
-      setTeams(response.data.teams)
-    } catch (err) {
-      alert(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadMembers = async (teamId) => {
-    try {
-      setMembersLoading(true)
-      const response = await teamsApi.getMembers(teamId)
-      setMembers(response.data.members)
-    } catch (err) {
-      alert(err.message)
-    } finally {
-      setMembersLoading(false)
-    }
-  }
-
-  const handleViewTeam = (team) => {
-    navigate('/tasks', { state: { teamId: team.id } })
-  }
+  }, [loadTeams])
 
   const handleManageMembers = async (team) => {
-    setSelectedTeam(team)
+    selectTeam(team)
     await loadMembers(team.id)
   }
 
@@ -67,13 +50,9 @@ export default function TeamsView() {
 
   const handleDeleteTeam = async (teamId) => {
     if (!confirm('Delete this team? This will also delete all its tasks.')) return
-
+    
     try {
-      await teamsApi.delete(teamId)
-      loadTeams()
-      if (selectedTeam?.id === teamId) {
-        setSelectedTeam(null)
-      }
+      await deleteTeam(teamId)
     } catch (err) {
       alert(err.message)
     }
@@ -81,8 +60,7 @@ export default function TeamsView() {
 
   const handleUpdateRole = async (memberId, role) => {
     try {
-      await teamsApi.updateMemberRole(selectedTeam.id, memberId, { role })
-      await loadMembers(selectedTeam.id)
+      await updateMemberRole(selectedTeam.id, memberId, role)
     } catch (err) {
       alert(err.message)
     }
@@ -96,12 +74,9 @@ export default function TeamsView() {
 
     try {
       if (isCurrentUser) {
-        await teamsApi.leaveTeam(selectedTeam.id)
-        setSelectedTeam(null)
-        loadTeams()
+        await leaveTeam(selectedTeam.id)
       } else {
-        await teamsApi.removeMember(selectedTeam.id, memberId)
-        await loadMembers(selectedTeam.id)
+        await removeMember(selectedTeam.id, memberId)
       }
     } catch (err) {
       alert(err.message)
@@ -113,9 +88,7 @@ export default function TeamsView() {
     team.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const currentUserRole = selectedTeam?.role
-
-  if (loading) {
+  if (loading && teams.length === 0) {
     return (
       <Shell>
         <Spinner />
@@ -156,7 +129,7 @@ export default function TeamsView() {
               <TeamPanel
                 key={team.id}
                 team={team}
-                onView={handleViewTeam}
+                onView={() => navigate('/tasks', { state: { teamId: team.id } })}
                 onEdit={handleEditTeam}
                 onDelete={handleDeleteTeam}
                 onManageMembers={handleManageMembers}
@@ -193,7 +166,7 @@ export default function TeamsView() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <button
-                  onClick={() => setSelectedTeam(null)}
+                  onClick={() => selectTeam(null)}
                   className="btn btn-ghost btn-sm btn-circle"
                 >
                   ←
@@ -202,7 +175,7 @@ export default function TeamsView() {
                 <span className="badge badge-neutral">{members.length}</span>
               </h2>
 
-              {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
+              {(selectedTeam.role === 'owner' || selectedTeam.role === 'admin') && (
                 <Button
                   variant="primary"
                   size="sm"
@@ -213,7 +186,7 @@ export default function TeamsView() {
               )}
             </div>
 
-            {membersLoading ? (
+            {loading ? (
               <Spinner size="sm" />
             ) : members.length > 0 ? (
               <div className="space-y-3">
@@ -221,7 +194,7 @@ export default function TeamsView() {
                   <MemberPanel
                     key={member.id}
                     member={member}
-                    currentUserRole={currentUserRole}
+                    currentUserRole={selectedTeam.role}
                     currentUserId={user?.id}
                     onUpdateRole={handleUpdateRole}
                     onRemove={handleRemoveMember}

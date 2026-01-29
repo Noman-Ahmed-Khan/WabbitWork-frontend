@@ -1,13 +1,18 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../state/auth.store'
-import { useUI } from '../../state/ui.store'
+import useAuthStore from '../../stores/authStore'
+import useUIStore from '../../stores/uiStore'
+import config from '../../config/env'
 import cx from '../../utils/cx'
 
+/**
+ * Bottom navigation dock
+ * Mobile-friendly navigation with theme toggle
+ */
 export default function Dock() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { logout } = useAuth()
-  const { theme, toggleTheme } = useUI()
+  const logout = useAuthStore((state) => state.logout)
+  const { theme, toggleTheme } = useUIStore()
 
   const navItems = [
     { path: '/dashboard', icon: '📊', label: 'Dashboard' },
@@ -37,10 +42,12 @@ export default function Dock() {
         </button>
       ))}
       
-      <button onClick={toggleTheme}>
-        <span className="text-2xl">{theme === 'light' ? '🌙' : '☀️'}</span>
-        <span className="btm-nav-label text-xs">Theme</span>
-      </button>
+      {config.features.darkMode && (
+        <button onClick={toggleTheme}>
+          <span className="text-2xl">{theme === 'light' ? '🌙' : '☀️'}</span>
+          <span className="btm-nav-label text-xs">Theme</span>
+        </button>
+      )}
 
       <button onClick={handleLogout}>
         <span className="text-2xl">🚪</span>

@@ -1,11 +1,15 @@
 import axios from 'axios'
+import config from '../config/env'
 
 /**
  * Axios instance configured for session-based authentication
- * Uses withCredentials to send HTTP-only cookies
+ * Uses environment variables for configuration
+ * 
+ * @module api/client
  */
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: config.api.baseURL,
+  timeout: config.api.timeout,
   withCredentials: true, // Required for session cookies
   headers: {
     'Content-Type': 'application/json',
@@ -22,6 +26,7 @@ client.interceptors.response.use(
       console.error('Network error:', error.message)
       return Promise.reject({
         message: 'Network error. Please check your connection.',
+        status: 0,
       })
     }
 

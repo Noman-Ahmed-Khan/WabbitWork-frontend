@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react'
-import { useUI } from '../../state/ui.store'
+import useUIStore from '../../stores/uiStore'
+import useTeamStore from '../../stores/teamStore'
 import Input from '../primitives/Input'
 import Button from '../primitives/Button'
-import teamsApi from '../../api/teams'
 
+/**
+ * Team create/edit overlay
+ */
 export default function TeamOverlay({ onSuccess }) {
-  const { overlayData, closeOverlay } = useUI()
+  const { overlayData, closeOverlay } = useUIStore()
+  const { createTeam, updateTeam, loading } = useTeamStore()
+  
   const isEdit = !!overlayData
   
   const [formData, setFormData] = useState({
     name: '',
     description: '',
   })
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -34,21 +38,18 @@ export default function TeamOverlay({ onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
     try {
       if (isEdit) {
-        await teamsApi.update(overlayData.id, formData)
+        await updateTeam(overlayData.id, formData)
       } else {
-        await teamsApi.create(formData)
+        await createTeam(formData)
       }
       onSuccess?.()
       closeOverlay()
     } catch (err) {
       setError(err.message)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -67,6 +68,7 @@ export default function TeamOverlay({ onSuccess }) {
             onChange={handleChange}
             placeholder="e.g., Development Team"
             required
+            maxLength={100}
           />
 
           <div className="form-control">

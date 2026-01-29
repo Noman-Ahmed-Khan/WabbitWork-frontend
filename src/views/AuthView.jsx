@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../state/auth.store'
+import useAuthStore from '../stores/authStore'
 import Panel from '../layouts/Panel'
 import Input from '../components/primitives/Input'
 import Button from '../components/primitives/Button'
+import config from '../config/env'
 
 export default function AuthView() {
   const [mode, setMode] = useState('login') // 'login' or 'register'
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { login, register } = useAuth()
+  const { login, register, loading, error, clearError } = useAuthStore()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -24,13 +23,11 @@ export default function AuthView() {
       ...prev,
       [e.target.name]: e.target.value
     }))
-    setError('')
+    clearError()
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
 
     try {
       if (mode === 'login') {
@@ -39,7 +36,7 @@ export default function AuthView() {
           password: formData.password,
         })
       } else {
-        // Validation
+        // Client-side validation
         if (formData.password.length < 8) {
           throw new Error('Password must be at least 8 characters')
         }
@@ -56,15 +53,14 @@ export default function AuthView() {
       }
       navigate('/dashboard')
     } catch (err) {
-      setError(err.message || 'Authentication failed')
-    } finally {
-      setLoading(false)
+      // Error is already set in store
+      console.error('Auth error:', err)
     }
   }
 
   const toggleMode = () => {
     setMode(mode === 'login' ? 'register' : 'login')
-    setError('')
+    clearError()
   }
 
   return (
@@ -75,7 +71,7 @@ export default function AuthView() {
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-content font-bold text-3xl mb-4">
             T
           </div>
-          <h1 className="text-3xl font-bold mb-2">Team Task Manager</h1>
+          <h1 className="text-3xl font-bold mb-2">{config.app.name}</h1>
           <p className="text-base-content/60">
             {mode === 'login' 
               ? 'Sign in to manage your team tasks' 
@@ -177,7 +173,7 @@ export default function AuthView() {
 
         {/* Footer */}
         <p className="text-center text-xs text-base-content/40 mt-8">
-          Full Stack Development Internship Assessment
+          {config.app.name} v{config.app.version}
         </p>
       </div>
     </div>
