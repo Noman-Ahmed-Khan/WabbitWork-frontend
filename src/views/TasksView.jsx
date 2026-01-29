@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { CheckSquare, Plus, Search, Filter, X } from 'lucide-react'
 import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
 import TaskPanel from '../components/panels/TaskPanel'
@@ -11,11 +12,13 @@ import TaskOverlay from '../components/overlays/TaskOverlay'
 import useTaskStore from '../stores/taskStore'
 import useTeamStore from '../stores/teamStore'
 import useUIStore from '../stores/uiStore'
-import useAuthStore from '../stores/authStore'
 
+/**
+ * Tasks view
+ * Manage and filter tasks
+ */
 export default function TasksView() {
   const location = useLocation()
-  const { user } = useAuthStore()
   const { activeOverlay, openOverlay } = useUIStore()
 
   const {
@@ -80,7 +83,10 @@ export default function TasksView() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Tasks</h1>
+            <h1 className="text-3xl font-bold mb-1 flex items-center gap-2">
+              <CheckSquare size={32} />
+              Tasks
+            </h1>
             <p className="text-base-content/60">
               {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} found
             </p>
@@ -89,7 +95,8 @@ export default function TasksView() {
             variant="primary"
             onClick={() => openOverlay('task')}
           >
-            + Create Task
+            <Plus size={18} />
+            Create Task
           </Button>
         </div>
 
@@ -97,11 +104,15 @@ export default function TasksView() {
         <Panel>
           <div className="space-y-4">
             {/* Search */}
-            <Input
-              placeholder="Search tasks..."
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-            />
+            <div className="relative">
+              <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+              <Input
+                placeholder="Search tasks..."
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                className="pl-10"
+              />
+            </div>
 
             {/* Filter Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -173,6 +184,7 @@ export default function TasksView() {
                   size="sm"
                   onClick={resetFilters}
                 >
+                  <X size={16} />
                   Clear Filters ({activeFilterCount})
                 </Button>
               )}
@@ -198,7 +210,7 @@ export default function TasksView() {
         ) : (
           <Panel>
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">📝</div>
+              <CheckSquare size={64} className="mx-auto mb-4 text-base-content/40" />
               <h3 className="text-xl font-bold mb-2">
                 {activeFilterCount > 0 ? 'No tasks found' : 'No tasks yet'}
               </h3>
@@ -212,6 +224,7 @@ export default function TasksView() {
                   variant="primary"
                   onClick={() => openOverlay('task')}
                 >
+                  <Plus size={18} />
                   Create Task
                 </Button>
               ) : (
@@ -219,6 +232,7 @@ export default function TasksView() {
                   variant="ghost"
                   onClick={resetFilters}
                 >
+                  <Filter size={18} />
                   Clear Filters
                 </Button>
               )}

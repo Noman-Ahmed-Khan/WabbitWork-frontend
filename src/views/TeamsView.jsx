@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Users, Plus, Search, ArrowLeft, UserPlus } from 'lucide-react'
 import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
 import TeamPanel from '../components/panels/TeamPanel'
@@ -13,6 +14,10 @@ import useTeamStore from '../stores/teamStore'
 import useUIStore from '../stores/uiStore'
 import useAuthStore from '../stores/authStore'
 
+/**
+ * Teams view
+ * Manage teams and members
+ */
 export default function TeamsView() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
@@ -102,24 +107,32 @@ export default function TeamsView() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Teams</h1>
+            <h1 className="text-3xl font-bold mb-1 flex items-center gap-2">
+              <Users size={32} />
+              Teams
+            </h1>
             <p className="text-base-content/60">Manage your teams and members</p>
           </div>
           <Button
             variant="primary"
             onClick={() => openOverlay('team')}
           >
-            + Create Team
+            <Plus size={18} />
+            Create Team
           </Button>
         </div>
 
         {/* Search */}
         <Panel>
-          <Input
-            placeholder="Search teams..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="relative">
+            <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+            <Input
+              placeholder="Search teams..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </Panel>
 
         {/* Teams Grid */}
@@ -139,7 +152,7 @@ export default function TeamsView() {
         ) : (
           <Panel>
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">👥</div>
+              <Users size={64} className="mx-auto mb-4 text-base-content/40" />
               <h3 className="text-xl font-bold mb-2">
                 {searchTerm ? 'No teams found' : 'No teams yet'}
               </h3>
@@ -153,6 +166,7 @@ export default function TeamsView() {
                   variant="primary"
                   onClick={() => openOverlay('team')}
                 >
+                  <Plus size={18} />
                   Create Team
                 </Button>
               )}
@@ -160,7 +174,7 @@ export default function TeamsView() {
           </Panel>
         )}
 
-        {/* Members Panel (slides in when team selected) */}
+        {/* Members Panel */}
         {selectedTeam && (
           <Panel>
             <div className="flex items-center justify-between mb-4">
@@ -169,7 +183,7 @@ export default function TeamsView() {
                   onClick={() => selectTeam(null)}
                   className="btn btn-ghost btn-sm btn-circle"
                 >
-                  ←
+                  <ArrowLeft size={20} />
                 </button>
                 <span>{selectedTeam.name} Members</span>
                 <span className="badge badge-neutral">{members.length}</span>
@@ -181,7 +195,8 @@ export default function TeamsView() {
                   size="sm"
                   onClick={() => openOverlay('member')}
                 >
-                  + Add Member
+                  <UserPlus size={16} />
+                  Add Member
                 </Button>
               )}
             </div>
@@ -203,6 +218,7 @@ export default function TeamsView() {
               </div>
             ) : (
               <div className="text-center py-8 text-base-content/60">
+                <Users size={48} className="mx-auto mb-2 opacity-40" />
                 No members yet
               </div>
             )}
