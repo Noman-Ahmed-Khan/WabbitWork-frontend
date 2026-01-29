@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, Users, CheckSquare, Moon, Sun, LogOut } from 'lucide-react'
 import useAuthStore from '../../stores/authStore'
 import useUIStore from '../../stores/uiStore'
 import config from '../../config/env'
@@ -15,9 +16,21 @@ export default function Dock() {
   const { theme, toggleTheme } = useUIStore()
 
   const navItems = [
-    { path: '/dashboard', icon: '📊', label: 'Dashboard' },
-    { path: '/teams', icon: '👥', label: 'Teams' },
-    { path: '/tasks', icon: '✓', label: 'Tasks' },
+    { 
+      path: '/dashboard', 
+      icon: LayoutDashboard, 
+      label: 'Dashboard' 
+    },
+    { 
+      path: '/teams', 
+      icon: Users, 
+      label: 'Teams' 
+    },
+    { 
+      path: '/tasks', 
+      icon: CheckSquare, 
+      label: 'Tasks' 
+    },
   ]
 
   const handleLogout = async () => {
@@ -29,28 +42,31 @@ export default function Dock() {
 
   return (
     <div className="btm-nav btm-nav-lg z-50 border-t border-base-300 bg-base-100/80 backdrop-blur-md">
-      {navItems.map((item) => (
-        <button
-          key={item.path}
-          className={cx(
-            location.pathname === item.path && 'active'
-          )}
-          onClick={() => navigate(item.path)}
-        >
-          <span className="text-2xl">{item.icon}</span>
-          <span className="btm-nav-label text-xs">{item.label}</span>
-        </button>
-      ))}
+      {navItems.map((item) => {
+        const Icon = item.icon
+        return (
+          <button
+            key={item.path}
+            className={cx(
+              location.pathname === item.path && 'active'
+            )}
+            onClick={() => navigate(item.path)}
+          >
+            <Icon size={20} />
+            <span className="btm-nav-label text-xs">{item.label}</span>
+          </button>
+        )
+      })}
       
       {config.features.darkMode && (
         <button onClick={toggleTheme}>
-          <span className="text-2xl">{theme === 'light' ? '🌙' : '☀️'}</span>
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           <span className="btm-nav-label text-xs">Theme</span>
         </button>
       )}
 
       <button onClick={handleLogout}>
-        <span className="text-2xl">🚪</span>
+        <LogOut size={20} />
         <span className="btm-nav-label text-xs">Logout</span>
       </button>
     </div>
