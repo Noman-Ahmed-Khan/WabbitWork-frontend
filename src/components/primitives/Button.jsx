@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react'
 import cx from '../../utils/cx'
 
 export default function Button({
@@ -28,7 +29,7 @@ export default function Button({
   return (
     <button
       className={cx(
-        'btn',
+        'btn gap-2',
         variantClasses[variant],
         sizeClasses[size],
         className
@@ -36,8 +37,8 @@ export default function Button({
       disabled={disabled || loading}
       {...props}
     >
-      {loading && <span className="loading loading-spinner loading-sm"></span>}
+      {loading && <Loader2 size={16} className="animate-spin" />}
       {children}
     </button>
   )
-}
+}s
