@@ -24,6 +24,13 @@ export const tokens = {
     full: '9999px',
   },
 
+  // Transparency and glass effect
+  opacity: {
+    glass: '0.7',
+    card: '0.75',
+    hover: '0.85',
+  },
+
   // Shadows for depth
   shadow: {
     sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
@@ -39,6 +46,14 @@ export const tokens = {
     md: '8px',
     lg: '12px',
     xl: '16px',
+  },
+
+  // Gradient definitions
+  gradients: {
+    primary: 'radial-gradient(circle at 20% 50%, rgba(37, 52, 63, 0.15) 0%, transparent 50%)',
+    secondary: 'radial-gradient(circle at 80% 80%, rgba(191, 201, 209, 0.15) 0%, transparent 50%)',
+    accent: 'radial-gradient(circle at 50% 0%, rgba(255, 155, 81, 0.1) 0%, transparent 60%)',
+    combined: 'radial-gradient(circle at 20% 50%, rgba(37, 52, 63, 0.12) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(191, 201, 209, 0.12) 0%, transparent 50%), radial-gradient(circle at 50% 0%, rgba(255, 155, 81, 0.08) 0%, transparent 60%)',
   },
 
   // Animation durations
