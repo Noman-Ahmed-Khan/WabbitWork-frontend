@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import useUIStore from '../../stores/uiStore'
 import useTaskStore from '../../stores/taskStore'
 import useTeamStore from '../../stores/teamStore'
 import Input from '../primitives/Input'
 import Select from '../primitives/Select'
 import Button from '../primitives/Button'
+import { modalVariants, backdropVariants, itemVariants, containerVariants } from '../../animations/variants'
+import { transitions } from '../../animations/transitions'
 
 /**
  * Task create/edit overlay
@@ -105,140 +108,182 @@ export default function TaskOverlay({ onSuccess }) {
   }
 
   return (
-    <dialog className="modal modal-open">
-      <div className="modal-box max-w-2xl overlay-enter">
-        <h3 className="font-bold text-lg mb-4">
-          {isEdit ? 'Edit Task' : 'Create New Task'}
-        </h3>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
-          <Input
-            label="Task Title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="e.g., Implement login feature"
-            required
-            maxLength={255}
-          />
-
-          {/* Description */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Description (Optional)</span>
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="textarea textarea-bordered h-24"
-              placeholder="Add more details about this task..."
-              maxLength={2000}
-            />
-          </div>
-
-          {/* Team & Assignment Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Team */}
-            <Select
-              label="Team"
-              name="team_id"
-              value={formData.team_id}
-              onChange={handleChange}
-              options={teams.map(team => ({
-                value: team.id,
-                label: team.name
-              }))}
-              placeholder="Select team"
-              required
-              disabled={isEdit || loadingTeams}
-            />
-
-            {/* Assigned To */}
-            <Select
-              label="Assign To (Optional)"
-              name="assigned_to"
-              value={formData.assigned_to}
-              onChange={handleChange}
-              options={members.map(member => ({
-                value: member.user_id,
-                label: `${member.first_name} ${member.last_name}`
-              }))}
-              placeholder="Unassigned"
-              disabled={!formData.team_id}
-            />
-          </div>
-
-          {/* Status & Priority Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Status */}
-            <Select
-              label="Status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              options={[
-                { value: 'todo', label: 'To Do' },
-                { value: 'in_progress', label: 'In Progress' },
-                { value: 'review', label: 'Review' },
-                { value: 'completed', label: 'Completed' },
-              ]}
-            />
-
-            {/* Priority */}
-            <Select
-              label="Priority"
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-              options={[
-                { value: 'low', label: 'Low' },
-                { value: 'medium', label: 'Medium' },
-                { value: 'high', label: 'High' },
-                { value: 'urgent', label: 'Urgent' },
-              ]}
-            />
-          </div>
-
-          {/* Due Date */}
-          <Input
-            label="Due Date (Optional)"
-            type="date"
-            name="due_date"
-            value={formData.due_date}
-            onChange={handleChange}
-            min={new Date().toISOString().split('T')[0]}
-          />
-
-          {error && (
-            <div className="alert alert-error">
-              <span className="text-sm">{error}</span>
-            </div>
-          )}
-
-          <div className="modal-action">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={closeOverlay}
+    <AnimatePresence mode="wait">
+      {overlayData?.type === 'task' && (
+        <motion.dialog 
+          className="modal modal-open"
+          variants={backdropVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
+          <motion.div 
+            className="modal-box max-w-2xl"
+            variants={modalVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <motion.h3 
+              className="font-bold text-lg mb-4"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={transitions.normal}
             >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={taskLoading}
-              disabled={loadingTeams}
-            >
-              {isEdit ? 'Update Task' : 'Create Task'}
-            </Button>
-          </div>
-        </form>
-      </div>
-      <form method="dialog" className="modal-backdrop" onClick={closeOverlay}>
-        <button>close</button>
-      </form>
-    </dialog>
+              {isEdit ? 'Edit Task' : 'Create New Task'}
+            </motion.h3>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <motion.div
+                variants={containerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                {/* Title */}
+                <motion.div variants={itemVariants}>
+                  <Input
+                    label="Task Title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="e.g., Implement login feature"
+                    required
+                    maxLength={255}
+                  />
+                </motion.div>
+
+                {/* Description */}
+                <motion.div variants={itemVariants} className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Description (Optional)</span>
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="textarea textarea-bordered h-24"
+                    placeholder="Add more details about this task..."
+                    maxLength={2000}
+                  />
+                </motion.div>
+
+                {/* Team & Assignment Row */}
+                <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Team */}
+                  <Select
+                    label="Team"
+                    name="team_id"
+                    value={formData.team_id}
+                    onChange={handleChange}
+                    options={teams.map(team => ({
+                      value: team.id,
+                      label: team.name
+                    }))}
+                    placeholder="Select team"
+                    required
+                    disabled={isEdit || loadingTeams}
+                  />
+
+                  {/* Assigned To */}
+                  <Select
+                    label="Assign To (Optional)"
+                    name="assigned_to"
+                    value={formData.assigned_to}
+                    onChange={handleChange}
+                    options={members.map(member => ({
+                      value: member.user_id,
+                      label: `${member.first_name} ${member.last_name}`
+                    }))}
+                    placeholder="Unassigned"
+                    disabled={!formData.team_id}
+                  />
+                </motion.div>
+
+                {/* Status & Priority Row */}
+                <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Status */}
+                  <Select
+                    label="Status"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    options={[
+                      { value: 'todo', label: 'To Do' },
+                      { value: 'in_progress', label: 'In Progress' },
+                      { value: 'review', label: 'Review' },
+                      { value: 'completed', label: 'Completed' },
+                    ]}
+                  />
+
+                  {/* Priority */}
+                  <Select
+                    label="Priority"
+                    name="priority"
+                    value={formData.priority}
+                    onChange={handleChange}
+                    options={[
+                      { value: 'low', label: 'Low' },
+                      { value: 'medium', label: 'Medium' },
+                      { value: 'high', label: 'High' },
+                      { value: 'urgent', label: 'Urgent' },
+                    ]}
+                  />
+                </motion.div>
+
+                {/* Due Date */}
+                <motion.div variants={itemVariants}>
+                  <Input
+                    label="Due Date (Optional)"
+                    type="date"
+                    name="due_date"
+                    value={formData.due_date}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </motion.div>
+
+                {error && (
+                  <motion.div 
+                    className="alert alert-error"
+                    variants={itemVariants}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                  >
+                    <span className="text-sm">{error}</span>
+                  </motion.div>
+                )}
+              </motion.div>
+
+              <motion.div 
+                className="modal-action"
+                variants={itemVariants}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={closeOverlay}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  loading={taskLoading}
+                  disabled={loadingTeams}
+                >
+                  {isEdit ? 'Update Task' : 'Create Task'}
+                </Button>
+              </motion.div>
+            </form>
+          </motion.div>
+          <form method="dialog" className="modal-backdrop" onClick={closeOverlay}>
+            <button>close</button>
+          </form>
+        </motion.dialog>
+      )}
+    </AnimatePresence>
   )
 }
