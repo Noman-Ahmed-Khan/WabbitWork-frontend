@@ -7,8 +7,56 @@
     @apply transition-colors duration-200;
   }
 
+  html {
+    background: linear-gradient(135deg, #EAEFEF 0%, #DDE5E5 100%);
+  }
+
   body {
-    @apply bg-base-100 text-base-content;
+    @apply bg-transparent text-base-content overflow-x-hidden;
+    position: relative;
+  }
+
+  /* Animated circular gradient backgrounds - behind content */
+  body::before {
+    content: '';
+    position: fixed;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(37, 52, 63, 0.15) 0%, transparent 65%);
+    border-radius: 50%;
+    top: -300px;
+    left: -300px;
+    pointer-events: none;
+    z-index: 0;
+    animation: float 20s ease-in-out infinite;
+    filter: blur(40px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle, rgba(191, 201, 209, 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -350px;
+    right: -350px;
+    pointer-events: none;
+    z-index: 0;
+    animation: float 25s ease-in-out infinite reverse;
+    filter: blur(50px);
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    33% {
+      transform: translate(40px, -40px);
+    }
+    66% {
+      transform: translate(-30px, 30px);
+    }
   }
 }
 
@@ -30,31 +78,44 @@
   @apply bg-primary/50;
 }
 
-/* Smooth overlay animations */
-.overlay-enter {
-  animation: overlayEnter 0.2s ease-out;
+/* Ensure content is above background */
+header, main, nav {
+  position: relative;
+  z-index: 10;
 }
 
-@keyframes overlayEnter {
+/* Card with solid background */
+.card {
+  @apply bg-base-100;
+}
+
+.card-transparent {
+  @apply bg-base-100/95 backdrop-blur-sm;
+}
+
+.btn-glass {
+  @apply bg-primary/70 hover:bg-primary/80 border-0 backdrop-blur-sm;
+}
+
+/* Page transition animations */
+@keyframes pageEnter {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(-10px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(0);
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
+@keyframes pageExit {
   from {
-    opacity: 0;
+    opacity: 1;
+    transform: translateY(0);
   }
   to {
-    opacity: 1;
+    opacity: 0;
+    transform: translateY(-10px);
   }
 }
