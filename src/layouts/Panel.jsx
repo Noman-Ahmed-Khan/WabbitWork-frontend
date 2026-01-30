@@ -16,9 +16,10 @@ export default function Panel({
       className={cx(
         'rounded-xl',
         'shadow-md',
-        'border border-base-300',
-        glass && 'bg-base-100/80 backdrop-blur-md',
-        !glass && 'bg-base-100',
+        'border border-base-300/60',
+        'relative',
+        'z-10',
+        glass ? 'bg-base-100/95 backdrop-blur-sm' : 'bg-base-100',
         !noPadding && 'p-4',
         className
       )}
