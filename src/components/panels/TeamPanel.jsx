@@ -8,13 +8,13 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
 
   return (
     <div className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow">
-      <div className="card-body p-5">
+      <div className="card-body p-3">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-lg truncate mb-1">{team.name}</h3>
+            <h3 className="font-bold text-sm truncate mb-1">{team.name}</h3>
             {team.description && (
-              <p className="text-sm text-base-content/60 line-clamp-2">
+              <p className="text-xs text-base-content/60 line-clamp-2">
                 {team.description}
               </p>
             )}
@@ -25,27 +25,27 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
         </div>
 
         {/* Stats */}
-        <div className="flex gap-4 mb-4">
-          <div className="flex items-center gap-2 text-sm">
-            <Users size={16} className="text-base-content/60" />
+        <div className="flex gap-3 mb-3">
+          <div className="flex items-center gap-2 text-xs">
+            <Users size={14} className="text-base-content/60" />
             <span className="font-medium">{team.member_count}</span>
             <span className="text-base-content/60">members</span>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <CheckSquare size={16} className="text-base-content/60" />
+          <div className="flex items-center gap-2 text-xs">
+            <CheckSquare size={14} className="text-base-content/60" />
             <span className="font-medium">{team.task_count}</span>
             <span className="text-base-content/60">tasks</span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="card-actions justify-end gap-2 flex-wrap">
+        <div className="card-actions justify-end gap-1 flex-wrap">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onView(team)}
           >
-            <Eye size={16} />
+            <Eye size={14} />
             View
           </Button>
           <Button
@@ -53,7 +53,7 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
             size="sm"
             onClick={() => onManageMembers(team)}
           >
-            <UserCog size={16} />
+            <UserCog size={14} />
             Members
           </Button>
           {(team.role === 'owner' || team.role === 'admin') && (
@@ -63,7 +63,7 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
                 size="sm"
                 onClick={() => onEdit(team)}
               >
-                <Edit size={16} />
+                <Edit size={14} />
                 Edit
               </Button>
               {team.role === 'owner' && (
@@ -73,7 +73,7 @@ export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMemb
                   onClick={() => onDelete(team.id)}
                   className="text-error hover:bg-error/10"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                   Delete
                 </Button>
               )}

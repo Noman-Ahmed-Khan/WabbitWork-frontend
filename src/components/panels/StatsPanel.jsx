@@ -63,30 +63,30 @@ export default function StatsPanel({ stats, loading }) {
 
   return (
     <Panel>
-      <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <BarChart3 size={24} />
+      <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+        <BarChart3 size={20} />
         <span>Task Overview</span>
       </h2>
 
       {/* Main stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         {statCards.map((stat) => {
           const Icon = stat.icon
           return (
             <div
               key={stat.label}
               className={cx(
-                'rounded-xl p-4 border-2',
+                'rounded-lg p-3 border-2',
                 `border-${stat.color}/20 bg-${stat.color}/5`
               )}
             >
-              <div className="flex items-center justify-between mb-2">
-                <Icon size={20} className={`text-${stat.color}`} />
-                <div className={`text-3xl font-bold text-${stat.color}`}>
+              <div className="flex items-center justify-between mb-1">
+                <Icon size={16} className={`text-${stat.color}`} />
+                <div className={`text-2xl font-bold text-${stat.color}`}>
                   {stat.value}
                 </div>
               </div>
-              <div className="text-sm text-base-content/60">
+              <div className="text-xs text-base-content/60">
                 {stat.label}
               </div>
             </div>
@@ -96,14 +96,14 @@ export default function StatsPanel({ stats, loading }) {
 
       {/* Alert stats */}
       {(alertStats[0].value > 0 || alertStats[1].value > 0) && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {alertStats.map((stat) => {
             const Icon = stat.icon
             return (
               <div
                 key={stat.label}
                 className={cx(
-                  'rounded-xl p-4 border-2',
+                  'rounded-lg p-3 border-2',
                   `border-${stat.color}/20 bg-${stat.color}/5`,
                   stat.value > 0 && 'ring-2 ring-offset-2 ring-offset-base-100',
                   stat.color === 'error' && stat.value > 0 && 'ring-error',
@@ -112,12 +112,12 @@ export default function StatsPanel({ stats, loading }) {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Icon size={20} className={`text-${stat.color}`} />
+                    <Icon size={16} className={`text-${stat.color}`} />
                     <div>
-                      <div className={`text-2xl font-bold text-${stat.color}`}>
+                      <div className={`text-xl font-bold text-${stat.color}`}>
                         {stat.value}
                       </div>
-                      <div className="text-sm text-base-content/60">
+                      <div className="text-xs text-base-content/60">
                         {stat.label}
                       </div>
                     </div>
