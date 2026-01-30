@@ -6,6 +6,7 @@ import AuthView from './views/AuthView'
 import DashboardView from './views/DashboardView'
 import TeamsView from './views/TeamsView'
 import TasksView from './views/TasksView'
+import Shell from './layouts/Shell'
 import Spinner from './components/primitives/Spinner'
 
 /**
@@ -71,7 +72,9 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardView />
+            <Shell>
+              <DashboardView />
+            </Shell>
           </ProtectedRoute>
         }
       />
@@ -79,7 +82,9 @@ function AppRoutes() {
         path="/teams"
         element={
           <ProtectedRoute>
-            <TeamsView />
+            <Shell>
+              <TeamsView />
+            </Shell>
           </ProtectedRoute>
         }
       />
@@ -87,7 +92,9 @@ function AppRoutes() {
         path="/tasks"
         element={
           <ProtectedRoute>
-            <TasksView />
+            <Shell>
+              <TasksView />
+            </Shell>
           </ProtectedRoute>
         }
       />
