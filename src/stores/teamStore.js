@@ -32,7 +32,7 @@ const useTeamStore = create((set, get) => ({
       const response = await teamsApi.getAll()
       set({ teams: response.data.teams, loading: false })
     } catch (error) {
-      set({ error: error.message, loading: false })
+      set({ error: error.message, loading: false, teams: [] })
       throw error
     }
   },
@@ -50,13 +50,19 @@ const useTeamStore = create((set, get) => ({
    * @param {string} teamId - Team ID
    */
   loadMembers: async (teamId) => {
+    if (!teamId || teamId.trim() === '') {
+      set({ members: [] })
+      return
+    }
+
     try {
       set({ loading: true, error: null })
       const response = await teamsApi.getMembers(teamId)
       set({ members: response.data.members, loading: false })
     } catch (error) {
-      set({ error: error.message, loading: false })
-      throw error
+      set({ error: error.message, loading: false, members: [] })
+      console.error('Load members error:', error)
+      throw error // Re-throw so caller can handle
     }
   },
 
