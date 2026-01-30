@@ -1,7 +1,10 @@
 import { BarChart3, CheckCircle2, Clock, GitCommit, AlertTriangle } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Panel from '../../layouts/Panel'
 import Badge from '../primitives/Badge'
 import cx from '../../utils/cx'
+import { itemVariants, containerVariants } from '../../animations/variants'
+import { transitions } from '../../animations/transitions'
 
 export default function StatsPanel({ stats, loading }) {
   if (loading) {
@@ -63,44 +66,67 @@ export default function StatsPanel({ stats, loading }) {
 
   return (
     <Panel>
-      <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+      <motion.h2 
+        className="text-lg font-bold mb-4 flex items-center gap-2"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={transitions.normal}
+      >
         <BarChart3 size={20} />
         <span>Task Overview</span>
-      </h2>
+      </motion.h2>
 
       {/* Main stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <motion.div 
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+      >
         {statCards.map((stat) => {
           const Icon = stat.icon
           return (
-            <div
+            <motion.div
               key={stat.label}
               className={cx(
                 'rounded-lg p-3 border-2',
                 `border-${stat.color}/20 bg-${stat.color}/5`
               )}
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+              transition={transitions.normal}
             >
               <div className="flex items-center justify-between mb-1">
                 <Icon size={16} className={`text-${stat.color}`} />
-                <div className={`text-2xl font-bold text-${stat.color}`}>
+                <motion.div 
+                  className={`text-2xl font-bold text-${stat.color}`}
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                >
                   {stat.value}
-                </div>
+                </motion.div>
               </div>
               <div className="text-xs text-base-content/60">
                 {stat.label}
               </div>
-            </div>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
 
       {/* Alert stats */}
       {(alertStats[0].value > 0 || alertStats[1].value > 0) && (
-        <div className="grid grid-cols-2 gap-3">
+        <motion.div 
+          className="grid grid-cols-2 gap-3"
+          variants={containerVariants}
+          initial="initial"
+          animate="animate"
+        >
           {alertStats.map((stat) => {
             const Icon = stat.icon
             return (
-              <div
+              <motion.div
                 key={stat.label}
                 className={cx(
                   'rounded-lg p-3 border-2',
@@ -109,29 +135,43 @@ export default function StatsPanel({ stats, loading }) {
                   stat.color === 'error' && stat.value > 0 && 'ring-error',
                   stat.color === 'warning' && stat.value > 0 && 'ring-warning'
                 )}
+                variants={itemVariants}
+                whileHover={{ y: -4 }}
+                transition={transitions.normal}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Icon size={16} className={`text-${stat.color}`} />
                     <div>
-                      <div className={`text-xl font-bold text-${stat.color}`}>
+                      <motion.div 
+                        className={`text-xl font-bold text-${stat.color}`}
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.4, duration: 0.3 }}
+                      >
                         {stat.value}
-                      </div>
+                      </motion.div>
                       <div className="text-xs text-base-content/60">
                         {stat.label}
                       </div>
                     </div>
                   </div>
                   {stat.value > 0 && (
-                    <Badge variant={stat.color} size="sm">
-                      Action Required
-                    </Badge>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.2, duration: 0.3 }}
+                    >
+                      <Badge variant={stat.color} size="sm">
+                        Action Required
+                      </Badge>
+                    </motion.div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       )}
     </Panel>
   )
