@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BarChart3, AlertCircle, Clock, Plus } from 'lucide-react'
+import { BarChart3, AlertCircle, Clock, CheckSquare } from 'lucide-react'
 import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
 import StatsPanel from '../components/panels/StatsPanel'
@@ -72,15 +72,15 @@ export default function DashboardView() {
 
   return (
     <Shell>
-      <div className="space-y-6 mb-24">
+      <div className="space-y-4 mb-24">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold mb-1 flex items-center gap-2">
-              <BarChart3 size={32} />
+            <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
+              <BarChart3 size={24} />
               Dashboard
             </h1>
-            <p className="text-base-content/60">Overview of your tasks</p>
+            <p className="text-sm text-base-content/60">Overview of your tasks</p>
           </div>
           <Button
             variant="primary"
@@ -96,15 +96,15 @@ export default function DashboardView() {
         {/* Overdue tasks */}
         {config.features.dueDateReminders && overdueTasks.length > 0 && (
           <Panel>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <AlertCircle size={24} className="text-error" />
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <AlertCircle size={20} className="text-error" />
                 <span>Overdue Tasks</span>
-                <span className="badge badge-error">{overdueTasks.length}</span>
+                <span className="badge badge-error badge-sm">{overdueTasks.length}</span>
               </h2>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {overdueTasks.map((task) => (
                 <TaskPanel
                   key={task.id}
@@ -120,15 +120,15 @@ export default function DashboardView() {
         {/* Due soon tasks */}
         {config.features.dueDateReminders && dueSoonTasks.length > 0 && (
           <Panel>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Clock size={24} className="text-warning" />
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Clock size={20} className="text-warning" />
                 <span>Due Soon</span>
-                <span className="badge badge-warning">{dueSoonTasks.length}</span>
+                <span className="badge badge-warning badge-sm">{dueSoonTasks.length}</span>
               </h2>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {dueSoonTasks.map((task) => (
                 <TaskPanel
                   key={task.id}
@@ -144,10 +144,10 @@ export default function DashboardView() {
         {/* Empty state */}
         {overdueTasks.length === 0 && dueSoonTasks.length === 0 && (
           <Panel>
-            <div className="text-center py-12">
-              <CheckSquare size={64} className="mx-auto mb-4 text-success" />
-              <h3 className="text-xl font-bold mb-2">All Caught Up!</h3>
-              <p className="text-base-content/60 mb-6">
+            <div className="text-center py-8">
+              <CheckSquare size={48} className="mx-auto mb-3 text-success" />
+              <h3 className="text-lg font-bold mb-2">All Caught Up!</h3>
+              <p className="text-sm text-base-content/60 mb-4">
                 No overdue or urgent tasks at the moment.
               </p>
               <Button
@@ -162,4 +162,4 @@ export default function DashboardView() {
       </div>
     </Shell>
   )
-}t
+}

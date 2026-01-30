@@ -33,24 +33,38 @@ export default function TasksView() {
 
   const { teams, members, loadTeams, loadMembers } = useTeamStore()
 
-  // Initialize filters from navigation state
+  // Load teams on mount
+  useEffect(() => {
+    loadTeams()
+  }, [loadTeams])
+
+  // Initialize filters from navigation state (if coming from teams page)
   useEffect(() => {
     if (location.state?.teamId) {
       setFilters({ team_id: location.state.teamId })
     }
   }, [location.state, setFilters])
 
-  // Load teams and tasks
+  // Load tasks when filters change
   useEffect(() => {
-    loadTeams()
     loadTasks()
-  }, [loadTeams, loadTasks])
+  }, [filters, loadTasks])
 
-  // Load members when team filter changes
+  // Load members when team filter changes (only if team_id is valid)
   useEffect(() => {
-    if (filters.team_id) {
-      loadMembers(filters.team_id)
+    const loadTeamMembers = async () => {
+      if (filters.team_id && filters.team_id.trim() !== '') {
+        try {
+          await loadMembers(filters.team_id)
+        } catch (error) {
+          console.error('Failed to load team members:', error)
+          // Optionally clear the team filter if it's invalid
+          // setFilters({ team_id: '', assigned_to: '' })
+        }
+      }
     }
+
+    loadTeamMembers()
   }, [filters.team_id, loadMembers])
 
   const handleFilterChange = (name, value) => {
@@ -79,15 +93,15 @@ export default function TasksView() {
 
   return (
     <Shell>
-      <div className="space-y-6 mb-24">
+      <div className="space-y-4 mb-24">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold mb-1 flex items-center gap-2">
-              <CheckSquare size={32} />
+            <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
+              <CheckSquare size={24} />
               Tasks
             </h1>
-            <p className="text-base-content/60">
+            <p className="text-sm text-base-content/60">
               {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} found
             </p>
           </div>
@@ -95,17 +109,17 @@ export default function TasksView() {
             variant="primary"
             onClick={() => openOverlay('task')}
           >
-            <Plus size={18} />
+            <Plus size={16} />
             Create Task
           </Button>
         </div>
 
         {/* Filters */}
         <Panel>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Search */}
             <div className="relative">
-              <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
               <Input
                 placeholder="Search tasks..."
                 value={filters.search}
@@ -115,7 +129,7 @@ export default function TasksView() {
             </div>
 
             {/* Filter Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Team Filter */}
               <Select
                 placeholder="All Teams"
@@ -162,12 +176,12 @@ export default function TasksView() {
                   value: member.user_id,
                   label: `${member.first_name} ${member.last_name}`
                 }))}
-                disabled={!filters.team_id}
+                disabled={!filters.team_id || members.length === 0}
               />
             </div>
 
             {/* Quick Filters */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <label className="label cursor-pointer gap-2">
                 <input
                   type="checkbox"
@@ -175,7 +189,7 @@ export default function TasksView() {
                   checked={filters.assigned_to_me}
                   onChange={(e) => handleFilterChange('assigned_to_me', e.target.checked)}
                 />
-                <span className="label-text">Assigned to me</span>
+                <span className="label-text text-sm">Assigned to me</span>
               </label>
 
               {activeFilterCount > 0 && (
@@ -184,8 +198,8 @@ export default function TasksView() {
                   size="sm"
                   onClick={resetFilters}
                 >
-                  <X size={16} />
-                  Clear Filters ({activeFilterCount})
+                  <X size={14} />
+                  Clear ({activeFilterCount})
                 </Button>
               )}
             </div>
@@ -196,7 +210,7 @@ export default function TasksView() {
         {loading ? (
           <Spinner />
         ) : tasks.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {tasks.map((task) => (
               <TaskPanel
                 key={task.id}
