@@ -103,21 +103,21 @@ export default function TeamsView() {
 
   return (
     <Shell>
-      <div className="space-y-6 mb-24">
+      <div className="space-y-4 mb-24">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold mb-1 flex items-center gap-2">
-              <Users size={32} />
+            <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
+              <Users size={24} />
               Teams
             </h1>
-            <p className="text-base-content/60">Manage your teams and members</p>
+            <p className="text-sm text-base-content/60">Manage your teams and members</p>
           </div>
           <Button
             variant="primary"
             onClick={() => openOverlay('team')}
           >
-            <Plus size={18} />
+            <Plus size={16} />
             Create Team
           </Button>
         </div>
@@ -125,7 +125,7 @@ export default function TeamsView() {
         {/* Search */}
         <Panel>
           <div className="relative">
-            <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
             <Input
               placeholder="Search teams..."
               value={searchTerm}
@@ -137,7 +137,7 @@ export default function TeamsView() {
 
         {/* Teams Grid */}
         {filteredTeams.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {filteredTeams.map((team) => (
               <TeamPanel
                 key={team.id}
@@ -152,11 +152,11 @@ export default function TeamsView() {
         ) : (
           <Panel>
             <div className="text-center py-12">
-              <Users size={64} className="mx-auto mb-4 text-base-content/40" />
-              <h3 className="text-xl font-bold mb-2">
+              <Users size={48} className="mx-auto mb-3 text-base-content/40" />
+              <h3 className="text-lg font-bold mb-2">
                 {searchTerm ? 'No teams found' : 'No teams yet'}
               </h3>
-              <p className="text-base-content/60 mb-6">
+              <p className="text-sm text-base-content/60 mb-4">
                 {searchTerm 
                   ? 'Try a different search term' 
                   : 'Create your first team to get started'}
@@ -166,7 +166,7 @@ export default function TeamsView() {
                   variant="primary"
                   onClick={() => openOverlay('team')}
                 >
-                  <Plus size={18} />
+                  <Plus size={16} />
                   Create Team
                 </Button>
               )}
@@ -177,16 +177,16 @@ export default function TeamsView() {
         {/* Members Panel */}
         {selectedTeam && (
           <Panel>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold flex items-center gap-2">
                 <button
                   onClick={() => selectTeam(null)}
                   className="btn btn-ghost btn-sm btn-circle"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={18} />
                 </button>
                 <span>{selectedTeam.name} Members</span>
-                <span className="badge badge-neutral">{members.length}</span>
+                <span className="badge badge-neutral badge-sm">{members.length}</span>
               </h2>
 
               {(selectedTeam.role === 'owner' || selectedTeam.role === 'admin') && (
@@ -195,7 +195,7 @@ export default function TeamsView() {
                   size="sm"
                   onClick={() => openOverlay('member')}
                 >
-                  <UserPlus size={16} />
+                  <UserPlus size={14} />
                   Add Member
                 </Button>
               )}
@@ -204,7 +204,7 @@ export default function TeamsView() {
             {loading ? (
               <Spinner size="sm" />
             ) : members.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {members.map((member) => (
                   <MemberPanel
                     key={member.id}
@@ -217,8 +217,8 @@ export default function TeamsView() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-base-content/60">
-                <Users size={48} className="mx-auto mb-2 opacity-40" />
+              <div className="text-center py-6 text-base-content/60">
+                <Users size={40} className="mx-auto mb-2 opacity-40" />
                 No members yet
               </div>
             )}

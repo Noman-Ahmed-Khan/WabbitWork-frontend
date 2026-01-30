@@ -41,7 +41,7 @@ export default function Dock() {
   }
 
   return (
-    <div className="btm-nav btm-nav-lg z-50 border-t border-base-300 bg-base-100/80 backdrop-blur-md">
+    <div className="btm-nav btm-nav-md z-50 border-t border-base-300 bg-base-100/80 backdrop-blur-md">
       {navItems.map((item) => {
         const Icon = item.icon
         return (
@@ -52,7 +52,7 @@ export default function Dock() {
             )}
             onClick={() => navigate(item.path)}
           >
-            <Icon size={20} />
+            <Icon size={18} />
             <span className="btm-nav-label text-xs">{item.label}</span>
           </button>
         )
@@ -60,13 +60,13 @@ export default function Dock() {
       
       {config.features.darkMode && (
         <button onClick={toggleTheme}>
-          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           <span className="btm-nav-label text-xs">Theme</span>
         </button>
       )}
 
       <button onClick={handleLogout}>
-        <LogOut size={20} />
+        <LogOut size={18} />
         <span className="btm-nav-label text-xs">Logout</span>
       </button>
     </div>

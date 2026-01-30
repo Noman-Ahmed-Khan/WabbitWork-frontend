@@ -14,12 +14,12 @@ export default function Panel({
   return (
     <div
       className={cx(
-        'rounded-2xl',
-        'shadow-lg',
+        'rounded-xl',
+        'shadow-md',
         'border border-base-300',
         glass && 'bg-base-100/80 backdrop-blur-md',
         !glass && 'bg-base-100',
-        !noPadding && 'p-6',
+        !noPadding && 'p-4',
         className
       )}
       {...props}

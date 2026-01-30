@@ -11,16 +11,16 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
 
   return (
     <div className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow">
-      <div className="card-body p-4">
+      <div className="card-body p-3">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base truncate mb-1">
+            <h3 className="font-semibold text-sm truncate mb-1">
               {task.title}
             </h3>
             {showTeam && task.team_name && (
               <p className="text-xs text-base-content/60 truncate flex items-center gap-1">
-                <User size={12} />
+                <User size={10} />
                 {task.team_name}
               </p>
             )}
@@ -34,13 +34,13 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
 
         {/* Description */}
         {task.description && (
-          <p className="text-sm text-base-content/70 line-clamp-2 mb-3">
+          <p className="text-xs text-base-content/70 line-clamp-2 mb-2">
             {task.description}
           </p>
         )}
 
         {/* Meta info */}
-        <div className="space-y-2 mb-3">
+        <div className="space-y-1 mb-2">
           {/* Status */}
           <div className="flex items-center gap-2 text-xs">
             <span className="text-base-content/60">Status:</span>
@@ -52,7 +52,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
           {/* Assignee */}
           {task.assignee_first_name && (
             <div className="flex items-center gap-2 text-xs">
-              <User size={12} className="text-base-content/60" />
+              <User size={10} className="text-base-content/60" />
               <span className="font-medium">
                 {task.assignee_first_name} {task.assignee_last_name}
               </span>
@@ -62,7 +62,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
           {/* Due date */}
           {task.due_date && (
             <div className="flex items-center gap-2 text-xs">
-              <Calendar size={12} className="text-base-content/60" />
+              <Calendar size={10} className="text-base-content/60" />
               <span
                 className={cx(
                   'font-medium',
@@ -77,13 +77,13 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
         </div>
 
         {/* Actions */}
-        <div className="card-actions justify-end">
+        <div className="card-actions justify-end gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onEdit(task)}
           >
-            <Edit size={14} />
+            <Edit size={12} />
             Edit
           </Button>
           <Button
@@ -92,7 +92,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
             onClick={() => onDelete(task.id)}
             className="text-error hover:bg-error/10"
           >
-            <Trash2 size={14} />
+            <Trash2 size={12} />
             Delete
           </Button>
         </div>

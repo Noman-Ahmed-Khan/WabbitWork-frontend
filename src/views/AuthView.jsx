@@ -70,15 +70,15 @@ export default function AuthView() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-base-200 p-3">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-content font-bold text-3xl mb-4">
+        <div className="text-center mb-6">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-content font-bold text-2xl mb-3">
             T
           </div>
-          <h1 className="text-3xl font-bold mb-2">{config.app.name}</h1>
-          <p className="text-base-content/60">
+          <h1 className="text-2xl font-bold mb-1">{config.app.name}</h1>
+          <p className="text-sm text-base-content/60">
             {mode === 'login' 
               ? 'Sign in to manage your team tasks' 
               : 'Create an account to get started'}
@@ -86,10 +86,10 @@ export default function AuthView() {
         </div>
 
         <Panel className="overlay-enter">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Register-only fields */}
             {mode === 'register' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   label="First Name"
                   name="first_name"
@@ -158,19 +158,19 @@ export default function AuthView() {
             >
               {mode === 'login' ? (
                 <>
-                  <LogIn size={18} />
+                  <LogIn size={16} />
                   Sign In
                 </>
               ) : (
                 <>
-                  <UserPlus size={18} />
+                  <UserPlus size={16} />
                   Create Account
                 </>
               )}
             </Button>
 
             {/* Toggle mode */}
-            <div className="text-center text-sm">
+            <div className="text-center text-xs">
               <span className="text-base-content/60">
                 {mode === 'login' 
                   ? "Don't have an account? " 
@@ -188,7 +188,7 @@ export default function AuthView() {
         </Panel>
 
         {/* Footer */}
-        <p className="text-center text-xs text-base-content/40 mt-8">
+        <p className="text-center text-xs text-base-content/40 mt-4">
           {config.app.name} v{config.app.version}
         </p>
       </div>
