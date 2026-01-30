@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Users, Plus, Search, ArrowLeft, UserPlus } from 'lucide-react'
-import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
 import TeamPanel from '../components/panels/TeamPanel'
 import MemberPanel from '../components/panels/MemberPanel'
@@ -94,16 +93,11 @@ export default function TeamsView() {
   )
 
   if (loading && teams.length === 0) {
-    return (
-      <Shell>
-        <Spinner />
-      </Shell>
-    )
+    return <Spinner />
   }
 
   return (
-    <Shell>
-      <div className="space-y-4 mb-24">
+    <div className="space-y-4 mb-24">
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -224,18 +218,17 @@ export default function TeamsView() {
             )}
           </Panel>
         )}
-      </div>
 
-      {/* Overlays */}
-      {activeOverlay === 'team' && (
-        <TeamOverlay onSuccess={loadTeams} />
-      )}
-      {activeOverlay === 'member' && (
-        <MemberOverlay
-          teamId={selectedTeam?.id}
-          onSuccess={() => loadMembers(selectedTeam.id)}
-        />
-      )}
-    </Shell>
+        {/* Overlays */}
+        {activeOverlay === 'team' && (
+          <TeamOverlay onSuccess={loadTeams} />
+        )}
+        {activeOverlay === 'member' && (
+          <MemberOverlay
+            teamId={selectedTeam?.id}
+            onSuccess={() => loadMembers(selectedTeam.id)}
+          />
+        )}
+      </div>
   )
 }

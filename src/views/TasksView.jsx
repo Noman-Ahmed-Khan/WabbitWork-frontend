@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { CheckSquare, Plus, Search, Filter, X } from 'lucide-react'
-import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
 import TaskPanel from '../components/panels/TaskPanel'
 import Button from '../components/primitives/Button'
@@ -92,8 +91,7 @@ export default function TasksView() {
   const activeFilterCount = Object.values(filters).filter(v => v && v !== '').length
 
   return (
-    <Shell>
-      <div className="space-y-4 mb-24">
+    <div className="space-y-4 mb-24">
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -253,12 +251,11 @@ export default function TasksView() {
             </div>
           </Panel>
         )}
-      </div>
 
-      {/* Task Overlay */}
-      {activeOverlay === 'task' && (
-        <TaskOverlay onSuccess={loadTasks} />
-      )}
-    </Shell>
+        {/* Task Overlay */}
+        {activeOverlay === 'task' && (
+          <TaskOverlay onSuccess={loadTasks} />
+        )}
+      </div>
   )
 }

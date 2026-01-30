@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, AlertCircle, Clock, CheckSquare } from 'lucide-react'
-import Shell from '../layouts/Shell'
 import Panel from '../layouts/Panel'
 import StatsPanel from '../components/panels/StatsPanel'
 import TaskPanel from '../components/panels/TaskPanel'
@@ -47,23 +46,17 @@ export default function DashboardView() {
   }
 
   if (loading && !dashboardStats) {
-    return (
-      <Shell>
-        <Spinner />
-      </Shell>
-    )
+    return <Spinner />
   }
 
   if (error) {
     return (
-      <Shell>
-        <Panel>
-          <div className="alert alert-error">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        </Panel>
-      </Shell>
+      <Panel>
+        <div className="alert alert-error">
+          <AlertCircle size={20} />
+          <span>{error}</span>
+        </div>
+      </Panel>
     )
   }
 
@@ -71,8 +64,7 @@ export default function DashboardView() {
   const overdueTasks = dashboardStats?.overdue || []
 
   return (
-    <Shell>
-      <div className="space-y-4 mb-24">
+    <div className="space-y-4 mb-24">
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -160,6 +152,5 @@ export default function DashboardView() {
           </Panel>
         )}
       </div>
-    </Shell>
   )
 }
