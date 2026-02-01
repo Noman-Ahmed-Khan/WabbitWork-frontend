@@ -66,16 +66,6 @@ export default function StatsPanel({ stats, loading }) {
 
   return (
     <Panel>
-      <motion.h2 
-        className="text-lg font-bold mb-4 flex items-center gap-2"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={transitions.normal}
-      >
-        <BarChart3 size={20} />
-        <span>Task Overview</span>
-      </motion.h2>
-
       {/* Main stats */}
       <motion.div 
         className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"

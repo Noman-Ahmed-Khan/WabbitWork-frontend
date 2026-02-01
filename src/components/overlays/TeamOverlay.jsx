@@ -11,10 +11,12 @@ import { transitions } from '../../animations/transitions'
  * Team create/edit overlay
  */
 export default function TeamOverlay({ onSuccess }) {
-  const { overlayData, closeOverlay } = useUIStore()
+  // Get activeOverlay to check against name
+  const { activeOverlay, overlayData, closeOverlay } = useUIStore()
   const { createTeam, updateTeam, loading } = useTeamStore()
   
-  const isEdit = !!overlayData
+  // Determine edit mode by checking for an ID, not just existence of data
+  const isEdit = !!overlayData?.id 
   
   const [formData, setFormData] = useState({
     name: '',
@@ -58,7 +60,8 @@ export default function TeamOverlay({ onSuccess }) {
 
   return (
     <AnimatePresence mode="wait">
-      {overlayData?.type === 'team' && (
+      {/* Fix Check activeOverlay string instead of overlayData.type */}
+      {activeOverlay === 'team' && (
         <motion.dialog 
           className="modal modal-open"
           variants={backdropVariants}

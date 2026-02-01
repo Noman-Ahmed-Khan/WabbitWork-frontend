@@ -13,11 +13,12 @@ import { transitions } from '../../animations/transitions'
  * Task create/edit overlay
  */
 export default function TaskOverlay({ onSuccess }) {
-  const { overlayData, closeOverlay } = useUIStore()
+  const { activeOverlay, overlayData, closeOverlay } = useUIStore()
   const { createTask, updateTask, loading: taskLoading } = useTaskStore()
   const { teams, members, loadTeams, loadMembers } = useTeamStore()
   
-  const isEdit = !!overlayData
+  // Check ID to determine edit mode
+  const isEdit = !!overlayData?.id
   
   const [formData, setFormData] = useState({
     title: '',
@@ -109,7 +110,8 @@ export default function TaskOverlay({ onSuccess }) {
 
   return (
     <AnimatePresence mode="wait">
-      {overlayData?.type === 'task' && (
+      {/* Check activeOverlay string */}
+      {activeOverlay === 'task' && (
         <motion.dialog 
           className="modal modal-open"
           variants={backdropVariants}

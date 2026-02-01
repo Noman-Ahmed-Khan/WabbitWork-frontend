@@ -12,7 +12,8 @@ import { transitions } from '../../animations/transitions'
  * Member invitation overlay
  */
 export default function MemberOverlay({ teamId, onSuccess }) {
-  const { overlayData, closeOverlay } = useUIStore()
+  // Get activeOverlay from store
+  const { activeOverlay, closeOverlay } = useUIStore()
   const { addMember, loading } = useTeamStore()
   
   const [formData, setFormData] = useState({
@@ -33,10 +34,18 @@ export default function MemberOverlay({ teamId, onSuccess }) {
     e.preventDefault()
     setError('')
 
+    // Safety check for Team ID
+    if (!teamId) {
+        setError('No team selected. Please try again.')
+        return
+    }
+
     try {
       await addMember(teamId, formData)
       onSuccess?.()
       closeOverlay()
+      // Reset form on success
+      setFormData({ email: '', role: 'member' }) 
     } catch (err) {
       setError(err.message)
     }
@@ -44,7 +53,8 @@ export default function MemberOverlay({ teamId, onSuccess }) {
 
   return (
     <AnimatePresence mode="wait">
-      {overlayData?.type === 'member' && (
+      {/* Check activeOverlay string instead of overlayData properties */}
+      {activeOverlay === 'member' && (
         <motion.dialog 
           className="modal modal-open"
           variants={backdropVariants}
