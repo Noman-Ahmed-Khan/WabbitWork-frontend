@@ -57,14 +57,12 @@ const config = {
     dueDateReminders: parseBoolean(getEnvVar('VITE_ENABLE_DUE_DATE_REMINDERS', 'true')),
   },
 
-  // Environment
-  isDevelopment: import.meta.env.DEV,
-  isProduction: import.meta.env.PROD,
+  // Debug Mode
   debugMode: parseBoolean(getEnvVar('VITE_DEBUG_MODE', 'false')),
 }
 
-// Log configuration in development
-if (config.isDevelopment && config.debugMode) {
+// Log configuration in debug mode
+if (config.debugMode) {
   console.log('App Configuration:', config)
 }
 
