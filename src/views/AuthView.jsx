@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogIn, UserPlus } from 'lucide-react'
+import { LogIn, UserPlus, Check, Circle } from 'lucide-react' // Added Check, Circle icons
 import useAuthStore from '../stores/authStore'
 import Panel from '../layouts/Panel'
 import Input from '../components/primitives/Input'
@@ -24,6 +24,17 @@ export default function AuthView() {
     last_name: '',
   })
 
+  // Real-time password validation checks
+  const passwordRequirements = [
+    { met: formData.password.length >= 8, text: "At least 8 characters" },
+    { met: /[A-Z]/.test(formData.password), text: "Uppercase letter" },
+    { met: /[a-z]/.test(formData.password), text: "Lowercase letter" },
+    { met: /[0-9]/.test(formData.password), text: "At least one number" },
+  ]
+
+  // Check if all requirements are met
+  const isPasswordValid = passwordRequirements.every(req => req.met)
+
   const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
@@ -42,13 +53,8 @@ export default function AuthView() {
           password: formData.password,
         })
       } else {
-        // Client-side validation
-        if (formData.password.length < 8) {
-          throw new Error('Password must be at least 8 characters')
-        }
-        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-          throw new Error('Password must contain uppercase, lowercase, and number')
-        }
+        // Double check validation (though button is disabled if invalid)
+        if (!isPasswordValid) return;
 
         await register({
           email: formData.email,
@@ -121,26 +127,39 @@ export default function AuthView() {
             />
 
             {/* Password */}
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder={mode === 'register' ? 'Min. 8 characters' : '••••••••'}
-              required
-            />
+            <div>
+              <Input
+                label="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder={mode === 'register' ? 'Min. 8 characters' : '••••••••'}
+                required
+              />
 
-            {mode === 'register' && (
-              <div className="text-xs text-base-content/60 space-y-1">
-                <p>Password must contain:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>At least 8 characters</li>
-                  <li>Uppercase and lowercase letters</li>
-                  <li>At least one number</li>
-                </ul>
-              </div>
-            )}
+              {/* Dynamic Password Requirements (Only show in register mode) */}
+              {mode === 'register' && (
+                <div className="mt-3 space-y-1 pl-1">
+                  <p className="text-xs font-medium text-base-content/70 mb-2">Password must contain:</p>
+                  {passwordRequirements.map((req, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
+                        req.met ? 'text-green-600 font-medium' : 'text-base-content/50'
+                      }`}
+                    >
+                      {req.met ? (
+                        <Check size={12} className="stroke-2" />
+                      ) : (
+                        <Circle size={8} fill="currentColor" className="opacity-40" />
+                      )}
+                      <span>{req.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Error message */}
             {error && (
@@ -155,6 +174,8 @@ export default function AuthView() {
               variant="primary"
               className="w-full"
               loading={loading}
+              // Disable button if registering and password is not valid
+              disabled={mode === 'register' && !isPasswordValid}
             >
               {mode === 'login' ? (
                 <>
