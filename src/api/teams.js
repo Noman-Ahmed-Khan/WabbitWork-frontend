@@ -53,14 +53,6 @@ export const teamsApi = {
   },
 
   /**
-   * Add member to team
-   */
-  addMember: async (teamId, data) => {
-    const response = await client.post(`/teams/${teamId}/members`, data)
-    return response.data
-  },
-
-  /**
    * Update member role
    */
   updateMemberRole: async (teamId, memberId, data) => {

@@ -1,8 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Users, CheckSquare, Moon, Sun, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, CheckSquare, Moon, Sun, LogOut, Settings } from 'lucide-react'
 import { motion } from 'framer-motion'
 import useAuthStore from '../../stores/authStore'
 import useUIStore from '../../stores/uiStore'
+import NotificationBell from '../notifications/NotificationBell'
+import InvitationBadge from '../invitations/InvitationBadge'
 import config from '../../config/env'
 import cx from '../../utils/cx'
 import { dockIconVariants, dockIndicatorVariants } from '../../animations/variants'
@@ -10,7 +12,7 @@ import { transitions } from '../../animations/transitions'
 
 /**
  * Bottom navigation dock
- * Mobile-friendly navigation with theme toggle
+ * Mobile-friendly navigation with notifications, invitations, theme toggle
  */
 export default function Dock() {
   const location = useLocation()
@@ -51,6 +53,7 @@ export default function Dock() {
         animate={{ opacity: 1, y: 0 }}
         transition={transitions.normal}
       >
+        {/* Main navigation */}
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
@@ -94,43 +97,60 @@ export default function Dock() {
         })}
         
         <div className="w-px h-8 bg-base-300/50 mx-1 md:mx-2" />
+
+        {/* Invitations */}
+        <InvitationBadge />
+
+        {/* Notifications */}
+        <NotificationBell />
+
+        <div className="w-px h-8 bg-base-300/50 mx-1 md:mx-2" />
         
+        {/* Theme toggle */}
         {config.features.darkMode && (
           <motion.button 
             onClick={toggleTheme}
-            className="flex flex-col items-center justify-center gap-1 px-3 md:px-4 py-2 rounded-lg text-base-content/70 hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
+            className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg text-base-content/70 hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
             title="Toggle theme"
-            whileHover={{ scale: 1.05, backgroundColor: 'var(--fallback-b2, oklch(var(--b2)/1))' }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={transitions.normal}
           >
             <motion.div
               animate={{ rotate: theme === 'light' ? 0 : 180 }}
               transition={transitions.normal}
             >
-              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </motion.div>
-            <span className="text-xs hidden sm:block">Theme</span>
           </motion.button>
         )}
 
+        {/* Settings */}
+        <motion.button 
+          onClick={() => navigate('/profile')}
+          className={cx(
+            'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-all duration-200',
+            location.pathname === '/profile'
+              ? 'text-primary bg-primary/10'
+              : 'text-base-content/70 hover:bg-base-200/50 hover:text-base-content'
+          )}
+          title="Settings"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Settings size={18} />
+        </motion.button>
+
+        {/* Logout */}
         <motion.button 
           onClick={handleLogout}
-          className="flex flex-col items-center justify-center gap-1 px-3 md:px-4 py-2 rounded-lg text-base-content/70 hover:bg-error/20 hover:text-error transition-all duration-200"
+          className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg text-base-content/70 hover:bg-error/20 hover:text-error transition-all duration-200"
           title="Logout"
-          whileHover={{ scale: 1.05, backgroundColor: 'var(--fallback-er, oklch(var(--er)/0.2))' }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={transitions.normal}
         >
-          <LogOut size={20} />
-          <span className="text-xs hidden sm:block">Logout</span>
+          <LogOut size={18} />
         </motion.button>
       </motion.div>
     </nav>
   )
-
 }

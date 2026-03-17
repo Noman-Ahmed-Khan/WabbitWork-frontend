@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogIn, UserPlus, Check, Circle } from 'lucide-react' // Added Check, Circle icons
+import { LogIn, UserPlus, Check, Circle } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import Panel from '../layouts/Panel'
 import Input from '../components/primitives/Input'
 import Button from '../components/primitives/Button'
+import ForgotPasswordForm from '../components/auth/ForgotPasswordForm'
 import config from '../config/env'
 
 /**
  * Authentication view
- * Handles login and registration
+ * Handles login, registration, and forgot password
  */
 export default function AuthView() {
-  const [mode, setMode] = useState('login')
+  const [mode, setMode] = useState('login') // 'login', 'register', 'forgot'
   const navigate = useNavigate()
   
   const { login, register, loading, error, clearError } = useAuthStore()
@@ -54,7 +55,7 @@ export default function AuthView() {
         })
       } else {
         // Double check validation (though button is disabled if invalid)
-        if (!isPasswordValid) return;
+        if (!isPasswordValid) return
 
         await register({
           email: formData.email,
@@ -71,8 +72,40 @@ export default function AuthView() {
   }
 
   const toggleMode = () => {
-    setMode(mode === 'login' ? 'register' : 'login')
+    const newMode = mode === 'login' ? 'register' : 'login'
+    setMode(newMode)
     clearError()
+    // Reset form when switching modes
+    setFormData({
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+    })
+  }
+
+  // Forgot password mode
+  if (mode === 'forgot') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-base-200 p-3">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="text-center mb-6">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-content font-bold text-2xl mb-3">
+              T
+            </div>
+            <h1 className="text-2xl font-bold mb-1">{config.app.name}</h1>
+          </div>
+
+          <ForgotPasswordForm onBack={() => setMode('login')} />
+
+          {/* Footer */}
+          <p className="text-center text-xs text-base-content/40 mt-4">
+            {config.app.name} v{config.app.version}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -160,6 +193,19 @@ export default function AuthView() {
                 </div>
               )}
             </div>
+
+            {/* Forgot password link (only in login mode) */}
+            {mode === 'login' && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => setMode('forgot')}
+                  className="text-xs link link-primary"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             {/* Error message */}
             {error && (

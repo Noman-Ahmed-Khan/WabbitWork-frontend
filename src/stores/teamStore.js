@@ -118,22 +118,6 @@ const useTeamStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Add member to team
-   * @param {string} teamId - Team ID
-   * @param {Object} data - Member data
-   */
-  addMember: async (teamId, data) => {
-    try {
-      set({ loading: true, error: null })
-      await teamsApi.addMember(teamId, data)
-      await get().loadMembers(teamId)
-      set({ loading: false })
-    } catch (error) {
-      set({ error: error.message, loading: false })
-      throw error
-    }
-  },
 
   /**
    * Update member role

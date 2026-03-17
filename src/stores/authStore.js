@@ -2,12 +2,6 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import authApi from '../api/auth'
 
-/**
- * Authentication store using Zustand
- * Manages user authentication state with persistence
- * 
- * @module stores/authStore
- */
 const useAuthStore = create(
   persist(
     (set, get) => ({
@@ -16,39 +10,30 @@ const useAuthStore = create(
       isAuthenticated: false,
       loading: false,
       error: null,
+      emailVerificationRequired: false,
 
       // Setters
-      /**
-       * Set user data
-       * @param {Object} user - User object
-       */
       setUser: (user) => set({ 
         user, 
         isAuthenticated: !!user, 
+        emailVerificationRequired: user ? !user.email_verified : false,
         error: null 
       }),
       
-      /**
-       * Set loading state
-       * @param {boolean} loading - Loading state
-       */
       setLoading: (loading) => set({ loading }),
-      
-      /**
-       * Set error message
-       * @param {string} error - Error message
-       */
       setError: (error) => set({ error }),
-
-      /**
-       * Clear error
-       */
       clearError: () => set({ error: null }),
 
-      // Actions
+      /**
+       * Mark email as verified (updates local state)
+       */
+      setEmailVerified: () => set(state => ({
+        user: state.user ? { ...state.user, is_verified: true } : null,
+        emailVerificationRequired: false,
+      })),
+
       /**
        * Check authentication status
-       * Called on app initialization
        */
       checkAuth: async () => {
         try {
@@ -56,15 +41,18 @@ const useAuthStore = create(
           const response = await authApi.checkStatus()
           
           if (response.data.isAuthenticated) {
+            const user = response.data.user
             set({ 
-              user: response.data.user, 
+              user, 
               isAuthenticated: true,
+              emailVerificationRequired: !user.email_verified,
               loading: false 
             })
           } else {
             set({ 
               user: null, 
               isAuthenticated: false,
+              emailVerificationRequired: false,
               loading: false 
             })
           }
@@ -72,7 +60,8 @@ const useAuthStore = create(
           console.error('Auth check failed:', error)
           set({ 
             user: null, 
-            isAuthenticated: false, 
+            isAuthenticated: false,
+            emailVerificationRequired: false, 
             loading: false,
             error: error.message 
           })
@@ -81,19 +70,17 @@ const useAuthStore = create(
 
       /**
        * Login user
-       * @param {Object} credentials - Login credentials
-       * @param {string} credentials.email - User email
-       * @param {string} credentials.password - User password
-       * @returns {Promise<Object>} API response
        */
       login: async (credentials) => {
         try {
           set({ loading: true, error: null })
           const response = await authApi.login(credentials)
+          const user = response.data.user
           
           set({ 
-            user: response.data.user, 
+            user, 
             isAuthenticated: true,
+            emailVerificationRequired: !user.email_verified,
             loading: false 
           })
           
@@ -106,17 +93,17 @@ const useAuthStore = create(
 
       /**
        * Register new user
-       * @param {Object} data - Registration data
-       * @returns {Promise<Object>} API response
        */
       register: async (data) => {
         try {
           set({ loading: true, error: null })
           const response = await authApi.register(data)
+          const user = response.data.user
           
           set({ 
-            user: response.data.user, 
+            user, 
             isAuthenticated: true,
+            emailVerificationRequired: !user.email_verified,
             loading: false 
           })
           
@@ -138,10 +125,79 @@ const useAuthStore = create(
         } finally {
           set({ 
             user: null, 
-            isAuthenticated: false, 
+            isAuthenticated: false,
+            emailVerificationRequired: false, 
             error: null 
           })
         }
+      },
+
+      /**
+       * Verify email with code (from banner)
+       */
+      verifyEmailWithCode: async (code) => {
+        try {
+          set({ loading: true, error: null })
+          const response = await authApi.verifyEmailWithCode(code)
+          
+          // Update user verification status
+          set(state => ({
+            user: state.user ? { ...state.user, is_verified: true } : null,
+            emailVerificationRequired: false,
+            loading: false,
+          }))
+          
+          return response
+        } catch (error) {
+          set({ loading: false, error: error.message })
+          throw error
+        }
+      },
+
+      /**
+       * Verify email with token (from email link)
+       */
+      verifyEmailWithToken: async (token, type) => {
+        try {
+          set({ loading: true, error: null })
+          const response = await authApi.verifyEmailWithToken(token, type)
+          
+          // Update user verification status
+          set(state => ({
+            user: state.user ? { ...state.user, is_verified: true } : null,
+            emailVerificationRequired: false,
+            loading: false,
+          }))
+          
+          return response
+        } catch (error) {
+          set({ loading: false, error: error.message })
+          throw error
+        }
+      },
+
+      /**
+       * Resend verification email
+       */
+      resendVerification: async () => {
+        try {
+          const response = await authApi.resendVerification()
+          return response
+        } catch (error) {
+          throw error
+        }
+      },
+
+      /**
+       * Update user profile in store
+       */
+      updateUser: (updates) => {
+        set(state => ({
+          user: state.user ? { ...state.user, ...updates } : null,
+          emailVerificationRequired: updates.email_verified === true 
+            ? false 
+            : state.emailVerificationRequired,
+        }))
       },
 
       /**
@@ -149,7 +205,8 @@ const useAuthStore = create(
        */
       reset: () => set({ 
         user: null, 
-        isAuthenticated: false, 
+        isAuthenticated: false,
+        emailVerificationRequired: false, 
         loading: false, 
         error: null 
       }),
@@ -158,7 +215,8 @@ const useAuthStore = create(
       name: 'auth-storage',
       partialize: (state) => ({ 
         user: state.user,
-        isAuthenticated: state.isAuthenticated 
+        isAuthenticated: state.isAuthenticated,
+        emailVerificationRequired: state.emailVerificationRequired,
       }),
     }
   )

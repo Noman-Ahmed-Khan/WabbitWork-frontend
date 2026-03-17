@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Send, Mail, Shield, MessageSquare } from 'lucide-react'
 import useUIStore from '../../stores/uiStore'
-import useTeamStore from '../../stores/teamStore'
+import useInvitationStore from '../../stores/invitationStore'
 import Input from '../primitives/Input'
 import Select from '../primitives/Select'
 import Button from '../primitives/Button'
@@ -10,17 +11,19 @@ import { transitions } from '../../animations/transitions'
 
 /**
  * Member invitation overlay
+ * Now uses invitation system instead of direct member addition
  */
-export default function MemberOverlay({ teamId, onSuccess }) {
-  // Get activeOverlay from store
+export default function MemberOverlay({ teamId, teamName, onSuccess }) {
   const { activeOverlay, closeOverlay } = useUIStore()
-  const { addMember, loading } = useTeamStore()
+  const { createInvitation, loading } = useInvitationStore()
   
   const [formData, setFormData] = useState({
     email: '',
     role: 'member',
+    message: '',
   })
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   const handleChange = (e) => {
     setFormData(prev => ({
@@ -36,19 +39,32 @@ export default function MemberOverlay({ teamId, onSuccess }) {
 
     // Safety check for Team ID
     if (!teamId) {
-        setError('No team selected. Please try again.')
-        return
+      setError('No team selected. Please try again.')
+      return
     }
 
     try {
-      await addMember(teamId, formData)
-      onSuccess?.()
-      closeOverlay()
-      // Reset form on success
-      setFormData({ email: '', role: 'member' }) 
+      await createInvitation(teamId, formData)
+      setSuccess(true)
+      
+      // Close after showing success
+      setTimeout(() => {
+        onSuccess?.()
+        closeOverlay()
+        // Reset form
+        setFormData({ email: '', role: 'member', message: '' })
+        setSuccess(false)
+      }, 2000)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Failed to send invitation')
     }
+  }
+
+  const handleClose = () => {
+    closeOverlay()
+    setFormData({ email: '', role: 'member', message: '' })
+    setError('')
+    setSuccess(false)
   }
 
   return (
@@ -69,91 +85,154 @@ export default function MemberOverlay({ teamId, onSuccess }) {
             animate="animate"
             exit="exit"
           >
-            <motion.h3 
-              className="font-bold text-lg mb-4"
+            {/* Header */}
+            <motion.div
+              className="mb-4"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={transitions.normal}
             >
-              Add Team Member
-            </motion.h3>
+              <h3 className="font-bold text-lg">Invite Team Member</h3>
+              {teamName && (
+                <p className="text-sm text-base-content/60">{teamName}</p>
+              )}
+            </motion.div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Success State */}
+            {success ? (
               <motion.div
-                variants={containerVariants}
-                initial="initial"
-                animate="animate"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
               >
-                <motion.div variants={itemVariants}>
-                  <Input
-                    label="Email Address"
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="member@example.com"
-                    required
-                  />
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                  <Select
-                    label="Role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    options={[
-                      { value: 'member', label: 'Member' },
-                      { value: 'admin', label: 'Admin' },
-                    ]}
-                  />
-                </motion.div>
-
-                <motion.div variants={itemVariants} className="text-sm text-base-content/60">
-                  <p className="mb-2 font-medium">Role permissions:</p>
-                  <ul className="list-disc list-inside space-y-1 text-xs">
-                    <li><strong>Member:</strong> Can view and create tasks</li>
-                    <li><strong>Admin:</strong> Can manage members and tasks</li>
-                  </ul>
-                </motion.div>
-
-                {error && (
-                  <motion.div 
-                    className="alert alert-error"
-                    variants={itemVariants}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                  >
-                    <span className="text-sm">{error}</span>
+                <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
+                  <Send size={32} className="text-success" />
+                </div>
+                <h3 className="font-semibold text-lg mb-1">Invitation Sent!</h3>
+                <p className="text-sm text-base-content/60">
+                  An invitation has been sent to {formData.email}
+                </p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <motion.div
+                  variants={containerVariants}
+                  initial="initial"
+                  animate="animate"
+                >
+                  {/* Email */}
+                  <motion.div variants={itemVariants}>
+                    <label className="label">
+                      <span className="label-text flex items-center gap-2">
+                        <Mail size={14} />
+                        Email Address
+                      </span>
+                    </label>
+                    <Input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="colleague@example.com"
+                      required
+                    />
                   </motion.div>
-                )}
-              </motion.div>
 
-              <motion.div 
-                className="modal-action"
-                variants={itemVariants}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={closeOverlay}
+                  {/* Role */}
+                  <motion.div variants={itemVariants}>
+                    <label className="label">
+                      <span className="label-text flex items-center gap-2">
+                        <Shield size={14} />
+                        Role
+                      </span>
+                    </label>
+                    <Select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleChange}
+                      options={[
+                        { value: 'member', label: 'Member - Can view and manage tasks' },
+                        { value: 'admin', label: 'Admin - Can also manage members' },
+                      ]}
+                    />
+                  </motion.div>
+
+                  {/* Personal Message (Optional) */}
+                  <motion.div variants={itemVariants}>
+                    <label className="label">
+                      <span className="label-text flex items-center gap-2">
+                        <MessageSquare size={14} />
+                        Personal Message (optional)
+                      </span>
+                    </label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="textarea textarea-bordered w-full h-20 text-sm"
+                      placeholder="Add a personal note to your invitation..."
+                      maxLength={500}
+                    />
+                    <div className="text-xs text-base-content/50 text-right mt-1">
+                      {formData.message.length}/500
+                    </div>
+                  </motion.div>
+
+                  {/* Info Box */}
+                  <motion.div 
+                    variants={itemVariants} 
+                    className="bg-base-200 rounded-lg p-3 text-sm text-base-content/70"
+                  >
+                    <p className="font-medium mb-1">How invitations work:</p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      <li>An email will be sent to the invited user</li>
+                      <li>They must accept the invitation to join</li>
+                      <li>Invitations expire after 7 days</li>
+                    </ul>
+                  </motion.div>
+
+                  {/* Error */}
+                  {error && (
+                    <motion.div 
+                      className="alert alert-error"
+                      variants={itemVariants}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                    >
+                      <span className="text-sm">{error}</span>
+                    </motion.div>
+                  )}
+                </motion.div>
+
+                {/* Actions */}
+                <motion.div 
+                  className="modal-action"
+                  variants={itemVariants}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  loading={loading}
-                >
-                  Add Member
-                </Button>
-              </motion.div>
-            </form>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleClose}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    loading={loading}
+                  >
+                    <Send size={16} />
+                    Send Invitation
+                  </Button>
+                </motion.div>
+              </form>
+            )}
           </motion.div>
-          <form method="dialog" className="modal-backdrop" onClick={closeOverlay}>
+          
+          <form method="dialog" className="modal-backdrop" onClick={handleClose}>
             <button>close</button>
           </form>
         </motion.dialog>

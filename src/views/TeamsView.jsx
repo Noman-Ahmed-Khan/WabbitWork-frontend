@@ -225,8 +225,9 @@ export default function TeamsView() {
         )}
         {activeOverlay === 'member' && (
           <MemberOverlay
-            teamId={selectedTeam?.id}
-            onSuccess={() => loadMembers(selectedTeam.id)}
+              teamId={selectedTeam?.id} 
+              teamName={selectedTeam?.name}
+              onSuccess={() => loadMembers(selectedTeam.id)}
           />
         )}
       </div>
