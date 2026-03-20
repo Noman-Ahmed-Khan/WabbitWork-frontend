@@ -23,10 +23,36 @@ export default function NotificationDropdown({ onClose }) {
     deleteAll,
   } = useNotificationStore()
 
-  // Fetch notifications on mount
+  // Fetch notifications on mount and when filter changes
   useEffect(() => {
-    fetchNotifications({ limit: 10 })
-  }, [fetchNotifications])
+    const params = {}
+    
+    if (filter === 'unread') {
+      params.is_read = false
+      params.limit = 100 // Higher limit for unread filter
+    } else {
+      // For all notifications, use smaller limit for performance
+      params.limit = 20
+    }
+    
+    fetchNotifications(params)
+  }, [fetchNotifications, filter])
+
+  useEffect(() => {
+    if (
+      filter === 'unread' &&
+      !loading &&
+      notifications.length === 0 &&
+      unreadCount > 0
+    ) {
+      // Retry with backend's max limit to catch all unread
+      const retryParams = { is_read: false, limit: 100 }
+      fetchNotifications(retryParams).catch((error) => {
+        console.warn('Failed to fetch unread notifications:', error)
+        // Silently fail - will still show "Fetching unread notifications..." message
+      })
+    }
+  }, [filter, loading, notifications.length, unreadCount, fetchNotifications])
 
   const handleMarkAllRead = async () => {
     try {
@@ -56,10 +82,8 @@ export default function NotificationDropdown({ onClose }) {
     onClose()
   }
 
-  // Filter notifications
-  const filteredNotifications = filter === 'unread' 
-    ? notifications.filter(n => !n.is_read)
-    : notifications
+  // No client-side filtering - API already filters
+  const filteredNotifications = notifications
 
   return (
     <motion.div
@@ -138,7 +162,9 @@ export default function NotificationDropdown({ onClose }) {
             <BellOff size={32} className="mx-auto mb-2 text-base-content/30" />
             <p className="text-sm text-base-content/60">
               {filter === 'unread' 
-                ? 'No unread notifications'
+                ? unreadCount > 0
+                  ? 'Fetching unread notifications...'
+                  : 'No unread notifications'
                 : 'No notifications yet'}
             </p>
           </div>

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import notificationsApi from '../api/notifications'
+import { validateNotifications, sanitizeNotification } from '../utils/validation'
 
 /**
  * Notification store using Zustand
@@ -52,7 +53,10 @@ const useNotificationStore = create((set, get) => ({
       set({ loading: true, error: null })
       const response = await notificationsApi.getAll(params)
       
-      const { notifications, pagination } = response.data
+      const { notifications: rawNotifications, pagination } = response.data
+      
+      // Validate and sanitize notifications
+      const notifications = validateNotifications(rawNotifications)
       
       set({ 
         notifications,
@@ -83,8 +87,11 @@ const useNotificationStore = create((set, get) => ({
       
       const { notifications: newNotifications, pagination: newPagination } = response.data
       
+      // Validate and sanitize new notifications
+      const validatedNotifications = validateNotifications(newNotifications)
+      
       set({ 
-        notifications: [...current, ...newNotifications],
+        notifications: [...current, ...validatedNotifications],
         pagination: newPagination,
       })
     } catch (error) {
@@ -138,19 +145,30 @@ const useNotificationStore = create((set, get) => ({
    * Mark all notifications as read
    */
   markAllAsRead: async () => {
+    const previousState = { ...get() }
+    
     try {
-      await notificationsApi.markAllAsRead()
+      const response = await notificationsApi.markAllAsRead()
+      
+      // Use server timestamp if provided, otherwise use client time
+      const timestamp = response.data?.timestamp || new Date().toISOString()
       
       // Update local state
       set(state => ({
         notifications: state.notifications.map(n => ({
           ...n,
           is_read: true,
-          read_at: new Date().toISOString(),
+          read_at: timestamp,
         })),
         unreadCount: 0,
       }))
+      
+      // Re-fetch to ensure full consistency with server
+      const fetchNotifications = get().fetchNotifications
+      await fetchNotifications()
     } catch (error) {
+      // Rollback on failure
+      set(previousState)
       console.error('Failed to mark all as read:', error)
       throw error
     }
@@ -231,8 +249,9 @@ const useNotificationStore = create((set, get) => ({
    * @param {Object} notification - New notification
    */
   addNotification: (notification) => {
+    const sanitized = sanitizeNotification(notification)
     set(state => ({
-      notifications: [notification, ...state.notifications],
+      notifications: [sanitized, ...state.notifications],
       unreadCount: state.unreadCount + 1,
     }))
   },

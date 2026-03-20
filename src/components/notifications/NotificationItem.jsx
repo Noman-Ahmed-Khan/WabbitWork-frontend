@@ -38,6 +38,10 @@ function getNotificationIcon(type) {
     task_overdue: <AlertCircle {...iconProps} className="text-error" />,
   }
   
+  if (!icons[type]) {
+    console.warn(`[Notifications] Unknown notification type: "${type}"`)
+  }
+  
   return icons[type] || <Mail {...iconProps} />
 }
 
@@ -78,8 +82,8 @@ export default function NotificationItem({ notification, onClose }) {
       className={cx(
         'relative group border-b border-base-300 transition-colors cursor-pointer',
         notification.is_read 
-          ? 'bg-base-100 hover:bg-base-200/50' 
-          : 'bg-primary/5 hover:bg-primary/10'
+          ? 'bg-base-100 text-base-content/70 hover:bg-base-200/30' 
+          : 'bg-base-100 text-base-content hover:bg-base-200/50'
       )}
       onClick={handleClick}
     >

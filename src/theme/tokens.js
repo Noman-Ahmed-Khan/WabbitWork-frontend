@@ -85,6 +85,25 @@ export const tokens = {
     admin: { color: 'secondary', label: 'Admin' },
     member: { color: 'neutral', label: 'Member' },
   },
+
+  // Badge semantics for notification/action indicators
+  badge: {
+    notification: { 
+      color: 'error', 
+      meaning: 'Notifications requiring attention',
+      position: 'absolute -top-1 -right-1'
+    },
+    invitation: { 
+      color: 'primary', 
+      meaning: 'Pending invitations requiring action',
+      position: 'absolute -top-1 -right-1'
+    },
+    pending: { 
+      color: 'warning', 
+      meaning: 'Pending operations in progress',
+      position: 'inline-flex'
+    },
+  },
 }
 
 export default tokens

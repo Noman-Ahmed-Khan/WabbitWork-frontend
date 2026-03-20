@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Check, X, Mail, Clock, User, Shield } from 'lucide-react'
 import useInvitationStore from '../../stores/invitationStore'
@@ -10,6 +11,7 @@ import { formatDate } from '../../utils/formatDate'
  * Single invitation card
  */
 export default function InvitationCard({ invitation, type = 'received' }) {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   
   const { 
@@ -23,10 +25,10 @@ export default function InvitationCard({ invitation, type = 'received' }) {
     try {
       setLoading(true)
       await acceptInvitation(invitation.id)
-      // Success message can be shown via toast
+      // Navigate to confirmation page
+      navigate('/invitations/confirmation?status=accepted')
     } catch (error) {
       alert(error.message || 'Failed to accept invitation')
-    } finally {
       setLoading(false)
     }
   }
@@ -36,9 +38,10 @@ export default function InvitationCard({ invitation, type = 'received' }) {
       try {
         setLoading(true)
         await declineInvitation(invitation.id)
+        // Navigate to confirmation page
+        navigate('/invitations/confirmation?status=declined')
       } catch (error) {
         alert(error.message || 'Failed to decline invitation')
-      } finally {
         setLoading(false)
       }
     }
@@ -74,16 +77,18 @@ export default function InvitationCard({ invitation, type = 'received' }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow"
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.98 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="card bg-base-100 border border-base-200 shadow hover:shadow-xl hover:border-primary/30 transition-all duration-300 overflow-hidden group"
     >
-      <div className="card-body p-4">
+      <div className="card-body p-5">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex-1">
-            <h3 className="font-semibold text-base mb-1">
+            <h3 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors duration-300">
               {invitation.team_name}
             </h3>
             
@@ -130,18 +135,19 @@ export default function InvitationCard({ invitation, type = 'received' }) {
 
         {/* Personal message */}
         {invitation.message && (
-          <div className="bg-base-200 rounded p-3 mb-3">
-            <p className="text-sm italic text-base-content/70">
-              "{invitation.message}"
+          <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-5 relative group/message hover:bg-primary/10 transition-colors duration-300">
+            <div className="absolute -top-2.5 left-4 bg-base-100 px-2 text-xs text-primary/70 font-bold tracking-widest uppercase rounded-full border border-primary/10">Message</div>
+            <p className="text-sm italic text-base-content/80 leading-relaxed relative z-10 before:content-['“'] before:text-2xl before:text-primary/30 before:mr-1 after:content-['”'] after:text-2xl after:text-primary/30 after:ml-1">
+              {invitation.message}
             </p>
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 pt-2 border-t border-base-300">
-          <div className="flex items-center gap-1 text-xs text-base-content/50">
-            <Clock size={12} />
-            <span>
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-base-200/60 mt-auto">
+          <div className="flex items-center gap-1.5 text-xs text-base-content/60 bg-base-200/40 py-1.5 px-3 rounded-lg border border-base-200">
+            <Clock size={12} className="text-primary/60" />
+            <span className="font-medium">
               {isPending 
                 ? `Expires ${formatDate(invitation.expires_at)}`
                 : formatDate(invitation.responded_at || invitation.created_at)

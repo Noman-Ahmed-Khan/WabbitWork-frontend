@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import invitationsApi from '../api/invitations'
+import { validateInvitations, sanitizeInvitation } from '../utils/validation'
 
 /**
  * Invitation store using Zustand
@@ -46,8 +47,11 @@ const useInvitationStore = create((set, get) => ({
       set({ loading: true, error: null })
       const response = await invitationsApi.getReceived(status)
       
+      // Validate and sanitize invitations
+      const invitations = validateInvitations(response.data.invitations)
+      
       set({ 
-        receivedInvitations: response.data.invitations,
+        receivedInvitations: invitations,
         loading: false 
       })
       
@@ -67,8 +71,11 @@ const useInvitationStore = create((set, get) => ({
       set({ loading: true, error: null })
       const response = await invitationsApi.getSent(filters)
       
+      // Validate and sanitize invitations
+      const invitations = validateInvitations(response.data.invitations)
+      
       set({ 
-        sentInvitations: response.data.invitations,
+        sentInvitations: invitations,
         loading: false 
       })
       

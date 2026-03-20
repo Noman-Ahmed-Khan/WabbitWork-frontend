@@ -2,10 +2,13 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import useAuthStore from './stores/authStore'
 import useUIStore from './stores/uiStore'
-import useNotificationStore from './stores/notificationStore'
-import useInvitationStore from './stores/invitationStore'
 
-// Views
+import ErrorBoundary from './components/ErrorBoundary'
+import Shell from './layouts/Shell'
+import Spinner from './components/primitives/Spinner'
+
+import useNotificationPoller from './hooks/useNotificationPoller'
+
 import AuthView from './views/AuthView'
 import DashboardView from './views/DashboardView'
 import TeamsView from './views/TeamsView'
@@ -15,10 +18,11 @@ import InvitationsView from './views/InvitationsView'
 import NotificationsView from './views/NotificationsView'
 import VerifyEmailView from './views/VerifyEmailView'
 import ResetPasswordView from './views/ResetPasswordView'
+import AcceptInvitationView from './views/AcceptInvitationView'
+import DeclineInvitationView from './views/DeclineInvitationView'
+import InvitationConfirmationView from './views/InvitationConfirmationView'
 
-// Components
-import Shell from './layouts/Shell'
-import Spinner from './components/primitives/Spinner'
+
 
 /**
  * Protected route wrapper
@@ -85,6 +89,19 @@ function AppRoutes() {
       
       {/* Password reset (accessible without auth - from email link) */}
       <Route path="/reset-password" element={<ResetPasswordView />} />
+
+      {/* Accept Invitation (accessible from email link) */}
+      <Route path="/accept-invitation" element={<AcceptInvitationView />} />
+      <Route path="/invitations/accept" element={<AcceptInvitationView />} />
+      <Route path="/invitations/accept/:id" element={<AcceptInvitationView />} />
+      
+      {/* Decline Invitation (accessible from email link) */}
+      <Route path="/decline-invitation" element={<DeclineInvitationView />} />
+      <Route path="/invitations/decline" element={<DeclineInvitationView />} />
+      <Route path="/invitations/decline/:id" element={<DeclineInvitationView />} />
+      
+      {/* Invitation Confirmation (redirect after accepting/declining from email) */}
+      <Route path="/invitations/confirmation" element={<InvitationConfirmationView />} />
 
       {/* ========== Protected Routes ========== */}
       <Route
@@ -168,8 +185,6 @@ export default function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const initializeTheme = useUIStore((state) => state.initializeTheme)
-  const fetchUnreadCount = useNotificationStore((state) => state.fetchUnreadCount)
-  const fetchPendingCount = useInvitationStore((state) => state.fetchPendingCount)
 
   useEffect(() => {
     // Initialize theme from localStorage
@@ -179,31 +194,18 @@ export default function App() {
     checkAuth()
   }, [checkAuth, initializeTheme])
 
-  // Fetch notification and invitation counts when authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchUnreadCount()
-      fetchPendingCount()
-
-      // Set up polling intervals
-      const notificationInterval = setInterval(fetchUnreadCount, 30000) // 30 seconds
-      const invitationInterval = setInterval(fetchPendingCount, 60000) // 60 seconds
-
-      return () => {
-        clearInterval(notificationInterval)
-        clearInterval(invitationInterval)
-      }
-    }
-  }, [isAuthenticated, fetchUnreadCount, fetchPendingCount])
+  useNotificationPoller()
 
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
-      <AppRoutes />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
+        <AppRoutes />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

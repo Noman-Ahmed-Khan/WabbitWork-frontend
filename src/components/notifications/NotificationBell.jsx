@@ -13,14 +13,7 @@ export default function NotificationBell() {
   const dropdownRef = useRef(null)
   const buttonRef = useRef(null)
   
-  const { unreadCount, fetchUnreadCount } = useNotificationStore()
-
-  // Fetch unread count on mount and every 30 seconds
-  useEffect(() => {
-    fetchUnreadCount()
-    const interval = setInterval(fetchUnreadCount, 30000)
-    return () => clearInterval(interval)
-  }, [fetchUnreadCount])
+  const { unreadCount } = useNotificationStore()
 
   // Close dropdown when clicking outside
   useEffect(() => {

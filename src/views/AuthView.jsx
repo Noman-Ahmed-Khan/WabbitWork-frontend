@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LogIn, UserPlus, Check, Circle } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import Panel from '../layouts/Panel'
@@ -15,6 +15,8 @@ import config from '../config/env'
 export default function AuthView() {
   const [mode, setMode] = useState('login') // 'login', 'register', 'forgot'
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const returnUrl = searchParams.get('returnUrl')
   
   const { login, register, loading, error, clearError } = useAuthStore()
 
@@ -64,7 +66,7 @@ export default function AuthView() {
           last_name: formData.last_name,
         })
       }
-      navigate('/dashboard')
+      navigate(returnUrl || '/dashboard')
     } catch (err) {
       // Error is already set in store
       console.error('Auth error:', err)

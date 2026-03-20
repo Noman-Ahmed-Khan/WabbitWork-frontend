@@ -4,6 +4,7 @@ import useAuthStore from '../stores/authStore'
 import Dock from '../components/navigation/Dock'
 import EmailVerificationBanner from '../components/auth/EmailVerificationBanner'
 import NotificationBell from '../components/notifications/NotificationBell'
+import InvitationBadge from '../components/invitations/InvitationBadge'
 import config from '../config/env'
 import { pageVariants } from '../animations/variants'
 import { transitions } from '../animations/transitions'
@@ -59,6 +60,11 @@ export default function Shell({ children }) {
             {/* Desktop notification bell */}
             <div className="hidden md:block">
               <NotificationBell />
+            </div>
+
+            {/* Desktop invitation badge */}
+            <div className="hidden md:block">
+              <InvitationBadge />
             </div>
 
             {/* User info */}

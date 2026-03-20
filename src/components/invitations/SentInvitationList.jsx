@@ -20,19 +20,22 @@ export default function SentInvitationList() {
     fetchSent 
   } = useInvitationStore()
 
-  const { teams, fetchTeams } = useTeamStore()
+  const { teams, loading: teamsLoading, loadTeams } = useTeamStore()
 
   useEffect(() => {
-    fetchTeams()
-  }, [fetchTeams])
+    loadTeams()
+  }, [loadTeams])
 
+  // Fetch sent invitations when teams are loaded or filters change
   useEffect(() => {
-    const filters = {}
-    if (statusFilter) filters.status = statusFilter
-    if (teamFilter) filters.team_id = teamFilter
-    
-    fetchSent(filters)
-  }, [fetchSent, statusFilter, teamFilter])
+    if (!teamsLoading) {
+      const filters = {}
+      if (statusFilter) filters.status = statusFilter
+      if (teamFilter) filters.team_id = teamFilter
+      
+      fetchSent(filters)
+    }
+  }, [fetchSent, statusFilter, teamFilter, teamsLoading])
 
   const statusOptions = [
     { value: '', label: 'All Status' },
@@ -46,6 +49,14 @@ export default function SentInvitationList() {
     { value: '', label: 'All Teams' },
     ...teams.map(t => ({ value: t.id, label: t.name })),
   ]
+
+  if (teamsLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">

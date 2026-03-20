@@ -99,10 +99,14 @@ export default function Dock() {
         <div className="w-px h-8 bg-base-300/50 mx-1 md:mx-2" />
 
         {/* Invitations */}
-        <InvitationBadge />
+        <div className="md:hidden">
+          <InvitationBadge />
+        </div>
 
         {/* Notifications */}
-        <NotificationBell />
+        <div className="md:hidden">
+          <NotificationBell />
+        </div>
 
         <div className="w-px h-8 bg-base-300/50 mx-1 md:mx-2" />
         

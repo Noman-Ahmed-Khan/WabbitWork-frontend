@@ -10,14 +10,7 @@ import cx from '../../utils/cx'
  */
 export default function InvitationBadge({ className }) {
   const navigate = useNavigate()
-  const { pendingCount, fetchPendingCount } = useInvitationStore()
-
-  // Fetch pending count on mount and every 60 seconds
-  useEffect(() => {
-    fetchPendingCount()
-    const interval = setInterval(fetchPendingCount, 60000)
-    return () => clearInterval(interval)
-  }, [fetchPendingCount])
+  const { pendingCount } = useInvitationStore()
 
   return (
     <motion.button
@@ -40,7 +33,7 @@ export default function InvitationBadge({ className }) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-warning text-warning-content text-xs font-bold"
+            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-content text-xs font-bold"
           >
             {pendingCount > 9 ? '9+' : pendingCount}
           </motion.span>
