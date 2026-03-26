@@ -1,121 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* App.css - Brutalist Editorial Theme Utilities */
 
-@layer base {
-  * {
-    @apply transition-colors duration-200;
-  }
-
-  html {
-    background: linear-gradient(135deg, #EAEFEF 0%, #DDE5E5 100%);
-  }
-
-  body {
-    @apply bg-transparent text-base-content overflow-x-hidden;
-    position: relative;
-  }
-
-  /* Animated circular gradient backgrounds - behind content */
-  body::before {
-    content: '';
-    position: fixed;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(37, 52, 63, 0.15) 0%, transparent 65%);
-    border-radius: 50%;
-    top: -300px;
-    left: -300px;
-    pointer-events: none;
-    z-index: 0;
-    animation: float 20s ease-in-out infinite;
-    filter: blur(40px);
-  }
-
-  body::after {
-    content: '';
-    position: fixed;
-    width: 900px;
-    height: 900px;
-    background: radial-gradient(circle, rgba(191, 201, 209, 0.12) 0%, transparent 70%);
-    border-radius: 50%;
-    bottom: -350px;
-    right: -350px;
-    pointer-events: none;
-    z-index: 0;
-    animation: float 25s ease-in-out infinite reverse;
-    filter: blur(50px);
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translate(0, 0);
-    }
-    33% {
-      transform: translate(40px, -40px);
-    }
-    66% {
-      transform: translate(-30px, 30px);
-    }
-  }
-}
-
-/* Custom scrollbar for morphic feel */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-base-200 rounded-full;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-base-300 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary/50;
-}
-
-/* Ensure content is above background */
-header, main, nav {
+/* Ensure content is above background grain */
+header, main, nav, aside {
   position: relative;
   z-index: 10;
 }
 
-/* Card with solid background */
-.card {
-  @apply bg-base-100;
-}
-
-.card-transparent {
-  @apply bg-base-100/95 backdrop-blur-sm;
-}
-
-.btn-glass {
-  @apply bg-primary/70 hover:bg-primary/80 border-0 backdrop-blur-sm;
-}
-
-/* Page transition animations */
-@keyframes pageEnter {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pageExit {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
+/* Form input baseline (editorial style) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea,
+select {
+  font-family: 'Inter', sans-serif;
 }

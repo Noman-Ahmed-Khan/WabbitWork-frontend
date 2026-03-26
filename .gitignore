@@ -36,3 +36,6 @@ coverage/
 
 # Debug
 .vscode/
+
+new_frontend_design_dark_mode/
+new_frontend_design_light_mode/

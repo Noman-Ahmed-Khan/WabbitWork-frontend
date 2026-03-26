@@ -1,9 +1,8 @@
 import { Component } from 'react'
-import { RefreshCw, AlertTriangle } from 'lucide-react'
 import Button from './primitives/Button'
 
 /**
- * Error boundary component
+ * Error boundary component - Brutalist Editorial Design
  * Catches errors in the component tree and displays a fallback UI
  */
 class ErrorBoundary extends Component {
@@ -22,7 +21,6 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log error to console for debugging
     console.error('Error caught by boundary:', error, errorInfo)
 
     this.setState(prevState => ({
@@ -31,9 +29,8 @@ class ErrorBoundary extends Component {
       errorCount: prevState.errorCount + 1,
     }))
 
-    // Log to external service (e.g., Sentry) in production
     if (process.env.NODE_ENV === 'production') {
-      // Example: Sentry.captureException(error, { contexts: { react: errorInfo } })
+      // Sentry.captureException(error, { contexts: { react: errorInfo } })
     }
   }
 
@@ -43,7 +40,6 @@ class ErrorBoundary extends Component {
       error: null,
       errorInfo: null,
     })
-    // Full page reload as fallback
     window.location.reload()
   }
 
@@ -52,32 +48,34 @@ class ErrorBoundary extends Component {
       const isDev = process.env.NODE_ENV === 'development'
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-base-100 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-[#9C9C9C] p-4">
           <div className="max-w-md w-full">
-            <div className="bg-base-200 rounded-lg border-2 border-error/30 p-6 text-center">
+            <div className="bg-surface-container-lowest rounded-xl p-8 text-center shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)]">
               {/* Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="bg-error/20 p-3 rounded-full">
-                  <AlertTriangle size={32} className="text-error" />
+              <div className="flex justify-center mb-6">
+                <div className="bg-tertiary/10 p-4 rounded-full">
+                  <span className="material-symbols-outlined text-4xl text-tertiary">warning</span>
                 </div>
               </div>
 
               {/* Title */}
-              <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
+              <h1 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+                Something Broke
+              </h1>
 
               {/* Description */}
-              <p className="text-sm text-base-content/70 mb-4">
+              <p className="text-sm text-on-surface-variant mb-6 font-body leading-relaxed">
                 An unexpected error occurred. Please try reloading the page.
                 {isDev && " The error details are shown in the browser console."}
               </p>
 
               {/* Error details (dev only) */}
               {isDev && this.state.error && (
-                <details className="text-left mb-4 bg-base-300 p-3 rounded text-xs">
-                  <summary className="cursor-pointer font-semibold mb-2">
+                <details className="text-left mb-6 bg-surface-container-highest p-4 rounded-lg text-xs">
+                  <summary className="cursor-pointer font-headline font-bold uppercase tracking-widest text-[10px] mb-2">
                     Error Details
                   </summary>
-                  <pre className="overflow-auto max-h-40 whitespace-pre-wrap break-words">
+                  <pre className="overflow-auto max-h-40 whitespace-pre-wrap break-words font-mono text-on-surface-variant">
                     {this.state.error.toString()}
                     {this.state.errorInfo?.componentStack}
                   </pre>
@@ -85,19 +83,17 @@ class ErrorBoundary extends Component {
               )}
 
               {/* Reload button */}
-              <Button
+              <button
                 onClick={this.handleReload}
-                variant="primary"
-                size="sm"
-                className="w-full"
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
               >
-                <RefreshCw size={16} />
+                <span className="material-symbols-outlined text-sm">refresh</span>
                 Reload Page
-              </Button>
+              </button>
 
               {/* Fallback text */}
-              <p className="text-xs text-base-content/50 mt-4">
-                If the problem persists, please contact support or try clearing your browser cache.
+              <p className="text-[10px] text-on-surface-variant/50 mt-6 uppercase tracking-widest font-bold">
+                If the problem persists, contact support or clear cache.
               </p>
             </div>
           </div>

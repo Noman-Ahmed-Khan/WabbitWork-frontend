@@ -8,6 +8,8 @@ import Shell from './layouts/Shell'
 import Spinner from './components/primitives/Spinner'
 
 import useNotificationPoller from './hooks/useNotificationPoller'
+import useSessionStore from './stores/sessionStore'
+import healthApi from './api/health'
 
 import AuthView from './views/AuthView'
 import DashboardView from './views/DashboardView'
@@ -21,6 +23,8 @@ import ResetPasswordView from './views/ResetPasswordView'
 import AcceptInvitationView from './views/AcceptInvitationView'
 import DeclineInvitationView from './views/DeclineInvitationView'
 import InvitationConfirmationView from './views/InvitationConfirmationView'
+import LandingView from './views/LandingView'
+
 
 
 
@@ -33,7 +37,7 @@ function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <div className="min-h-screen flex items-center justify-center bg-surface-container-highest">
         <Spinner />
       </div>
     )
@@ -55,7 +59,7 @@ function PublicRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <div className="min-h-screen flex items-center justify-center bg-surface-container-highest">
         <Spinner />
       </div>
     )
@@ -170,10 +174,20 @@ function AppRoutes() {
         }
       />
 
+      {/* ========== Landing Page ========== */}
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <LandingView />
+          </PublicRoute>
+        }
+      />
+
       {/* ========== Redirects ========== */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+
   )
 }
 
@@ -185,6 +199,7 @@ export default function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const initializeTheme = useUIStore((state) => state.initializeTheme)
+  const refreshSession = useSessionStore((state) => state.refreshSession)
 
   useEffect(() => {
     // Initialize theme from localStorage
@@ -192,7 +207,20 @@ export default function App() {
     
     // Check authentication status on mount
     checkAuth()
+
+    // Preliminary health check
+    healthApi.checkHealth()
+      .then(data => console.log('System Status:', data.status))
+      .catch(err => console.error('System Link Failure:', err))
   }, [checkAuth, initializeTheme])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Refresh session every 15 minutes to keep cookie alive
+      const interval = setInterval(refreshSession, 15 * 60 * 1000)
+      return () => clearInterval(interval)
+    }
+  }, [isAuthenticated, refreshSession])
 
   useNotificationPoller()
 
