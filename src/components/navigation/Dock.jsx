@@ -1,18 +1,14 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Users, CheckSquare, Moon, Sun, LogOut, Settings } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import useAuthStore from '../../stores/authStore'
 import useUIStore from '../../stores/uiStore'
 import NotificationBell from '../notifications/NotificationBell'
 import InvitationBadge from '../invitations/InvitationBadge'
 import config from '../../config/env'
-import cx from '../../utils/cx'
-import { dockIconVariants, dockIndicatorVariants } from '../../animations/variants'
-import { transitions } from '../../animations/transitions'
 
 /**
- * Bottom navigation dock
- * Mobile-friendly navigation with notifications, invitations, theme toggle
+ * Bottom navigation dock - Brutalist Editorial Design
+ * Mobile-friendly navigation with high-contrast active states
  */
 export default function Dock() {
   const location = useLocation()
@@ -23,17 +19,17 @@ export default function Dock() {
   const navItems = [
     { 
       path: '/dashboard', 
-      icon: LayoutDashboard, 
+      icon: 'grid_view', 
       label: 'Dashboard' 
     },
     { 
       path: '/teams', 
-      icon: Users, 
+      icon: 'groups', 
       label: 'Teams' 
     },
     { 
       path: '/tasks', 
-      icon: CheckSquare, 
+      icon: 'assignment', 
       label: 'Tasks' 
     },
   ]
@@ -46,114 +42,71 @@ export default function Dock() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-base-300/50 bg-base-100/70 backdrop-blur-lg">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-stone-200 md:hidden">
       <motion.div
-        className="container mx-auto px-3 h-16 flex items-center justify-center gap-1 md:gap-2"
-        initial={{ opacity: 0, y: 10 }}
+        className="px-4 h-15 flex items-center justify-around"
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={transitions.normal}
       >
         {/* Main navigation */}
         {navItems.map((item) => {
-          const Icon = item.icon
           const isActive = location.pathname === item.path
           return (
-            <motion.button
+            <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={cx(
-                'relative flex flex-col items-center justify-center gap-1 px-3 md:px-4 py-2 rounded-lg transition-colors duration-200',
-                isActive 
-                  ? 'text-primary-content' 
-                  : 'text-base-content/70 hover:bg-base-200/50 hover:text-base-content'
-              )}
-              title={item.label}
-              variants={dockIconVariants}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
+              className={`relative flex flex-col items-center justify-center gap-1 min-w-[64px] py-3 transition-all ${
+                isActive ? 'text-black' : 'text-stone-400'
+              }`}
             >
+              <span className={`material-symbols-outlined text-2xl ${isActive ? 'scale-110' : ''} transition-transform`}>
+                {item.icon}
+              </span>
+              <span className="text-[11px] font-headline font-black uppercase tracking-widest">
+                {item.label}
+              </span>
               {isActive && (
                 <motion.div
-                  layoutId="dock-active"
-                  className="absolute inset-0 bg-primary/80 shadow-lg rounded-lg z-0"
-                  variants={dockIndicatorVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={transitions.spring}
+                  layoutId="active-indicator-dock"
+                  className="absolute -top-[1px] w-8 h-[3px] bg-tertiary"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <motion.div 
-                className="relative z-10 flex flex-col items-center"
-                animate={isActive ? { scale: 1.1 } : { scale: 1 }}
-                transition={transitions.fast}
-              >
-                <Icon size={20} />
-                <span className="text-xs hidden sm:block">{item.label}</span>
-              </motion.div>
-            </motion.button>
+            </button>
           )
         })}
-        
-        <div className="w-px h-8 bg-base-300/50 mx-1 md:mx-2" />
 
-        {/* Invitations */}
-        <div className="md:hidden">
-          <InvitationBadge />
+        {/* Action icons */}
+        <div className="flex items-center gap-2">
+           <InvitationBadge className="!p-2" />
+           <NotificationBell className="!p-2" />
         </div>
 
-        {/* Notifications */}
-        <div className="md:hidden">
-          <NotificationBell />
-        </div>
-
-        <div className="w-px h-8 bg-base-300/50 mx-1 md:mx-2" />
-        
-        {/* Theme toggle */}
-        {config.features.darkMode && (
-          <motion.button 
-            onClick={toggleTheme}
-            className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg text-base-content/70 hover:bg-base-200/50 hover:text-base-content transition-all duration-200"
-            title="Toggle theme"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: theme === 'light' ? 0 : 180 }}
-              transition={transitions.normal}
-            >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </motion.div>
-          </motion.button>
-        )}
-
-        {/* Settings */}
-        <motion.button 
+        {/* Profile */}
+        <button 
           onClick={() => navigate('/profile')}
-          className={cx(
-            'flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-all duration-200',
-            location.pathname === '/profile'
-              ? 'text-primary bg-primary/10'
-              : 'text-base-content/70 hover:bg-base-200/50 hover:text-base-content'
-          )}
-          title="Settings"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className={`flex flex-col items-center justify-center gap-1 min-w-[64px] py-3 transition-all ${
+            location.pathname === '/profile' ? 'text-black' : 'text-stone-400'
+          }`}
         >
-          <Settings size={18} />
-        </motion.button>
+          <span className="material-symbols-outlined text-2xl">person</span>
+          <span className="text-[9px] font-headline font-black uppercase tracking-widest">Profile</span>
+          {location.pathname === '/profile' && (
+            <motion.div
+              layoutId="active-indicator-dock"
+              className="absolute -top-[1px] w-8 h-[3px] bg-tertiary"
+              transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+            />
+          )}
+        </button>
 
         {/* Logout */}
-        <motion.button 
+        <button 
           onClick={handleLogout}
-          className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg text-base-content/70 hover:bg-error/20 hover:text-error transition-all duration-200"
-          title="Logout"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="flex flex-col items-center justify-center p-3 text-stone-400 hover:text-tertiary transition-colors"
         >
-          <LogOut size={18} />
-        </motion.button>
+          <span className="material-symbols-outlined text-2xl">logout</span>
+        </button>
       </motion.div>
     </nav>
   )

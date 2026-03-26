@@ -3,97 +3,76 @@ import { persist } from 'zustand/middleware'
 
 /**
  * UI state store using Zustand
- * Manages theme, overlays, and global UI state
- * 
- * @module stores/uiStore
+ * Manages theme toggle, overlays, and global UI state
  */
 const useUIStore = create(
   persist(
     (set, get) => ({
       // State
       theme: 'light',
+      kineticFx: true,
       activeOverlay: null,
       overlayData: null,
       sidebarOpen: false,
       notifications: [],
 
       // Theme Actions
-      /**
-       * Set theme
-       * @param {string} theme - Theme name ('light' or 'dark')
-       */
       setTheme: (theme) => {
+        const root = window.document.documentElement
+        const daisyTheme = theme === 'dark' ? 'brutalist-dark' : 'brutalist'
+        
+        // Sync DaisyUI theme
+        root.setAttribute('data-theme', daisyTheme)
+        
+        // Sync Tailwind dark mode class
+        if (theme === 'dark') {
+          root.classList.add('dark')
+        } else {
+          root.classList.remove('dark')
+        }
+        
         set({ theme })
-        document.documentElement.setAttribute('data-theme', theme)
       },
 
-      /**
-       * Toggle between light and dark theme
-       */
       toggleTheme: () => {
         const { theme } = get()
         const newTheme = theme === 'light' ? 'dark' : 'light'
         get().setTheme(newTheme)
       },
 
-      /**
-       * Initialize theme from stored value
-       * Called on app mount
-       */
       initializeTheme: () => {
         const { theme } = get()
-        document.documentElement.setAttribute('data-theme', theme)
+        get().setTheme(theme)
+      },
+
+      // Kinetic FX toggle
+      toggleKineticFx: () => {
+        set((state) => ({ kineticFx: !state.kineticFx }))
       },
 
       // Overlay Actions
-      /**
-       * Open overlay with optional data
-       * @param {string} name - Overlay name
-       * @param {Object} data - Optional data to pass to overlay
-       */
       openOverlay: (name, data = null) => {
         set({ activeOverlay: name, overlayData: data })
       },
 
-      /**
-       * Close active overlay
-       */
       closeOverlay: () => {
         set({ activeOverlay: null, overlayData: null })
       },
 
-      /**
-       * Update overlay data
-       * @param {Object} data - New data
-       */
       updateOverlayData: (data) => {
         set({ overlayData: data })
       },
 
       // Sidebar Actions
-      /**
-       * Toggle sidebar open/closed
-       */
       toggleSidebar: () => {
         set((state) => ({ sidebarOpen: !state.sidebarOpen }))
       },
 
-      /**
-       * Set sidebar state
-       * @param {boolean} open - Open state
-       */
       setSidebarOpen: (open) => {
         set({ sidebarOpen: open })
       },
 
-      // Notification Actions
-      /**
-       * Add notification
-       * @param {Object} notification - Notification object
-       * @param {string} notification.message - Notification message
-       * @param {string} notification.type - Notification type (success, error, warning, info)
-       * @returns {number} Notification ID
-       */
+      // Toast Notification Actions
       addNotification: (notification) => {
         const id = Date.now()
         set((state) => ({
@@ -103,7 +82,6 @@ const useUIStore = create(
           ]
         }))
         
-        // Auto-remove after 5 seconds
         setTimeout(() => {
           get().removeNotification(id)
         }, 5000)
@@ -111,19 +89,12 @@ const useUIStore = create(
         return id
       },
 
-      /**
-       * Remove notification by ID
-       * @param {number} id - Notification ID
-       */
       removeNotification: (id) => {
         set((state) => ({
           notifications: state.notifications.filter(n => n.id !== id)
         }))
       },
 
-      /**
-       * Clear all notifications
-       */
       clearNotifications: () => {
         set({ notifications: [] })
       },
@@ -131,7 +102,8 @@ const useUIStore = create(
     {
       name: 'ui-storage',
       partialize: (state) => ({ 
-        theme: state.theme 
+        theme: state.theme,
+        kineticFx: state.kineticFx,
       }),
     }
   )
