@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { CheckCircle, AlertCircle } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
-import Panel from '../layouts/Panel'
-import Button from '../components/primitives/Button'
 import Spinner from '../components/primitives/Spinner'
 import config from '../config/env'
 
 /**
- * Email verification page (from email link)
+ * Email verification page - Brutalist Editorial Design
+ * Accessed from email verification link
  */
 export default function VerifyEmailView() {
   const navigate = useNavigate()
@@ -20,7 +18,6 @@ export default function VerifyEmailView() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
-  // Use store methods to update state globally
   const { verifyEmailWithToken, setEmailVerified, isAuthenticated } = useAuthStore()
 
   useEffect(() => {
@@ -32,13 +29,11 @@ export default function VerifyEmailView() {
       }
 
       try {
-        // Use the store method - this updates global state
         await verifyEmailWithToken(token, type)
         setSuccess(true)
       } catch (err) {
         setError(err.message || 'Verification failed')
         
-        // Even if there's an error, if the message indicates already verified
         if (err.message?.toLowerCase().includes('already verified')) {
           setEmailVerified()
           setSuccess(true)
@@ -52,71 +47,74 @@ export default function VerifyEmailView() {
     verify()
   }, [token, type, verifyEmailWithToken, setEmailVerified])
 
-  // Loading state
   if (verifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200 p-3">
+      <div className="brutalist-grain-bg min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <Spinner />
-          <p className="text-sm text-base-content/60 mt-3">Verifying your email...</p>
+          <p className="text-sm text-on-surface-variant mt-4 font-label uppercase tracking-widest">Verifying your email...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 p-3">
+    <div className="brutalist-grain-bg min-h-screen flex items-center justify-center p-6 font-body text-on-background">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-6">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-content font-bold text-2xl mb-3">
-            T
-          </div>
-          <h1 className="text-2xl font-bold mb-1">{config.app.name}</h1>
+        <div className="text-center mb-8">
+          <span className="font-headline font-black text-2xl tracking-tighter uppercase text-on-tertiary-fixed">
+            {config.app.name}
+          </span>
+          <span className="block font-label text-[10px] tracking-[0.2em] uppercase text-on-surface-variant opacity-60">
+            Brutalist Edition
+          </span>
         </div>
 
-        <Panel className="text-center">
+        <div className="glass-panel rounded-xl p-8 md:p-12 shadow-[40px_0_40px_-20px_rgba(0,0,0,0.06)] text-center">
           {success ? (
             <>
-              <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={32} className="text-success" />
+              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+                <span className="material-symbols-outlined text-3xl text-green-700" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  check_circle
+                </span>
               </div>
-              <h2 className="text-lg font-bold mb-2">
+              <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
                 {type === 'email-change' ? 'Email Updated!' : 'Email Verified!'}
               </h2>
-              <p className="text-sm text-base-content/60 mb-4">
+              <p className="text-sm text-on-surface-variant mb-8 font-body leading-relaxed">
                 {type === 'email-change' 
                   ? 'Your email address has been successfully changed.'
                   : 'Your email has been verified. You now have full access to all features.'
                 }
               </p>
-              <Button 
-                variant="primary" 
+              <button 
                 onClick={() => navigate(isAuthenticated ? '/dashboard' : '/auth')}
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
               >
                 {isAuthenticated ? 'Go to Dashboard' : 'Sign In'}
-              </Button>
+              </button>
             </>
           ) : (
             <>
-              <div className="w-16 h-16 rounded-full bg-error/20 flex items-center justify-center mx-auto mb-4">
-                <AlertCircle size={32} className="text-error" />
+              <div className="w-16 h-16 rounded-full bg-tertiary/10 flex items-center justify-center mx-auto mb-6">
+                <span className="material-symbols-outlined text-3xl text-tertiary">warning</span>
               </div>
-              <h2 className="text-lg font-bold mb-2">Verification Failed</h2>
-              <p className="text-sm text-base-content/60 mb-4">
+              <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+                Verification Failed
+              </h2>
+              <p className="text-sm text-on-surface-variant mb-8 font-body leading-relaxed">
                 {error || 'The verification link is invalid or has expired.'}
               </p>
-              <div className="flex flex-col gap-2">
-                <Button 
-                  variant="primary" 
-                  onClick={() => navigate(isAuthenticated ? '/dashboard' : '/auth')}
-                >
-                  {isAuthenticated ? 'Go to Dashboard' : 'Sign In'}
-                </Button>
-              </div>
+              <button 
+                onClick={() => navigate(isAuthenticated ? '/dashboard' : '/auth')}
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                {isAuthenticated ? 'Go to Dashboard' : 'Sign In'}
+              </button>
             </>
           )}
-        </Panel>
+        </div>
       </div>
     </div>
   )

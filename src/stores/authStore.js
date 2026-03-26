@@ -201,6 +201,36 @@ const useAuthStore = create(
       },
 
       /**
+       * Change password (authenticated user)
+       */
+      changePassword: async (currentPassword, newPassword) => {
+        try {
+          set({ loading: true, error: null })
+          const response = await authApi.changePassword(currentPassword, newPassword)
+          set({ loading: false })
+          return response
+        } catch (error) {
+          set({ loading: false, error: error.message })
+          throw error
+        }
+      },
+
+      /**
+       * Initiate email change
+       */
+      changeEmail: async (newEmail, password) => {
+        try {
+          set({ loading: true, error: null })
+          const response = await authApi.changeEmail(newEmail, password)
+          set({ loading: false })
+          return response
+        } catch (error) {
+          set({ loading: false, error: error.message })
+          throw error
+        }
+      },
+
+      /**
        * Reset store to initial state
        */
       reset: () => set({ 
