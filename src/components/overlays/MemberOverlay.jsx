@@ -1,17 +1,12 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Mail, Shield, MessageSquare } from 'lucide-react'
 import useUIStore from '../../stores/uiStore'
 import useInvitationStore from '../../stores/invitationStore'
-import Input from '../primitives/Input'
-import Select from '../primitives/Select'
-import Button from '../primitives/Button'
-import { modalVariants, backdropVariants, itemVariants, containerVariants } from '../../animations/variants'
-import { transitions } from '../../animations/transitions'
+import { modalVariants, backdropVariants } from '../../animations/variants'
 
 /**
- * Member invitation overlay
- * Now uses invitation system instead of direct member addition
+ * Member Invitation Overlay - Brutalist Editorial Design
+ * High-end glass panel with editorial typography and tactile inputs
  */
 export default function MemberOverlay({ teamId, teamName, onSuccess }) {
   const { activeOverlay, closeOverlay } = useUIStore()
@@ -37,7 +32,6 @@ export default function MemberOverlay({ teamId, teamName, onSuccess }) {
     e.preventDefault()
     setError('')
 
-    // Safety check for Team ID
     if (!teamId) {
       setError('No team selected. Please try again.')
       return
@@ -47,11 +41,9 @@ export default function MemberOverlay({ teamId, teamName, onSuccess }) {
       await createInvitation(teamId, formData)
       setSuccess(true)
       
-      // Close after showing success
       setTimeout(() => {
         onSuccess?.()
         closeOverlay()
-        // Reset form
         setFormData({ email: '', role: 'member', message: '' })
         setSuccess(false)
       }, 2000)
@@ -68,174 +60,170 @@ export default function MemberOverlay({ teamId, teamName, onSuccess }) {
   }
 
   return (
-    <AnimatePresence mode="wait">
-      {/* Check activeOverlay string instead of overlayData properties */}
+    <AnimatePresence>
       {activeOverlay === 'member' && (
-        <motion.dialog 
-          className="modal modal-open"
-          variants={backdropVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12 overflow-y-auto">
+          {/* Backdrop with grain effect implicit via index.css grain */}
           <motion.div 
-            className="modal-box"
+            className="fixed inset-0 bg-black/30 backdrop-blur-md"
+            variants={backdropVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            onClick={handleClose}
+          />
+
+          <motion.div 
+            className="w-full max-w-xl glass-panel rounded-2xl shadow-2xl relative overflow-hidden flex flex-col md:flex-row"
             variants={modalVariants}
             initial="initial"
             animate="animate"
             exit="exit"
           >
-            {/* Header */}
-            <motion.div
-              className="mb-4"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={transitions.normal}
-            >
-              <h3 className="font-bold text-lg">Invite Team Member</h3>
-              {teamName && (
-                <p className="text-sm text-base-content/60">{teamName}</p>
-              )}
-            </motion.div>
+            {/* Editorial Sidebar Accent */}
+            <div className="md:w-32 bg-on-tertiary-fixed text-white p-6 flex flex-col justify-end hidden md:flex">
+               <span className="font-headline font-black text-4xl opacity-20 rotate-[-90deg] translate-x-3 translate-y-12 select-none pointer-events-none whitespace-nowrap">INVITE</span>
+            </div>
 
-            {/* Success State */}
-            {success ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-8"
-              >
-                <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
-                  <Send size={32} className="text-success" />
+            <div className="flex-1 p-8 md:p-12">
+              {/* Header */}
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-2">
+                   <div className="w-8 h-8 rounded-full bg-tertiary flex items-center justify-center">
+                      <span className="material-symbols-outlined text-white text-sm">person_add</span>
+                   </div>
+                   <h2 className="font-headline font-black text-2xl uppercase tracking-tighter">Invite Member</h2>
                 </div>
-                <h3 className="font-semibold text-lg mb-1">Invitation Sent!</h3>
-                <p className="text-sm text-base-content/60">
-                  An invitation has been sent to {formData.email}
-                </p>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <motion.div
-                  variants={containerVariants}
-                  initial="initial"
-                  animate="animate"
-                >
-                  {/* Email */}
-                  <motion.div variants={itemVariants}>
-                    <label className="label">
-                      <span className="label-text flex items-center gap-2">
-                        <Mail size={14} />
-                        Email Address
-                      </span>
-                    </label>
-                    <Input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="colleague@example.com"
-                      required
-                    />
-                  </motion.div>
+                {teamName && (
+                  <p className="text-xs font-headline font-bold text-stone-400 uppercase tracking-widest">{teamName}</p>
+                )}
+              </div>
 
-                  {/* Role */}
-                  <motion.div variants={itemVariants}>
-                    <label className="label">
-                      <span className="label-text flex items-center gap-2">
-                        <Shield size={14} />
-                        Role
-                      </span>
-                    </label>
-                    <Select
-                      name="role"
-                      value={formData.role}
-                      onChange={handleChange}
-                      options={[
-                        { value: 'member', label: 'Member - Can view and manage tasks' },
-                        { value: 'admin', label: 'Admin - Can also manage members' },
-                      ]}
-                    />
-                  </motion.div>
-
-                  {/* Personal Message (Optional) */}
-                  <motion.div variants={itemVariants}>
-                    <label className="label">
-                      <span className="label-text flex items-center gap-2">
-                        <MessageSquare size={14} />
-                        Personal Message (optional)
-                      </span>
-                    </label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      className="textarea textarea-bordered w-full h-20 text-sm"
-                      placeholder="Add a personal note to your invitation..."
-                      maxLength={500}
-                    />
-                    <div className="text-xs text-base-content/50 text-right mt-1">
-                      {formData.message.length}/500
+              {/* Success State */}
+              <AnimatePresence mode="wait">
+                {success ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-12"
+                  >
+                    <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 relative">
+                       <motion.div 
+                         initial={{ scale: 0 }}
+                         animate={{ scale: 1.5, opacity: 0 }}
+                         transition={{ repeat: Infinity, duration: 1.5 }}
+                         className="absolute inset-0 bg-green-200 rounded-full"
+                       />
+                       <span className="material-symbols-outlined text-4xl text-green-600 relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     </div>
+                    <h3 className="font-headline font-black text-xl uppercase tracking-tight mb-2">Invitation Sent!</h3>
+                    <p className="text-sm font-body text-on-surface-variant/80">
+                      An invitation has been sent to {formData.email}
+                    </p>
                   </motion.div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Email */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-on-surface ml-1">
+                        Email Address
+                      </label>
+                      <div className="relative">
+                         <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-stone-400">mail</span>
+                         <input
+                           type="email"
+                           name="email"
+                           value={formData.email}
+                           onChange={handleChange}
+                           placeholder="colleague@example.com"
+                           className="w-full h-14 pl-12 pr-5 bg-surface-container-highest border-none rounded-xl font-body text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-on-tertiary-fixed transition-all"
+                           required
+                         />
+                      </div>
+                    </div>
 
-                  {/* Info Box */}
-                  <motion.div 
-                    variants={itemVariants} 
-                    className="bg-base-200 rounded-lg p-3 text-sm text-base-content/70"
-                  >
-                    <p className="font-medium mb-1">How invitations work:</p>
-                    <ul className="list-disc list-inside space-y-1 text-xs">
-                      <li>An email will be sent to the invited user</li>
-                      <li>They must accept the invitation to join</li>
-                      <li>Invitations expire after 7 days</li>
-                    </ul>
-                  </motion.div>
+                    {/* Role */}
+                    <div className="space-y-2">
+                       <label className="block text-xs font-black uppercase tracking-[0.3em] text-on-surface ml-1">
+                          Access Role
+                       </label>
+                       <div className="flex gap-4">
+                          {['member', 'admin'].map(role => (
+                            <button
+                              key={role}
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, role }))}
+                              className={`flex-1 p-4 rounded-xl border-2 transition-all text-left group ${
+                                formData.role === role 
+                                  ? 'border-black bg-black text-white' 
+                                  : 'border-stone-100 bg-surface-container-low text-on-surface-variant hover:border-black'
+                              }`}
+                            >
+                               <span className="font-headline font-black text-xs uppercase tracking-widest block mb-1">{role}</span>
+                               <span className={`text-[9px] leading-tight block opacity-60 ${formData.role === role ? 'text-white' : 'text-stone-400'}`}>
+                                  {role === 'admin' ? 'Can manage members' : 'Full access to tasks'}
+                               </span>
+                            </button>
+                          ))}
+                       </div>
+                    </div>
 
-                  {/* Error */}
-                  {error && (
-                    <motion.div 
-                      className="alert alert-error"
-                      variants={itemVariants}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                    >
-                      <span className="text-sm">{error}</span>
-                    </motion.div>
-                  )}
-                </motion.div>
+                    {/* Personal Message */}
+                    <div className="space-y-2">
+                       <label className="block text-xs font-black uppercase tracking-[0.3em] text-on-surface ml-1">
+                          Message (Optional)
+                       </label>
+                       <textarea
+                         name="message"
+                         value={formData.message}
+                         onChange={handleChange}
+                         className="w-full h-24 p-5 bg-surface-container-highest border-none rounded-xl font-body text-on-surface text-sm placeholder:text-outline-variant focus:ring-2 focus:ring-on-tertiary-fixed transition-all resize-none"
+                         placeholder="Add a personal note..."
+                         maxLength={500}
+                       />
+                       <div className="text-[10px] font-headline font-bold text-stone-400 text-right tracking-widest uppercase">
+                         {formData.message.length}/500
+                       </div>
+                    </div>
 
-                {/* Actions */}
-                <motion.div 
-                  className="modal-action"
-                  variants={itemVariants}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleClose}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    loading={loading}
-                  >
-                    <Send size={16} />
-                    Send Invitation
-                  </Button>
-                </motion.div>
-              </form>
-            )}
+                    {/* Error */}
+                    {error && (
+                      <div className="p-4 bg-tertiary/10 text-tertiary rounded-xl font-body text-sm flex gap-3">
+                         <span className="material-symbols-outlined text-xl">error_outline</span>
+                         {error}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="pt-4 flex items-center justify-end gap-4">
+                       <button
+                         type="button"
+                         onClick={handleClose}
+                         className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-stone-400 hover:text-black transition-colors"
+                       >
+                         Dismiss
+                       </button>
+                       <button
+                         type="submit"
+                         disabled={loading}
+                         className="h-14 px-8 bg-on-tertiary-fixed text-surface rounded-xl font-headline font-bold text-sm tracking-tight flex items-center justify-center gap-3 transition-all duration-300 hover:scale-[1.05] active:scale-95 primary-btn-glow"
+                       >
+                         {loading ? (
+                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                         ) : (
+                           <>
+                             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+                             <span className="uppercase tracking-[0.2em]">Send Invitation</span>
+                           </>
+                         )}
+                       </button>
+                    </div>
+                  </form>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
-          
-          <form method="dialog" className="modal-backdrop" onClick={handleClose}>
-            <button>close</button>
-          </form>
-        </motion.dialog>
+        </div>
       )}
     </AnimatePresence>
   )

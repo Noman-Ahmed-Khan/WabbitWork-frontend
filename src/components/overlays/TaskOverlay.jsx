@@ -3,21 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion'
 import useUIStore from '../../stores/uiStore'
 import useTaskStore from '../../stores/taskStore'
 import useTeamStore from '../../stores/teamStore'
-import Input from '../primitives/Input'
-import Select from '../primitives/Select'
-import Button from '../primitives/Button'
-import { modalVariants, backdropVariants, itemVariants, containerVariants } from '../../animations/variants'
-import { transitions } from '../../animations/transitions'
+import { modalVariants, backdropVariants } from '../../animations/variants'
 
 /**
- * Task create/edit overlay
+ * Task Create/Edit Overlay - Brutalist Editorial Design
+ * Complex grid-based form with glass panel, editorial typography, and select blocks
  */
 export default function TaskOverlay({ onSuccess }) {
   const { activeOverlay, overlayData, closeOverlay } = useUIStore()
   const { createTask, updateTask, loading: taskLoading } = useTaskStore()
   const { teams, members, loadTeams, loadMembers } = useTeamStore()
   
-  // Check ID to determine edit mode
   const isEdit = !!overlayData?.id
   
   const [formData, setFormData] = useState({
@@ -33,19 +29,13 @@ export default function TaskOverlay({ onSuccess }) {
   const [error, setError] = useState('')
   const [loadingTeams, setLoadingTeams] = useState(true)
 
-  // Load teams on mount
   useEffect(() => {
     const initTeams = async () => {
-      try {
-        await loadTeams()
-      } finally {
-        setLoadingTeams(false)
-      }
+      try { await loadTeams() } finally { setLoadingTeams(false) }
     }
     initTeams()
   }, [loadTeams])
 
-  // Populate form when editing
   useEffect(() => {
     if (overlayData) {
       setFormData({
@@ -57,19 +47,12 @@ export default function TaskOverlay({ onSuccess }) {
         priority: overlayData.priority || 'medium',
         due_date: overlayData.due_date || '',
       })
-      
-      // Load members for the team
-      if (overlayData.team_id) {
-        loadMembers(overlayData.team_id)
-      }
+      if (overlayData.team_id) { loadMembers(overlayData.team_id) }
     }
   }, [overlayData, loadMembers])
 
-  // Load members when team changes
   useEffect(() => {
-    if (formData.team_id && !isEdit) {
-      loadMembers(formData.team_id)
-    }
+    if (formData.team_id && !isEdit) { loadMembers(formData.team_id) }
   }, [formData.team_id, isEdit, loadMembers])
 
   const handleChange = (e) => {
@@ -77,7 +60,6 @@ export default function TaskOverlay({ onSuccess }) {
     setFormData(prev => ({
       ...prev,
       [name]: value,
-      // Reset assignee when team changes
       ...(name === 'team_id' && { assigned_to: '' })
     }))
     setError('')
@@ -86,205 +68,180 @@ export default function TaskOverlay({ onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-
     try {
-      // Prepare payload
       const payload = {
         ...formData,
         assigned_to: formData.assigned_to || null,
         due_date: formData.due_date || null,
       }
-
-      if (isEdit) {
-        await updateTask(overlayData.id, payload)
-      } else {
-        await createTask(payload)
-      }
-      
+      if (isEdit) { await updateTask(overlayData.id, payload) } else { await createTask(payload) }
       onSuccess?.()
       closeOverlay()
-    } catch (err) {
-      setError(err.message)
-    }
+    } catch (err) { setError(err.message) }
+  }
+
+  const handleClose = () => {
+    closeOverlay()
+    setError('')
   }
 
   return (
-    <AnimatePresence mode="wait">
-      {/* Check activeOverlay string */}
+    <AnimatePresence>
       {activeOverlay === 'task' && (
-        <motion.dialog 
-          className="modal modal-open"
-          variants={backdropVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-12 overflow-y-auto">
           <motion.div 
-            className="modal-box max-w-2xl"
-            variants={modalVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <motion.h3 
-              className="font-bold text-lg mb-4"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={transitions.normal}
-            >
-              {isEdit ? 'Edit Task' : 'Create New Task'}
-            </motion.h3>
+            className="fixed inset-0 bg-black/30 backdrop-blur-md"
+            variants={backdropVariants}
+            initial="initial" animate="animate" exit="exit"
+            onClick={handleClose}
+          />
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <motion.div
-                variants={containerVariants}
-                initial="initial"
-                animate="animate"
-              >
+          <motion.div 
+            className="w-full max-w-2xl glass-panel rounded-2xl shadow-2xl relative overflow-hidden flex flex-col md:flex-row"
+            variants={modalVariants}
+            initial="initial" animate="animate" exit="exit"
+          >
+            {/* Sidebar Accent */}
+            <div className="md:w-32 bg-on-tertiary-fixed text-white p-6 flex flex-col justify-end hidden md:flex">
+               <span className="font-headline font-black text-4xl opacity-20 rotate-[-90deg] translate-x-3 translate-y-12 select-none pointer-events-none uppercase tracking-tighter">
+                 {isEdit ? 'ARCHIVE' : 'PROTOCOL'}
+               </span>
+            </div>
+
+            <div className="flex-1 p-8 md:p-12 overflow-y-auto max-h-[90vh]">
+              {/* Header */}
+              <div className="mb-10 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                     <div className="w-8 h-8 rounded-full bg-tertiary flex items-center justify-center">
+                        <span className="material-symbols-outlined text-white text-sm">assignment</span>
+                     </div>
+                     <h2 className="font-headline font-black text-2xl uppercase tracking-tighter">
+                       {isEdit ? 'Edit Protocol' : 'Develop Task'}
+                     </h2>
+                  </div>
+                  <p className="text-xs font-headline font-bold text-stone-400 uppercase tracking-widest italic">Operational roadmap for team progress</p>
+                </div>
+                <button onClick={handleClose} className="text-stone-400 hover:text-black transition-colors">
+                   <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Title */}
-                <motion.div variants={itemVariants}>
-                  <Input
-                    label="Task Title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="e.g., Implement login feature"
-                    required
-                    maxLength={255}
+                <div className="space-y-2">
+                  <label className="block text-xs font-black uppercase tracking-[0.3em] ml-1">Protocol Title</label>
+                  <input
+                    type="text" name="title" value={formData.title} onChange={handleChange}
+                    placeholder="e.g., SYNC API ENDPOINTS"
+                    className="w-full h-14 px-5 bg-surface-container-highest border-none rounded-xl font-headline font-black text-lg uppercase tracking-widest focus:ring-2 focus:ring-on-tertiary-fixed transition-all"
+                    required maxLength={255}
                   />
-                </motion.div>
+                </div>
 
                 {/* Description */}
-                <motion.div variants={itemVariants} className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Description (Optional)</span>
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    className="textarea textarea-bordered h-24"
-                    placeholder="Add more details about this task..."
-                    maxLength={2000}
-                  />
-                </motion.div>
+                <div className="space-y-2">
+                   <label className="block text-xs font-black uppercase tracking-[0.3em] ml-1">Mission Briefing</label>
+                   <textarea
+                     name="description" value={formData.description} onChange={handleChange}
+                     className="w-full h-32 p-5 bg-surface-container-highest border-none rounded-xl font-body text-sm focus:ring-2 focus:ring-on-tertiary-fixed transition-all resize-none"
+                     placeholder="Detailed operational steps..." maxLength={2000}
+                   />
+                </div>
 
                 {/* Team & Assignment Row */}
-                <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Team */}
-                  <Select
-                    label="Team"
-                    name="team_id"
-                    value={formData.team_id}
-                    onChange={handleChange}
-                    options={teams.map(team => ({
-                      value: team.id,
-                      label: team.name
-                    }))}
-                    placeholder="Select team"
-                    required
-                    disabled={isEdit || loadingTeams}
-                  />
-
-                  {/* Assigned To */}
-                  <Select
-                    label="Assign To (Optional)"
-                    name="assigned_to"
-                    value={formData.assigned_to}
-                    onChange={handleChange}
-                    options={members.map(member => ({
-                      value: member.user_id,
-                      label: `${member.first_name} ${member.last_name}`
-                    }))}
-                    placeholder="Unassigned"
-                    disabled={!formData.team_id}
-                  />
-                </motion.div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] ml-1">Squad Deployment</label>
+                      <select
+                        name="team_id" value={formData.team_id} onChange={handleChange}
+                        className="w-full h-14 px-5 bg-surface-container-highest border-none rounded-xl font-headline font-bold uppercase tracking-widest text-[10px] focus:ring-2 focus:ring-on-tertiary-fixed transition-all cursor-pointer"
+                        required disabled={isEdit || loadingTeams}
+                      >
+                         <option value="">SELECT UNIFIED SQUAD</option>
+                         {teams.map(team => <option key={team.id} value={team.id}>{team.name.toUpperCase()}</option>)}
+                      </select>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] ml-1">Assigned Unit</label>
+                      <select
+                        name="assigned_to" value={formData.assigned_to} onChange={handleChange}
+                        className="w-full h-14 px-5 bg-surface-container-highest border-none rounded-xl font-headline font-bold uppercase tracking-widest text-[10px] focus:ring-2 focus:ring-on-tertiary-fixed transition-all cursor-pointer"
+                        disabled={!formData.team_id}
+                      >
+                         <option value="">FREE AGENT</option>
+                         {members.map(member => <option key={member.user_id} value={member.user_id}>{`${member.first_name} ${member.last_name}`.toUpperCase()}</option>)}
+                      </select>
+                   </div>
+                </div>
 
                 {/* Status & Priority Row */}
-                <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Status */}
-                  <Select
-                    label="Status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    options={[
-                      { value: 'todo', label: 'To Do' },
-                      { value: 'in_progress', label: 'In Progress' },
-                      { value: 'review', label: 'Review' },
-                      { value: 'completed', label: 'Completed' },
-                    ]}
-                  />
-
-                  {/* Priority */}
-                  <Select
-                    label="Priority"
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleChange}
-                    options={[
-                      { value: 'low', label: 'Low' },
-                      { value: 'medium', label: 'Medium' },
-                      { value: 'high', label: 'High' },
-                      { value: 'urgent', label: 'Urgent' },
-                    ]}
-                  />
-                </motion.div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] ml-1">Operational Status</label>
+                      <div className="flex flex-wrap gap-2">
+                         {['todo', 'in_progress', 'review', 'completed'].map(st => (
+                           <button
+                             key={st} type="button" onClick={() => setFormData(p => ({ ...p, status: st }))}
+                             className={`px-3 py-2 rounded-lg font-headline font-black text-[9px] uppercase tracking-widest border-2 transition-all ${
+                               formData.status === st ? 'bg-black text-white border-black' : 'bg-surface-container-low text-on-surface-variant border-transparent'
+                             }`}
+                           >
+                              {st === 'in_progress' ? 'ACTIVE' : st.toUpperCase()}
+                           </button>
+                         ))}
+                      </div>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] ml-1">Threat Level</label>
+                      <div className="flex flex-wrap gap-2">
+                         {['low', 'medium', 'high', 'urgent'].map(pr => (
+                           <button
+                             key={pr} type="button" onClick={() => setFormData(p => ({ ...p, priority: pr }))}
+                             className={`px-3 py-2 rounded-lg font-headline font-black text-[9px] uppercase tracking-widest border-2 transition-all ${
+                               formData.priority === pr 
+                                 ? pr === 'urgent' ? 'bg-tertiary text-white border-tertiary' : 'bg-black text-white border-black'
+                                 : 'bg-surface-container-low text-on-surface-variant border-transparent'
+                             }`}
+                           >
+                              {pr.toUpperCase()}
+                           </button>
+                         ))}
+                      </div>
+                   </div>
+                </div>
 
                 {/* Due Date */}
-                <motion.div variants={itemVariants}>
-                  <Input
-                    label="Due Date (Optional)"
-                    type="date"
-                    name="due_date"
-                    value={formData.due_date}
-                    onChange={handleChange}
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </motion.div>
+                <div className="space-y-2">
+                   <label className="block text-xs font-black uppercase tracking-[0.3em] ml-1">Deadline Sequence</label>
+                   <input
+                     type="date" name="due_date" value={formData.due_date} onChange={handleChange}
+                     min={new Date().toISOString().split('T')[0]}
+                     className="w-full h-14 px-5 bg-surface-container-highest border-none rounded-xl font-headline font-bold text-sm tracking-[0.2em] focus:ring-2 focus:ring-on-tertiary-fixed transition-all"
+                   />
+                </div>
 
-                {error && (
-                  <motion.div 
-                    className="alert alert-error"
-                    variants={itemVariants}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                  >
-                    <span className="text-sm">{error}</span>
-                  </motion.div>
-                )}
-              </motion.div>
+                {error && <div className="p-4 bg-tertiary/10 text-tertiary rounded-xl font-body text-sm flex gap-3"><span className="material-symbols-outlined">error</span>{error}</div>}
 
-              <motion.div 
-                className="modal-action"
-                variants={itemVariants}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={closeOverlay}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  loading={taskLoading}
-                  disabled={loadingTeams}
-                >
-                  {isEdit ? 'Update Task' : 'Create Task'}
-                </Button>
-              </motion.div>
-            </form>
+                {/* Actions */}
+                <div className="pt-4 flex items-center justify-end gap-6">
+                   <button
+                     type="button" onClick={handleClose}
+                     className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-stone-400 hover:text-black transition-colors"
+                   >
+                     Abort Sequence
+                   </button>
+                   <button
+                     type="submit" disabled={taskLoading}
+                     className="h-14 px-12 bg-on-tertiary-fixed text-surface rounded-none font-headline font-black text-sm uppercase tracking-[0.3em] hover:bg-tertiary hover:scale-[1.05] active:scale-95 transition-all shadow-[8px_8px_0_0_rgba(0,0,0,0.1)]"
+                   >
+                     {taskLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : (isEdit ? 'Commit Changes' : 'Initialize Protocol')}
+                   </button>
+                </div>
+              </form>
+            </div>
           </motion.div>
-          <form method="dialog" className="modal-backdrop" onClick={closeOverlay}>
-            <button>close</button>
-          </form>
-        </motion.dialog>
+        </div>
       )}
     </AnimatePresence>
   )

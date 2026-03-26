@@ -1,126 +1,96 @@
-import { Users, CheckSquare, Eye, Edit, Trash2, UserCog } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Badge from '../primitives/Badge'
-import Button from '../primitives/Button'
 import tokens from '../../theme/tokens'
-import { itemVariants } from '../../animations/variants'
-import { transitions } from '../../animations/transitions'
 
+/**
+ * Team Panel - Brutalist Editorial Design
+ * Uses bento-style card structure, Material Symbols, and tactical hover
+ */
 export default function TeamPanel({ team, onView, onEdit, onDelete, onManageMembers }) {
-  const roleConfig = tokens.role[team.role]
+  const roleConfig = tokens.role[team.role] || { color: 'default', label: team.role }
 
   return (
     <motion.div 
-      className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow"
-      variants={itemVariants}
-      initial="initial"
-      animate="animate"
-      whileHover={{ y: -2 }}
-      transition={transitions.normal}
+      className="bg-surface-container-low/50 rounded-xl p-6 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 relative group"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      layout
     >
-      <div className="card-body p-3">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm truncate mb-1">{team.name}</h3>
-            {team.description && (
-              <p className="text-xs text-base-content/60 line-clamp-2">
-                {team.description}
-              </p>
-            )}
+      {/* Editorial Role Tag */}
+      <div className="absolute top-0 right-6 -translate-y-1/2">
+         <Badge variant={roleConfig.color} size="sm">
+            {roleConfig.label}
+         </Badge>
+      </div>
+
+      {/* Header */}
+      <div className="mb-6">
+        <h3 className="font-headline font-black text-xl uppercase tracking-tighter leading-tight mb-2 group-hover:text-tertiary transition-colors">
+          {team.name}
+        </h3>
+        {team.description && (
+          <p className="text-sm font-body text-on-surface-variant/80 line-clamp-2 leading-relaxed">
+            {team.description}
+          </p>
+        )}
+      </div>
+
+      {/* Stats bento row */}
+      <div className="flex flex-wrap gap-4 mb-8 pt-6 border-t border-stone-200/50">
+        <div className="flex flex-col">
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 mb-1">Collaborators</span>
+          <div className="flex items-center gap-1.5">
+             <span className="material-symbols-outlined text-[16px] text-on-surface-variant">group</span>
+             <span className="text-[11px] font-headline font-black uppercase tracking-widest">{team.member_count}</span>
           </div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Badge variant={roleConfig.color} size="sm">
-              {roleConfig.label}
-            </Badge>
-          </motion.div>
         </div>
-
-        {/* Stats */}
-        <div className="flex gap-3 mb-3">
-          <motion.div 
-            className="flex items-center gap-2 text-xs"
-            whileHover={{ scale: 1.05 }}
-          >
-            <Users size={14} className="text-base-content/60" />
-            <span className="font-medium">{team.member_count}</span>
-            <span className="text-base-content/60">members</span>
-          </motion.div>
-          <motion.div 
-            className="flex items-center gap-2 text-xs"
-            whileHover={{ scale: 1.05 }}
-          >
-            <CheckSquare size={14} className="text-base-content/60" />
-            <span className="font-medium">{team.task_count}</span>
-            <span className="text-base-content/60">tasks</span>
-          </motion.div>
+        <div className="flex flex-col">
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 mb-1">Assignments</span>
+          <div className="flex items-center gap-1.5">
+             <span className="material-symbols-outlined text-[16px] text-on-surface-variant">task_alt</span>
+             <span className="text-[11px] font-headline font-black uppercase tracking-widest">{team.task_count}</span>
+          </div>
         </div>
+      </div>
 
-        {/* Actions */}
-        <div className="card-actions justify-end gap-1 flex-wrap">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Button
-              variant="ghost"
-              size="sm"
+      {/* Actions (visible on hover) */}
+      <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+         <div className="flex items-center gap-1">
+            <button
               onClick={() => onView(team)}
+              className="px-4 py-2 bg-black text-white text-[10px] font-headline font-black uppercase tracking-widest active:scale-95 transition-all"
             >
-              <Eye size={14} />
-              View
-            </Button>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Button
-              variant="ghost"
-              size="sm"
+              Enter Hub
+            </button>
+            <button
               onClick={() => onManageMembers(team)}
+              className="p-2 rounded-lg hover:bg-stone-100 transition-colors"
+              title="Manage members"
             >
-              <UserCog size={14} />
-              Members
-            </Button>
-          </motion.div>
-          {(team.role === 'owner' || team.role === 'admin') && (
-            <>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(team)}
-                >
-                  <Edit size={14} />
-                  Edit
-                </Button>
-              </motion.div>
-              {team.role === 'owner' && (
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(team.id)}
-                    className="text-error hover:bg-error/10"
-                  >
-                    <Trash2 size={14} />
-                    Delete
-                  </Button>
-                </motion.div>
-              )}
-            </>
-          )}
-        </div>
+              <span className="material-symbols-outlined text-xl">manage_accounts</span>
+            </button>
+         </div>
+
+         {(team.role === 'owner' || team.role === 'admin') && (
+            <div className="flex items-center gap-1">
+               <button
+                 onClick={() => onEdit(team)}
+                 className="p-2 rounded-lg hover:bg-stone-100 transition-colors"
+                 title="Edit Team"
+               >
+                 <span className="material-symbols-outlined text-xl">edit_note</span>
+               </button>
+               {team.role === 'owner' && (
+                 <button
+                   onClick={() => onDelete(team.id)}
+                   className="p-2 rounded-lg hover:bg-red-50 text-red-500 transition-colors"
+                   title="Delete Team"
+                 >
+                   <span className="material-symbols-outlined text-xl">delete_outline</span>
+                 </button>
+               )}
+            </div>
+         )}
       </div>
     </motion.div>
   )

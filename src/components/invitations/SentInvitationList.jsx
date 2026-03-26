@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Filter } from 'lucide-react'
 import useInvitationStore from '../../stores/invitationStore'
 import useTeamStore from '../../stores/teamStore'
 import InvitationCard from './InvitationCard'
 import Spinner from '../primitives/Spinner'
-import Select from '../primitives/Select'
 
 /**
- * List of sent invitations
+ * List of sent invitations - Brutalist Editorial Design
+ * Matches the brutalist bento card grid pattern
  */
 export default function SentInvitationList() {
   const [statusFilter, setStatusFilter] = useState('')
@@ -26,7 +25,6 @@ export default function SentInvitationList() {
     loadTeams()
   }, [loadTeams])
 
-  // Fetch sent invitations when teams are loaded or filters change
   useEffect(() => {
     if (!teamsLoading) {
       const filters = {}
@@ -38,70 +36,98 @@ export default function SentInvitationList() {
   }, [fetchSent, statusFilter, teamFilter, teamsLoading])
 
   const statusOptions = [
-    { value: '', label: 'All Status' },
+    { value: '', label: 'All' },
     { value: 'pending', label: 'Pending' },
     { value: 'accepted', label: 'Accepted' },
     { value: 'declined', label: 'Declined' },
     { value: 'cancelled', label: 'Cancelled' },
   ]
 
-  const teamOptions = [
-    { value: '', label: 'All Teams' },
-    ...teams.map(t => ({ value: t.id, label: t.name })),
-  ]
-
   if (teamsLoading) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="flex justify-center py-16">
         <Spinner />
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Filter size={16} className="text-base-content/50" />
-        <Select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          options={statusOptions}
-          className="select-sm w-36"
-        />
-        <Select
-          value={teamFilter}
-          onChange={(e) => setTeamFilter(e.target.value)}
-          options={teamOptions}
-          className="select-sm w-44"
-        />
+    <div className="space-y-6">
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-on-surface-variant text-sm">filter_list</span>
+          <div className="flex gap-2">
+            {statusOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setStatusFilter(opt.value)}
+                className={`px-3 py-1 text-[10px] font-headline font-bold uppercase tracking-widest transition-all ${
+                  statusFilter === opt.value
+                    ? 'bg-black text-white'
+                    : 'bg-surface-container-highest text-on-surface-variant hover:bg-black hover:text-white'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Team Filter */}
+        {teams.length > 0 && (
+          <select
+            value={teamFilter}
+            onChange={(e) => setTeamFilter(e.target.value)}
+            className="bg-surface-container-highest border-none rounded-lg px-4 py-1.5 font-headline text-[10px] uppercase tracking-widest focus:ring-2 focus:ring-black"
+          >
+            <option value="">All Teams</option>
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
-      {/* List */}
+      {/* Sent Invitation Cards */}
       {loading ? (
-        <div className="flex justify-center py-12">
+        <div className="flex justify-center py-16">
           <Spinner />
         </div>
       ) : sentInvitations.length === 0 ? (
-        <div className="text-center py-12">
-          <Send size={48} className="mx-auto mb-3 text-base-content/20" />
-          <p className="text-base-content/60">
-            No invitations sent
+        <div className="text-center py-20">
+          <div className="font-headline font-black text-6xl leading-[0.9] text-on-surface-variant/20 italic select-none mb-8">
+            NOTHING<br />SENT<br />YET
+          </div>
+          <p className="text-on-surface-variant text-sm font-medium">
+            No invitations dispatched. Send one from a team page.
           </p>
         </div>
       ) : (
         <motion.div 
-          className="space-y-3"
+          className="grid grid-cols-1 md:grid-cols-12 gap-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <AnimatePresence mode="popLayout">
-            {sentInvitations.map((invitation) => (
-              <InvitationCard
+            {sentInvitations.map((invitation, index) => (
+              <div
                 key={invitation.id}
-                invitation={invitation}
-                type="sent"
-              />
+                className={
+                  index === 0 
+                    ? 'md:col-span-8' 
+                    : index === 1 
+                      ? 'md:col-span-4'
+                      : index % 3 === 0 
+                        ? 'md:col-span-8' 
+                        : 'md:col-span-4'
+                }
+              >
+                <InvitationCard
+                  invitation={invitation}
+                  type="sent"
+                />
+              </div>
             ))}
           </AnimatePresence>
         </motion.div>

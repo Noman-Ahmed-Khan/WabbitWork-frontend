@@ -1,15 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Check, X, Mail, Clock, User, Shield } from 'lucide-react'
 import useInvitationStore from '../../stores/invitationStore'
-import Button from '../primitives/Button'
-import Badge from '../primitives/Badge'
 import { formatDate } from '../../utils/formatDate'
 
 /**
- * Single invitation card
+ * Invitation Card - Brutalist Editorial Bento Design
+ * Matches the invitations design reference with tonal carving,
+ * oversized typography, and editorial layout
  */
+
+const statusConfig = {
+  pending: { bg: 'bg-tertiary-container/20', text: 'text-tertiary', label: 'PENDING', dotColor: 'bg-tertiary' },
+  accepted: { bg: 'bg-green-100', text: 'text-green-700', label: 'ACCEPTED', dotColor: 'bg-green-500' },
+  declined: { bg: 'bg-red-100', text: 'text-red-700', label: 'DECLINED', dotColor: 'bg-red-500' },
+  cancelled: { bg: 'bg-stone-100', text: 'text-stone-500', label: 'CANCELLED', dotColor: 'bg-stone-400' },
+  expired: { bg: 'bg-stone-100', text: 'text-stone-500', label: 'EXPIRED', dotColor: 'bg-stone-400' },
+}
+
 export default function InvitationCard({ invitation, type = 'received' }) {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -25,7 +33,6 @@ export default function InvitationCard({ invitation, type = 'received' }) {
     try {
       setLoading(true)
       await acceptInvitation(invitation.id)
-      // Navigate to confirmation page
       navigate('/invitations/confirmation?status=accepted')
     } catch (error) {
       alert(error.message || 'Failed to accept invitation')
@@ -38,7 +45,6 @@ export default function InvitationCard({ invitation, type = 'received' }) {
       try {
         setLoading(true)
         await declineInvitation(invitation.id)
-        // Navigate to confirmation page
         navigate('/invitations/confirmation?status=declined')
       } catch (error) {
         alert(error.message || 'Failed to decline invitation')
@@ -74,132 +80,125 @@ export default function InvitationCard({ invitation, type = 'received' }) {
 
   const isPending = invitation.status === 'pending'
   const isExpired = new Date(invitation.expires_at) < new Date()
+  const statusKey = isExpired && isPending ? 'expired' : invitation.status
+  const status = statusConfig[statusKey] || statusConfig.pending
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.98 }}
-      whileHover={{ y: -4 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="card bg-base-100 border border-base-200 shadow hover:shadow-xl hover:border-primary/30 transition-all duration-300 overflow-hidden group"
+      className={`bg-[#E7E6E6] p-6 md:p-8 rounded-xl shadow-sm group hover:scale-[1.01] transition-all duration-300 ${
+        invitation.status === 'declined' ? 'opacity-60' : ''
+      } ${isPending && !isExpired ? 'border-l-4 border-tertiary' : ''}`}
     >
-      <div className="card-body p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex-1">
-            <h3 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors duration-300">
+      {/* Header Row */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          {/* Inviter Avatar Placeholder */}
+          <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
+            <span className="material-symbols-outlined text-on-surface-variant">
+              {type === 'received' ? 'person' : 'send'}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-headline font-black text-xl uppercase tracking-tighter truncate">
               {invitation.team_name}
             </h3>
-            
-            <div className="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
+            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mt-0.5">
               {type === 'received' ? (
                 <>
-                  <div className="flex items-center gap-1">
-                    <User size={12} />
-                    <span>
-                      Invited by {invitation.inviter_first_name} {invitation.inviter_last_name}
-                    </span>
-                  </div>
-                  <span>•</span>
+                  Invited by{' '}
+                  <span className="text-black">
+                    {invitation.inviter_first_name} {invitation.inviter_last_name}
+                  </span>
                 </>
               ) : (
                 <>
-                  <div className="flex items-center gap-1">
-                    <Mail size={12} />
-                    <span>{invitation.invited_email}</span>
-                  </div>
-                  <span>•</span>
+                  Sent to{' '}
+                  <span className="text-black">{invitation.invited_email}</span>
                 </>
               )}
-              
-              <div className="flex items-center gap-1">
-                <Shield size={12} />
-                <span className="capitalize">{invitation.role}</span>
-              </div>
-            </div>
+            </p>
           </div>
-
-          {/* Status badge */}
-          <Badge
-            variant={
-              invitation.status === 'accepted' ? 'success' :
-              invitation.status === 'declined' ? 'error' :
-              invitation.status === 'cancelled' ? 'ghost' :
-              isExpired ? 'error' : 'warning'
-            }
-          >
-            {isExpired && isPending ? 'Expired' : invitation.status}
-          </Badge>
         </div>
 
-        {/* Personal message */}
+        {/* Status Badge */}
+        <span className={`${status.bg} ${status.text} px-2 py-1 text-[10px] font-bold tracking-widest uppercase rounded`}>
+          {status.label}
+        </span>
+      </div>
+
+      {/* Role & Message */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="material-symbols-outlined text-sm text-on-surface-variant">shield</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant capitalize">
+            Role: {invitation.role}
+          </span>
+        </div>
         {invitation.message && (
-          <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-5 relative group/message hover:bg-primary/10 transition-colors duration-300">
-            <div className="absolute -top-2.5 left-4 bg-base-100 px-2 text-xs text-primary/70 font-bold tracking-widest uppercase rounded-full border border-primary/10">Message</div>
-            <p className="text-sm italic text-base-content/80 leading-relaxed relative z-10 before:content-['“'] before:text-2xl before:text-primary/30 before:mr-1 after:content-['”'] after:text-2xl after:text-primary/30 after:ml-1">
-              {invitation.message}
-            </p>
+          <p className="text-sm font-body text-on-surface-variant leading-relaxed mt-3">
+            "{invitation.message}"
+          </p>
+        )}
+      </div>
+
+      {/* Footer: Time + Actions */}
+      <div className="flex items-center justify-between pt-4 border-t border-stone-300/50">
+        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+          {isPending 
+            ? `Expires ${formatDate(invitation.expires_at)}`
+            : formatDate(invitation.responded_at || invitation.created_at)
+          }
+        </span>
+
+        {/* Received Pending Actions */}
+        {type === 'received' && isPending && !isExpired && (
+          <div className="flex gap-2">
+            <button
+              onClick={handleDecline}
+              disabled={loading}
+              className="px-4 py-2 border border-black text-[10px] font-black uppercase tracking-widest hover:bg-error/10 active:scale-95 transition-all disabled:opacity-50"
+            >
+              Decline
+            </button>
+            <button
+              onClick={handleAccept}
+              disabled={loading}
+              className="px-4 py-2 bg-black text-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform disabled:opacity-50 flex items-center gap-2"
+            >
+              {loading && (
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                check_circle
+              </span>
+              Accept
+            </button>
           </div>
         )}
 
-        {/* Footer */}
-        <div className="flex items-center justify-between gap-3 pt-4 border-t border-base-200/60 mt-auto">
-          <div className="flex items-center gap-1.5 text-xs text-base-content/60 bg-base-200/40 py-1.5 px-3 rounded-lg border border-base-200">
-            <Clock size={12} className="text-primary/60" />
-            <span className="font-medium">
-              {isPending 
-                ? `Expires ${formatDate(invitation.expires_at)}`
-                : formatDate(invitation.responded_at || invitation.created_at)
-              }
-            </span>
+        {/* Sent Pending Actions */}
+        {type === 'sent' && isPending && !isExpired && (
+          <div className="flex gap-2">
+            <button
+              onClick={handleResend}
+              disabled={loading}
+              className="px-4 py-2 bg-transparent text-[10px] font-black uppercase tracking-widest underline hover:text-tertiary transition-colors disabled:opacity-50"
+            >
+              Resend
+            </button>
+            <button
+              onClick={handleCancel}
+              disabled={loading}
+              className="px-4 py-2 border border-stone-400 text-[10px] font-black uppercase tracking-widest hover:border-black transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
           </div>
-
-          {/* Actions */}
-          {type === 'received' && isPending && !isExpired && (
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDecline}
-                loading={loading}
-              >
-                <X size={14} />
-                Decline
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleAccept}
-                loading={loading}
-              >
-                <Check size={14} />
-                Accept
-              </Button>
-            </div>
-          )}
-
-          {type === 'sent' && isPending && !isExpired && (
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResend}
-                loading={loading}
-              >
-                Resend
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCancel}
-                loading={loading}
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </motion.div>
   )

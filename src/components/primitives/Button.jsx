@@ -1,6 +1,7 @@
-import { Loader2 } from 'lucide-react'
-import cx from '../../utils/cx'
-
+/**
+ * Button - Brutalist Editorial Design
+ * Replaces DaisyUI btn classes with design system tokens
+ */
 export default function Button({
   children,
   variant = 'primary',
@@ -11,33 +12,30 @@ export default function Button({
   ...props
 }) {
   const variantClasses = {
-    primary: 'btn-primary',
-    secondary: 'btn-secondary',
-    accent: 'btn-accent',
-    ghost: 'btn-ghost',
-    error: 'btn-error',
-    success: 'btn-success',
-    outline: 'btn-outline',
+    primary: 'bg-on-tertiary-fixed text-white hover:scale-105 active:scale-95',
+    secondary: 'bg-primary-container text-on-primary-container hover:bg-surface-container-highest',
+    accent: 'bg-tertiary text-white hover:scale-105 active:scale-95',
+    ghost: 'bg-transparent text-on-surface hover:bg-surface-container-highest',
+    error: 'bg-error text-on-error hover:opacity-80',
+    success: 'bg-green-700 text-white hover:opacity-80',
+    outline: 'bg-transparent border-2 border-black text-black hover:bg-black hover:text-white',
   }
 
   const sizeClasses = {
-    sm: 'btn-sm',
-    md: 'btn-md',
-    lg: 'btn-lg',
+    sm: 'px-4 py-1.5 text-[10px]',
+    md: 'px-6 py-2.5 text-xs',
+    lg: 'px-8 py-3.5 text-sm',
   }
 
   return (
     <button
-      className={cx(
-        'btn gap-2',
-        variantClasses[variant],
-        sizeClasses[size],
-        className
-      )}
+      className={`inline-flex items-center justify-center gap-2 font-headline font-black uppercase tracking-widest transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant] || variantClasses.primary} ${sizeClasses[size] || sizeClasses.md} ${className}`}
       disabled={disabled || loading}
       {...props}
     >
-      {loading && <Loader2 size={16} className="animate-spin" />}
+      {loading && (
+        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+      )}
       {children}
     </button>
   )

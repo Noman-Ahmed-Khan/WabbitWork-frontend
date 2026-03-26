@@ -1,20 +1,21 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { CheckSquare, Plus, Search, Filter, X } from 'lucide-react'
-import Panel from '../layouts/Panel'
-import TaskPanel from '../components/panels/TaskPanel'
-import Button from '../components/primitives/Button'
-import Input from '../components/primitives/Input'
-import Select from '../components/primitives/Select'
-import Spinner from '../components/primitives/Spinner'
+import { motion } from 'framer-motion'
 import TaskOverlay from '../components/overlays/TaskOverlay'
+import Spinner from '../components/primitives/Spinner'
 import useTaskStore from '../stores/taskStore'
 import useTeamStore from '../stores/teamStore'
 import useUIStore from '../stores/uiStore'
 
+const priorityConfig = {
+  urgent: { bg: 'bg-tertiary-container', text: 'text-on-tertiary-container', border: 'border-tertiary', label: 'URGENT' },
+  high: { bg: 'bg-tertiary-fixed', text: 'text-white', border: 'border-tertiary-fixed', label: 'HIGH' },
+  medium: { bg: 'bg-secondary-container', text: 'text-on-secondary-container', border: 'border-secondary', label: 'MEDIUM' },
+  low: { bg: 'bg-surface-container-highest', text: 'text-on-surface-variant', border: 'border-outline-variant', label: 'LOW' },
+}
+
 /**
- * Tasks view
- * Manage and filter tasks
+ * Tasks View - Brutalist Editorial Design
  */
 export default function TasksView() {
   const location = useLocation()
@@ -25,54 +26,26 @@ export default function TasksView() {
     filters,
     loading,
     setFilters,
-    resetFilters,
     loadTasks,
     deleteTask,
+    dashboardStats,
   } = useTaskStore()
 
-  const { teams, members, loadTeams, loadMembers } = useTeamStore()
+  const { teams, loadTeams } = useTeamStore()
 
-  // Load teams on mount
   useEffect(() => {
     loadTeams()
   }, [loadTeams])
 
-  // Initialize filters from navigation state (if coming from teams page)
   useEffect(() => {
     if (location.state?.teamId) {
       setFilters({ team_id: location.state.teamId })
     }
   }, [location.state, setFilters])
 
-  // Load tasks when filters change
   useEffect(() => {
     loadTasks()
   }, [filters, loadTasks])
-
-  // Load members when team filter changes (only if team_id is valid)
-  useEffect(() => {
-    const loadTeamMembers = async () => {
-      if (filters.team_id && filters.team_id.trim() !== '') {
-        try {
-          await loadMembers(filters.team_id)
-        } catch (error) {
-          console.error('Failed to load team members:', error)
-          // Optionally clear the team filter if it's invalid
-          // setFilters({ team_id: '', assigned_to: '' })
-        }
-      }
-    }
-
-    loadTeamMembers()
-  }, [filters.team_id, loadMembers])
-
-  const handleFilterChange = (name, value) => {
-    setFilters({
-      [name]: value,
-      // Reset assignee when team changes
-      ...(name === 'team_id' && { assigned_to: '' })
-    })
-  }
 
   const handleEditTask = (task) => {
     openOverlay('task', task)
@@ -80,7 +53,6 @@ export default function TasksView() {
 
   const handleDeleteTask = async (taskId) => {
     if (!confirm('Delete this task?')) return
-
     try {
       await deleteTask(taskId)
     } catch (err) {
@@ -88,174 +60,149 @@ export default function TasksView() {
     }
   }
 
-  const activeFilterCount = Object.values(filters).filter(v => v && v !== '').length
+  const stats = dashboardStats?.stats || {}
+  const completedCount = stats.by_status?.completed || 0
+  const totalTasks = stats.total || tasks.length || 1
+  const completedPct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0
 
   return (
-    <div className="space-y-4 mb-24">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-              <CheckSquare size={24} />
-              Tasks
-            </h1>
-            <p className="text-sm text-base-content/60">
-              {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} found
+    <div className="p-12 relative">
+      <div className="max-w-6xl mx-auto">
+        {/* Hero Heading */}
+        <div className="mb-16">
+          <h1 className="font-headline font-black text-[8rem] leading-[0.8] tracking-tighter text-on-surface opacity-90 uppercase">
+            Tasks
+          </h1>
+          <div className="flex items-center justify-between mt-4">
+            <p className="font-label uppercase tracking-widest text-xs text-on-surface-variant font-bold">
+              Editorial Pipeline / {tasks.length} Active
             </p>
+            <div className="flex gap-2">
+              <span className="h-1 w-12 bg-on-surface" />
+              <span className="h-1 w-4 bg-on-surface opacity-30" />
+            </div>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => openOverlay('task')}
-          >
-            <Plus size={16} />
-            Create Task
-          </Button>
         </div>
 
-        {/* Filters */}
-        <Panel>
-          <div className="space-y-3">
-            {/* Search */}
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
-              <Input
-                placeholder="Search tasks..."
-                value={filters.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="pl-10"
-              />
+        {/* Task List Container */}
+        <div className="bg-surface-container-high p-8 space-y-4 rounded-xl shadow-inner min-h-[400px]">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Spinner />
             </div>
-
-            {/* Filter Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-              {/* Team Filter */}
-              <Select
-                placeholder="All Teams"
-                value={filters.team_id}
-                onChange={(e) => handleFilterChange('team_id', e.target.value)}
-                options={teams.map(team => ({
-                  value: team.id,
-                  label: team.name
-                }))}
-              />
-
-              {/* Status Filter */}
-              <Select
-                placeholder="All Status"
-                value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-                options={[
-                  { value: 'todo', label: 'To Do' },
-                  { value: 'in_progress', label: 'In Progress' },
-                  { value: 'review', label: 'Review' },
-                  { value: 'completed', label: 'Completed' },
-                ]}
-              />
-
-              {/* Priority Filter */}
-              <Select
-                placeholder="All Priorities"
-                value={filters.priority}
-                onChange={(e) => handleFilterChange('priority', e.target.value)}
-                options={[
-                  { value: 'low', label: 'Low' },
-                  { value: 'medium', label: 'Medium' },
-                  { value: 'high', label: 'High' },
-                  { value: 'urgent', label: 'Urgent' },
-                ]}
-              />
-
-              {/* Assignee Filter */}
-              <Select
-                placeholder="All Assignees"
-                value={filters.assigned_to}
-                onChange={(e) => handleFilterChange('assigned_to', e.target.value)}
-                options={members.map(member => ({
-                  value: member.user_id,
-                  label: `${member.first_name} ${member.last_name}`
-                }))}
-                disabled={!filters.team_id || members.length === 0}
-              />
-            </div>
-
-            {/* Quick Filters */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <label className="label cursor-pointer gap-2">
-                <input
-                  type="checkbox"
-                  className="checkbox checkbox-sm"
-                  checked={filters.assigned_to_me}
-                  onChange={(e) => handleFilterChange('assigned_to_me', e.target.checked)}
-                />
-                <span className="label-text text-sm">Assigned to me</span>
-              </label>
-
-              {activeFilterCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetFilters}
+          ) : tasks.length > 0 ? (
+            tasks.map((task) => {
+              const priority = priorityConfig[task.priority] || priorityConfig.medium
+              return (
+                <motion.div
+                  key={task.id}
+                  className="group flex items-center bg-surface-container-lowest p-6 hover:scale-[1.01] hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer relative overflow-hidden"
+                  onClick={() => handleEditTask(task)}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={{ scale: 1.01 }}
                 >
-                  <X size={14} />
-                  Clear ({activeFilterCount})
-                </Button>
-              )}
-            </div>
-          </div>
-        </Panel>
+                  {/* Priority bar */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${priority.border.replace('border-', 'bg-')}`} />
+                  
+                  <div className="flex-1 pl-4">
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className={`${priority.bg} ${priority.text} px-2 py-0.5 text-[10px] font-black uppercase tracking-widest`}>
+                        {priority.label}
+                      </span>
+                      <span className="text-xs font-label text-on-surface-variant opacity-60">
+                        ID-{task.id?.slice(-4) || '0000'}
+                      </span>
+                    </div>
+                    <h3 className="font-headline text-xl font-bold text-on-surface">
+                      {task.title}
+                    </h3>
+                  </div>
 
-        {/* Tasks Grid */}
-        {loading ? (
-          <Spinner />
-        ) : tasks.length > 0 ? (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {tasks.map((task) => (
-              <TaskPanel
-                key={task.id}
-                task={task}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
-                showTeam={!filters.team_id}
-              />
-            ))}
-          </div>
-        ) : (
-          <Panel>
-            <div className="text-center py-12">
-              <CheckSquare size={64} className="mx-auto mb-4 text-base-content/40" />
-              <h3 className="text-xl font-bold mb-2">
-                {activeFilterCount > 0 ? 'No tasks found' : 'No tasks yet'}
-              </h3>
-              <p className="text-base-content/60 mb-6">
-                {activeFilterCount > 0
-                  ? 'Try adjusting your filters'
-                  : 'Create your first task to get started'}
+                  <div className="flex items-center gap-8">
+                    <div className="text-right">
+                      <span className="block text-[10px] font-black uppercase tracking-widest text-on-surface-variant opacity-40">
+                        {task.due_date ? 'Deadline' : 'Status'}
+                      </span>
+                      <span className="font-headline font-bold text-on-surface">
+                        {task.due_date
+                          ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                          : task.status?.replace('_', ' ') || 'Active'}
+                      </span>
+                    </div>
+                    <div className="h-10 w-10 flex items-center justify-center rounded-full border border-outline-variant group-hover:bg-on-surface group-hover:text-surface transition-colors">
+                      <span className="material-symbols-outlined text-on-surface group-hover:text-surface">chevron_right</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })
+          ) : (
+            <div className="text-center py-20">
+              <div className="font-headline font-black text-6xl leading-[0.9] text-on-surface-variant/20 italic select-none mb-8">
+                EMPTY<br />PIPELINE
+              </div>
+              <p className="text-on-surface-variant text-sm mb-8">
+                No tasks in the current filter. Create one to begin.
               </p>
-              {activeFilterCount === 0 ? (
-                <Button
-                  variant="primary"
-                  onClick={() => openOverlay('task')}
-                >
-                  <Plus size={18} />
-                  Create Task
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  onClick={resetFilters}
-                >
-                  <Filter size={18} />
-                  Clear Filters
-                </Button>
-              )}
+              <button
+                onClick={() => openOverlay('task')}
+                className="bg-on-surface text-surface px-8 py-3 font-headline font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform"
+              >
+                Create Task
+              </button>
             </div>
-          </Panel>
-        )}
+          )}
+        </div>
 
-        {/* Task Overlay */}
-        {activeOverlay === 'task' && (
-          <TaskOverlay onSuccess={loadTasks} />
-        )}
+        {/* Bottom Stats + Tip */}
+        <div className="mt-12 flex flex-col md:flex-row gap-12">
+          <div className="flex-1 border-t-4 border-on-surface pt-6">
+            <h4 className="font-headline font-black text-2xl uppercase tracking-tighter mb-4">
+              Productivity Stats
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-surface-container-highest p-6">
+                <span className="block text-[10px] font-black uppercase opacity-40 text-on-surface">Completed</span>
+                <span className="text-4xl font-headline font-black text-on-surface">{completedPct}%</span>
+              </div>
+              <div className="bg-surface-container-highest p-6">
+                <span className="block text-[10px] font-black uppercase opacity-40 text-on-surface">Active</span>
+                <span className="text-4xl font-headline font-black text-on-surface">{tasks.length}</span>
+              </div>
+            </div>
+          </div>
+          <div className="w-full md:w-1/3 bg-on-surface text-surface p-8 shadow-brutalist">
+            <span className="material-symbols-outlined text-4xl mb-4">auto_awesome</span>
+            <h4 className="font-headline font-bold text-lg mb-2 leading-tight">
+              Optimization Tip:
+            </h4>
+            <p className="font-label text-xs opacity-80 leading-relaxed">
+              {tasks.length > 5
+                ? "You have multiple active tasks. Try prioritizing your urgent items first to maintain editorial flow."
+                : "Your pipeline is light. Great time to pick up new items from the backlog."}
+            </p>
+          </div>
+        </div>
       </div>
+
+      {/* FAB */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <motion.button
+          className="bg-on-surface text-surface h-16 w-16 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform active:scale-95 group border-4 border-surface"
+          onClick={() => openOverlay('task')}
+          whileTap={{ scale: 0.9 }}
+        >
+          <span className="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform duration-300">
+            add
+          </span>
+        </motion.button>
+      </div>
+
+      {/* Task Overlay */}
+      {activeOverlay === 'task' && (
+        <TaskOverlay onSuccess={loadTasks} />
+      )}
+    </div>
   )
 }

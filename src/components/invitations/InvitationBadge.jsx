@@ -1,30 +1,23 @@
-import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useInvitationStore from '../../stores/invitationStore'
-import cx from '../../utils/cx'
 
 /**
- * Invitation badge with pending count
+ * Invitation badge with pending count - Brutalist Editorial Design
  */
-export default function InvitationBadge({ className }) {
+export default function InvitationBadge({ className = '' }) {
   const navigate = useNavigate()
   const { pendingCount } = useInvitationStore()
 
   return (
     <motion.button
       onClick={() => navigate('/invitations')}
-      className={cx(
-        'relative p-2 rounded-lg transition-colors duration-200',
-        'text-base-content/70 hover:bg-base-200/50 hover:text-base-content',
-        className
-      )}
+      className={`relative p-2 rounded-lg transition-colors duration-200 text-on-surface-variant hover:bg-surface-container-highest hover:text-black ${className}`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       title="Invitations"
     >
-      <Mail size={20} />
+      <span className="material-symbols-outlined">mail</span>
       
       {/* Pending badge */}
       <AnimatePresence>
@@ -33,7 +26,7 @@ export default function InvitationBadge({ className }) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-content text-xs font-bold"
+            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-tertiary text-white text-[10px] font-black"
           >
             {pendingCount > 9 ? '9+' : pendingCount}
           </motion.span>

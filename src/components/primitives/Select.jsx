@@ -1,5 +1,7 @@
-import cx from '../../utils/cx'
-
+/**
+ * Select - Brutalist Editorial Design
+ * Replaces DaisyUI select classes with design system tokens
+ */
 export default function Select({
   label,
   error,
@@ -10,18 +12,14 @@ export default function Select({
   ...props
 }) {
   return (
-    <div className={cx('form-control w-full', containerClassName)}>
+    <div className={`w-full ${containerClassName}`}>
       {label && (
-        <label className="label">
-          <span className="label-text font-medium">{label}</span>
+        <label className="block font-headline font-bold text-[10px] uppercase tracking-widest text-stone-400 mb-2">
+          {label}
         </label>
       )}
       <select
-        className={cx(
-          'select select-bordered w-full',
-          error && 'select-error',
-          className
-        )}
+        className={`w-full bg-surface-container-highest border-none rounded-lg px-4 py-2 font-headline text-xs uppercase tracking-widest focus:ring-2 focus:ring-black transition-all ${error ? 'ring-2 ring-tertiary' : ''} ${className}`}
         {...props}
       >
         {placeholder && <option value="">{placeholder}</option>}
@@ -32,9 +30,9 @@ export default function Select({
         ))}
       </select>
       {error && (
-        <label className="label">
-          <span className="label-text-alt text-error">{error}</span>
-        </label>
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-tertiary">
+          {error}
+        </p>
       )}
     </div>
   )

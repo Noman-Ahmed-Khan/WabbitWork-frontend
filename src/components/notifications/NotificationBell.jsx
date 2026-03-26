@@ -1,21 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
-import { Bell } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useNotificationStore from '../../stores/notificationStore'
 import NotificationDropdown from './NotificationDropdown'
-import cx from '../../utils/cx'
 
 /**
- * Notification bell with unread badge and dropdown
+ * Notification bell - Brutalist Editorial style
  */
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   const buttonRef = useRef(null)
-  
+
   const { unreadCount } = useNotificationStore()
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -38,29 +35,22 @@ export default function NotificationBell() {
       <motion.button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className={cx(
-          'relative p-2 rounded-lg transition-colors duration-200',
-          isOpen 
-            ? 'bg-base-200 text-base-content' 
-            : 'text-base-content/70 hover:bg-base-200/50 hover:text-base-content'
-        )}
+        className="relative hover:opacity-70 transition-opacity"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Notifications"
       >
-        <Bell size={20} />
-        
-        {/* Unread badge */}
+        <span className="material-symbols-outlined text-black dark:text-white transition-colors duration-300">notifications</span>
+
+        {/* Unread dot */}
         <AnimatePresence>
           {unreadCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-error-content text-xs font-bold"
-            >
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </motion.span>
+              className="absolute -top-1 -right-1 w-2 h-2 bg-tertiary rounded-full"
+            />
           )}
         </AnimatePresence>
       </motion.button>
