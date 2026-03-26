@@ -1,23 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom'
-import { XCircle, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import useAuthStore from '../stores/authStore'
 import useInvitationStore from '../stores/invitationStore'
-import Panel from '../layouts/Panel'
-import Button from '../components/primitives/Button'
 import Spinner from '../components/primitives/Spinner'
 import config from '../config/env'
 
 /**
- * Handle declining an invitation from an email link
+ * Handle declining an invitation from an email link - Brutalist Editorial Design
  */
 export default function DeclineInvitationView() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { id: paramId } = useParams()
   
-  // Can be in query string as ?token=... or ?id=..., or in path as /:id
   const invitationId = paramId || searchParams.get('token') || searchParams.get('id')
 
   const [processing, setProcessing] = useState(true)
@@ -35,19 +31,16 @@ export default function DeclineInvitationView() {
         return
       }
 
-      // If user is not authenticated, they need to log in first
-      if (!isAuthenticated) {
-        setError('Please sign in to decline this invitation.')
-        setProcessing(false)
-        return
-      }
-
       try {
-        await declineInvitation(invitationId)
+        if (isAuthenticated) {
+          await declineInvitation(invitationId)
+        } else {
+          const { declineInvitationPublic } = useInvitationStore.getState()
+          await declineInvitationPublic(invitationId)
+        }
         setSuccess(true)
-        // Redirect to confirmation page after 1.5 seconds
         setTimeout(() => {
-          navigate('/invitations/confirmation?status=declined')
+          navigate(isAuthenticated ? '/invitations/confirmation?status=declined' : '/auth?mode=login&declined=true')
         }, 1500)
       } catch (err) {
         setError(err.message || 'Failed to decline invitation. It may be invalid or expired.')
@@ -61,80 +54,81 @@ export default function DeclineInvitationView() {
 
   if (processing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200 p-3">
+      <div className="brutalist-grain-bg min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <Spinner />
-          <p className="text-sm text-base-content/60 mt-3">Processing invitation...</p>
+          <p className="text-sm text-on-surface-variant mt-4 font-label uppercase tracking-widest">
+            Processing invitation...
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 p-3">
+    <div className="brutalist-grain-bg min-h-screen flex items-center justify-center p-6 font-body text-on-background">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-6">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-content font-bold text-2xl mb-3">
-            T
-          </div>
-          <h1 className="text-2xl font-bold mb-1">{config.app.name}</h1>
+        <div className="text-center mb-8">
+          <span className="font-headline font-black text-2xl tracking-tighter uppercase text-on-tertiary-fixed">
+            {config.app.name}
+          </span>
         </div>
 
-        <Panel className="text-center overflow-hidden">
+        <div className="glass-panel rounded-xl p-8 md:p-12 shadow-[40px_0_40px_-20px_rgba(0,0,0,0.06)] text-center overflow-hidden">
           {success ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, type: 'spring' }}
             >
-              <div className="w-20 h-20 rounded-full bg-warning/10 flex items-center justify-center mx-auto mb-6 relative">
+              <div className="w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-6 relative">
                 <motion.div 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                  className="absolute inset-0 bg-warning/20 rounded-full animate-ping opacity-20"
+                  className="absolute inset-0 bg-stone-100 rounded-full animate-ping opacity-20"
                 />
-                <XCircle size={40} className="text-warning relative z-10" />
+                <span className="material-symbols-outlined text-4xl text-stone-600 relative z-10">cancel</span>
               </div>
-              <h2 className="text-2xl font-bold mb-3 tracking-tight">Invitation Declined</h2>
-              <p className="text-base text-base-content/70 mb-8 leading-relaxed">
+              <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+                Invitation Declined
+              </h2>
+              <p className="text-sm text-on-surface-variant mb-8 leading-relaxed">
                 You have declined the team invitation. The team organizer has been notified. Redirecting you...
               </p>
-              <Button 
-                variant="primary" 
+              <button 
                 onClick={() => navigate('/dashboard')}
-                className="w-full"
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
               >
                 Go to Dashboard Now
-              </Button>
+              </button>
             </motion.div>
           ) : (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="w-20 h-20 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-6">
-                <AlertCircle size={40} className="text-error" />
+              <div className="w-20 h-20 rounded-full bg-tertiary/10 flex items-center justify-center mx-auto mb-6">
+                <span className="material-symbols-outlined text-4xl text-tertiary">warning</span>
               </div>
-              <h2 className="text-2xl font-bold mb-3 tracking-tight">Could Not Decline</h2>
-              <div className="bg-base-200/50 rounded-lg p-4 mb-8">
-                <p className="text-sm text-base-content/80 font-medium">
+              <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+                Could Not Decline
+              </h2>
+              <div className="bg-surface-container-highest rounded-xl p-4 mb-8">
+                <p className="text-sm text-on-surface-variant font-medium">
                   {error}
                 </p>
               </div>
-              <div className="flex flex-col gap-3">
-                <Button 
-                  variant="primary" 
-                  onClick={() => navigate(isAuthenticated ? '/dashboard' : `/auth?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
-                  className="w-full"
-                >
-                  {isAuthenticated ? 'Go to Dashboard' : 'Sign In to Proceed'}
-                </Button>
-              </div>
+              <button 
+                onClick={() => navigate(isAuthenticated ? '/dashboard' : `/auth?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                {isAuthenticated ? 'Go to Dashboard' : 'Sign In to Proceed'}
+              </button>
             </motion.div>
           )}
-        </Panel>
+        </div>
       </div>
     </div>
   )

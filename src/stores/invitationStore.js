@@ -168,6 +168,36 @@ const useInvitationStore = create((set, get) => ({
   },
 
   /**
+   * Accept invitation via public link (no auth)
+   */
+  acceptInvitationPublic: async (id) => {
+    try {
+      set({ loading: true, error: null })
+      const response = await invitationsApi.acceptPublic(id)
+      set({ loading: false })
+      return response
+    } catch (error) {
+      set({ loading: false, error: error.message })
+      throw error
+    }
+  },
+
+  /**
+   * Decline invitation via public link (no auth)
+   */
+  declineInvitationPublic: async (id) => {
+    try {
+      set({ loading: true, error: null })
+      const response = await invitationsApi.declinePublic(id)
+      set({ loading: false })
+      return response
+    } catch (error) {
+      set({ loading: false, error: error.message })
+      throw error
+    }
+  },
+
+  /**
    * Create team invitation
    * @param {string} teamId - Team ID
    * @param {Object} data - Invitation data

@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { CheckCircle, XCircle, AlertCircle } from 'lucide-react'
-import Button from '../components/primitives/Button'
 import config from '../config/env'
 
 /**
- * Confirmation view for accepting/declining team invitations from email
- * Handles redirect from email links with query parameter: /invitations/confirmation?status=accepted|declined
+ * Confirmation view for accepting/declining team invitations - Brutalist Editorial Design
+ * Handles redirect from email links: /invitations/confirmation?status=accepted|declined
  */
 export default function InvitationConfirmationView() {
   const navigate = useNavigate()
@@ -15,7 +13,6 @@ export default function InvitationConfirmationView() {
   const [displayMessage, setDisplayMessage] = useState('')
 
   useEffect(() => {
-    // Validate status parameter
     const validStatuses = ['accepted', 'declined']
     if (!status || !validStatuses.includes(status)) {
       setDisplayMessage('invalid')
@@ -29,130 +26,118 @@ export default function InvitationConfirmationView() {
   const isInvalid = displayMessage === 'invalid'
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 p-3">
+    <div className="brutalist-grain-bg min-h-screen flex items-center justify-center p-6 font-body text-on-background">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-6">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-content font-bold text-2xl mb-3">
-            T
-          </div>
-          <h1 className="text-2xl font-bold mb-1">{config.app.name}</h1>
+        <div className="text-center mb-8">
+          <span className="font-headline font-black text-2xl tracking-tighter uppercase text-on-tertiary-fixed">
+            {config.app.name}
+          </span>
+          <span className="block font-label text-[10px] tracking-[0.2em] uppercase text-on-surface-variant opacity-60">
+            Brutalist Edition
+          </span>
         </div>
 
         {/* Card */}
-        <div className="bg-base-100 rounded-2xl shadow-lg border border-base-300 p-6 md:p-8">
+        <div className="glass-panel rounded-xl p-8 md:p-12 shadow-[40px_0_40px_-20px_rgba(0,0,0,0.06)]">
           {isAccepted && (
             <>
-              {/* Success Icon */}
-              <div className="text-center mb-6">
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-success/20">
-                  <CheckCircle className="w-8 h-8 text-success" />
+              <div className="text-center mb-8">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4">
+                  <span className="material-symbols-outlined text-3xl text-green-700" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    check_circle
+                  </span>
                 </div>
-              </div>
-
-              {/* Title & Message */}
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold mb-2">Invitation Accepted!</h2>
-                <p className="text-base-content/60">
+                <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+                  Invitation Accepted!
+                </h2>
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   You have successfully accepted the team invitation. You can now access the team and collaborate with your team members.
                 </p>
               </div>
-
-              {/* Actions */}
               <div className="space-y-3">
-                <Button
+                <button
                   onClick={() => navigate('/teams')}
-                  className="w-full"
+                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   View Teams
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={() => navigate('/dashboard')}
-                  variant="outline"
-                  className="w-full"
+                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all"
                 >
                   Go to Dashboard
-                </Button>
+                </button>
               </div>
             </>
           )}
 
           {isDeclined && (
             <>
-              {/* Decline Icon */}
-              <div className="text-center mb-6">
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-warning/20">
-                  <XCircle className="w-8 h-8 text-warning" />
+              <div className="text-center mb-8">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-stone-100 mb-4">
+                  <span className="material-symbols-outlined text-3xl text-stone-600">cancel</span>
                 </div>
-              </div>
-
-              {/* Title & Message */}
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold mb-2">Invitation Declined</h2>
-                <p className="text-base-content/60">
+                <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+                  Invitation Declined
+                </h2>
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   You have declined the team invitation. The team organizer has been notified. You can still accept invitations in your invitations panel.
                 </p>
               </div>
-
-              {/* Actions */}
               <div className="space-y-3">
-                <Button
+                <button
                   onClick={() => navigate('/invitations')}
-                  className="w-full"
+                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   View Invitations
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={() => navigate('/dashboard')}
-                  variant="outline"
-                  className="w-full"
+                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all"
                 >
                   Go to Dashboard
-                </Button>
+                </button>
               </div>
             </>
           )}
 
           {isInvalid && (
             <>
-              {/* Error Icon */}
-              <div className="text-center mb-6">
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-error/20">
-                  <AlertCircle className="w-8 h-8 text-error" />
+              <div className="text-center mb-8">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-tertiary/10 mb-4">
+                  <span className="material-symbols-outlined text-3xl text-tertiary">warning</span>
                 </div>
-              </div>
-
-              {/* Title & Message */}
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold mb-2">Invalid Link</h2>
-                <p className="text-base-content/60">
-                  The invitation link appears to be invalid or expired. Please check your email for the correct link or contact support if you need assistance.
+                <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+                  Invalid Link
+                </h2>
+                <p className="text-sm text-on-surface-variant leading-relaxed">
+                  The invitation link appears to be invalid or expired. Please check your email for the correct link or contact support.
                 </p>
               </div>
-
-              {/* Actions */}
               <div className="space-y-3">
-                <Button
+                <button
                   onClick={() => navigate('/dashboard')}
-                  className="w-full"
+                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   Home
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={() => navigate('/invitations')}
-                  variant="outline"
-                  className="w-full"
+                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all"
                 >
                   View Invitations
-                </Button>
+                </button>
               </div>
             </>
           )}
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-sm text-base-content/50">
-          <p>Need help? Contact support at support@{config.app.domain}</p>
+        <div className="text-center mt-8 opacity-40">
+          <p className="font-label text-[10px] uppercase tracking-[0.3em] text-on-surface-variant">
+            Need help? Contact support@{config.app.domain}
+          </p>
         </div>
       </div>
     </div>

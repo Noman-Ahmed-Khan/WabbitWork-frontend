@@ -102,6 +102,24 @@ export const invitationsApi = {
     const response = await client.post(`/teams/${teamId}/invitations`, data)
     return response.data
   },
+
+  /**
+   * Accept invitation from email link (public - no auth required)
+   * @param {string} id - Invitation ID
+   */
+  acceptPublic: async (id) => {
+    const response = await client.get(`/invitations/public/${id}/accept`)
+    return response.data
+  },
+
+  /**
+   * Decline invitation from email link (public - no auth required)
+   * @param {string} id - Invitation ID
+   */
+  declinePublic: async (id) => {
+    const response = await client.get(`/invitations/public/${id}/decline`)
+    return response.data
+  },
 }
 
 export default invitationsApi

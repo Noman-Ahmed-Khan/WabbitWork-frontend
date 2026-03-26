@@ -1,640 +1,520 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { 
-  User, 
-  Lock, 
-  Bell, 
-  Monitor,
-  Camera,
-  Save,
-  Mail,
-  Eye,
-  EyeOff,
-  Check,
-  Circle,
-  Trash2,
-  LogOut,
-  Shield,
-  Smartphone,
-  Globe,
-} from 'lucide-react'
 import useAuthStore from '../stores/authStore'
-import authApi from '../api/auth'
-import sessionsApi from '../api/sessions'
-import Panel from '../layouts/Panel'
-import Input from '../components/primitives/Input'
-import Button from '../components/primitives/Button'
+import useUIStore from '../stores/uiStore'
+import useSessionStore from '../stores/sessionStore'
 import Spinner from '../components/primitives/Spinner'
-import NotificationPreferences from '../components/notifications/NotificationPreferences'
-import { formatDate } from '../utils/formatDate'
+import Input from '../components/primitives/Input'
 
 /**
- * Profile & Settings View
+ * Settings / Profile View - Brutalist Editorial Design
+ * Bento panel layout with profile, system toggles, privacy, security
  */
 export default function ProfileView() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const initialTab = searchParams.get('tab') || 'profile'
-  const [activeTab, setActiveTab] = useState(initialTab)
-
-  const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'security', label: 'Security', icon: Lock },
-    { id: 'sessions', label: 'Sessions', icon: Monitor },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-  ]
-
-  const handleTabChange = (tabId) => {
-    setActiveTab(tabId)
-    setSearchParams({ tab: tabId })
-  }
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-bold">Settings</h1>
-        <p className="text-sm text-base-content/60">Manage your account and preferences</p>
-      </div>
-
-      {/* Tabs */}
-      <div className="tabs tabs-boxed bg-base-200 p-1">
-        {tabs.map((tab) => {
-          const Icon = tab.icon
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`tab gap-2 flex-1 ${activeTab === tab.id ? 'tab-active' : ''}`}
-            >
-              <Icon size={16} />
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Tab content */}
-      <motion.div
-        key={activeTab}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        {activeTab === 'profile' && <ProfileTab />}
-        {activeTab === 'security' && <SecurityTab />}
-        {activeTab === 'sessions' && <SessionsTab />}
-        {activeTab === 'notifications' && <NotificationPreferences />}
-      </motion.div>
-    </div>
-  )
-}
-
-/**
- * Profile Tab
- */
-function ProfileTab() {
-  const { user, updateUser } = useAuthStore()
+  const navigate = useNavigate()
+  const { user, loading, updateProfile, logout, changePassword, changeEmail } = useAuthStore()
+  const { kineticFx, toggleKineticFx, theme, toggleTheme } = useUIStore()
+  const { sessions, loadSessions, terminateSession, terminateAllSessions } = useSessionStore()
+  const [activeTab, setActiveTab] = useState('profile')
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState({ type: '', text: '' })
-  
+
   const [formData, setFormData] = useState({
-    first_name: user?.first_name || '',
-    last_name: user?.last_name || '',
+    first_name: '',
+    last_name: '',
+    bio: '',
   })
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    try {
-      setSaving(true)
-      setMessage({ type: '', text: '' })
-      
-      // TODO: Add profile update API endpoint when available
-      // For now, just update local state
-      updateUser(formData)
-      
-      setMessage({ type: 'success', text: 'Profile updated successfully!' })
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Failed to update profile' })
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <Panel>
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-lg font-bold mb-1">Profile Information</h2>
-          <p className="text-sm text-base-content/60">Update your personal details</p>
-        </div>
-
-        {/* Avatar */}
-        <div className="flex items-center gap-4">
-          <div className="avatar placeholder">
-            <div className="w-20 h-20 rounded-full bg-primary text-primary-content">
-              {user?.avatar_url ? (
-                <img src={user.avatar_url} alt="Avatar" />
-              ) : (
-                <span className="text-2xl font-bold">
-                  {user?.first_name?.[0]}{user?.last_name?.[0]}
-                </span>
-              )}
-            </div>
-          </div>
-          <div>
-            <Button variant="ghost" size="sm" disabled>
-              <Camera size={16} />
-              Change Avatar
-            </Button>
-            <p className="text-xs text-base-content/50 mt-1">
-              Avatar upload coming soon
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="First Name"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              required
-            />
-            <Input
-              label="Last Name"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Email (read-only, change via security tab) */}
-          <div>
-            <label className="label">
-              <span className="label-text">Email Address</span>
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                value={user?.email || ''}
-                className="input input-bordered flex-1"
-                disabled
-              />
-              <Button 
-                type="button" 
-                variant="ghost"
-                onClick={() => document.getElementById('change-email-modal').showModal()}
-              >
-                Change
-              </Button>
-            </div>
-            {!user?.is_verified && (
-              <p className="text-xs text-warning mt-1">
-                ⚠️ Email not verified
-              </p>
-            )}
-          </div>
-
-          {/* Messages */}
-          {message.text && (
-            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'} text-sm py-2`}>
-              {message.text}
-            </div>
-          )}
-
-          <div className="flex justify-end">
-            <Button type="submit" variant="primary" loading={saving}>
-              <Save size={16} />
-              Save Changes
-            </Button>
-          </div>
-        </form>
-      </div>
-
-      {/* Change Email Modal */}
-      <ChangeEmailModal />
-    </Panel>
-  )
-}
-
-/**
- * Change Email Modal
- */
-function ChangeEmailModal() {
-  const { user } = useAuthStore()
-  const [formData, setFormData] = useState({ newEmail: '', password: '' })
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState({ type: '', text: '' })
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    try {
-      setLoading(true)
-      setMessage({ type: '', text: '' })
-      
-      await authApi.changeEmail(formData.newEmail, formData.password)
-      
-      setMessage({ 
-        type: 'success', 
-        text: 'Verification email sent to your new address. Please check your inbox.' 
-      })
-      setFormData({ newEmail: '', password: '' })
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Failed to change email' })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <dialog id="change-email-modal" className="modal">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg mb-4">Change Email Address</h3>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="label">
-              <span className="label-text">Current Email</span>
-            </label>
-            <input
-              type="email"
-              value={user?.email || ''}
-              className="input input-bordered w-full"
-              disabled
-            />
-          </div>
-
-          <Input
-            label="New Email Address"
-            type="email"
-            value={formData.newEmail}
-            onChange={(e) => setFormData(prev => ({ ...prev, newEmail: e.target.value }))}
-            placeholder="new@example.com"
-            required
-          />
-
-          <Input
-            label="Current Password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-            placeholder="Enter your password to confirm"
-            required
-          />
-
-          {message.text && (
-            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'} text-sm py-2`}>
-              {message.text}
-            </div>
-          )}
-
-          <div className="modal-action">
-            <form method="dialog">
-              <Button variant="ghost">Cancel</Button>
-            </form>
-            <Button type="submit" variant="primary" loading={loading}>
-              <Mail size={16} />
-              Change Email
-            </Button>
-          </div>
-        </form>
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
-  )
-}
-
-/**
- * Security Tab
- */
-function SecurityTab() {
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState({ type: '', text: '' })
-  
-  const [formData, setFormData] = useState({
+  const [securityData, setSecurityData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
+    newEmail: '',
+    emailPassword: '',
   })
 
-  // Password requirements
-  const passwordRequirements = [
-    { met: formData.newPassword.length >= 8, text: "At least 8 characters" },
-    { met: /[A-Z]/.test(formData.newPassword), text: "Uppercase letter" },
-    { met: /[a-z]/.test(formData.newPassword), text: "Lowercase letter" },
-    { met: /[0-9]/.test(formData.newPassword), text: "At least one number" },
-  ]
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        bio: user.bio || '',
+      })
+    }
+  }, [user])
 
-  const isPasswordValid = passwordRequirements.every(req => req.met)
-  const passwordsMatch = formData.newPassword === formData.confirmPassword && formData.confirmPassword.length > 0
+  useEffect(() => {
+    if (activeTab === 'sessions') {
+      loadSessions()
+    }
+  }, [activeTab, loadSessions])
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    setMessage({ type: '', text: '' })
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!isPasswordValid) {
-      setMessage({ type: 'error', text: 'New password does not meet requirements' })
-      return
-    }
+  const handleSecurityChange = (e) => {
+    setSecurityData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
 
-    if (!passwordsMatch) {
-      setMessage({ type: 'error', text: 'Passwords do not match' })
-      return
-    }
-
+  const handleSave = async () => {
+    setSaving(true)
     try {
-      setLoading(true)
-      await authApi.changePassword(formData.currentPassword, formData.newPassword)
-      
-      setMessage({ type: 'success', text: 'Password changed successfully!' })
-      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Failed to change password' })
-    } finally {
-      setLoading(false)
+      await updateProfile(formData)
+    } catch (err) {
+      console.error('Failed to save:', err)
+    }
+    setSaving(false)
+  }
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault()
+    if (securityData.newPassword !== securityData.confirmPassword) {
+      alert('Passwords do not match')
+      return
+    }
+    setSaving(true)
+    try {
+      await changePassword(securityData.currentPassword, securityData.newPassword)
+      alert('Password changed successfully')
+      setSecurityData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }))
+    } catch (err) {
+      alert(err.message || 'Failed to change password')
+    }
+    setSaving(false)
+  }
+
+  const handleChangeEmail = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      await changeEmail(securityData.newEmail, securityData.emailPassword)
+      alert('Verification email sent to new address')
+      setSecurityData(prev => ({ ...prev, newEmail: '', emailPassword: '' }))
+    } catch (err) {
+      alert(err.message || 'Failed to initiate email change')
+    }
+    setSaving(false)
+  }
+
+  const handleLogout = async () => {
+    if (confirm('Are you sure you want to sign out?')) {
+      await logout()
+      navigate('/auth')
     }
   }
+
+  const handleTerminateSession = async (sid) => {
+    if (confirm('Terminate this session?')) {
+      try {
+        await terminateSession(sid)
+      } catch (err) {
+        alert(err.message || 'Failed to terminate session')
+      }
+    }
+  }
+
+  if (loading && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Spinner />
+      </div>
+    )
+  }
+
+  const tabs = ['Profile', 'Security', 'Sessions', 'Notifications']
+
+  const Toggle = ({ checked, onChange, label, sublabel }) => (
+    <div className="flex items-center justify-between group">
+      <div>
+        <p className="font-headline font-bold text-lg uppercase tracking-tight group-hover:text-tertiary transition-colors text-on-surface">{label}</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-outline mt-1">{sublabel}</p>
+      </div>
+      <label className="relative inline-flex items-center cursor-pointer">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          className="sr-only custom-toggle"
+        />
+        <div className="toggle-bg block w-14 h-8 bg-surface-container-highest rounded-full transition-colors border-2 border-transparent group-hover:border-outline" />
+        <div className="toggle-dot absolute left-1 top-1 bg-on-surface w-6 h-6 rounded-full transition-transform duration-300 shadow-sm" />
+      </label>
+    </div>
+  )
 
   return (
-    <Panel>
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-lg font-bold mb-1">Change Password</h2>
-          <p className="text-sm text-base-content/60">
-            Update your password to keep your account secure
-          </p>
+    <div className="p-12 max-w-6xl mx-auto relative z-10 transition-colors duration-300">
+      {/* Header */}
+      <div className="mb-16">
+        <h2 className="font-headline text-5xl font-black text-on-surface tracking-tighter leading-none mb-4 uppercase italic">
+          Settings
+        </h2>
+        <p className="font-label text-xs uppercase tracking-[0.4em] text-on-surface-variant font-black">
+          Architect your digital presence
+        </p>
+      </div>
+
+      {/* Settings Panel */}
+      <div className="bg-surface p-1 rounded-none shadow-editorial border-t-8 border-on-surface overflow-hidden">
+        {/* Tab Navigation */}
+        <div className="flex gap-12 px-12 pt-10 pb-6 border-b border-outline-variant/20 overflow-x-auto bg-surface-container-lowest">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab.toLowerCase())}
+              className="relative pb-4 group"
+            >
+              <span className={`font-headline text-xl uppercase tracking-tighter ${
+                activeTab === tab.toLowerCase()
+                  ? 'font-black text-on-surface scale-110 block'
+                  : 'font-bold text-outline group-hover:text-on-surface transition-all block'
+              }`}>
+                {tab}
+              </span>
+              {activeTab === tab.toLowerCase() && (
+                <motion.div 
+                  layoutId="tab-indicator"
+                  className="absolute bottom-0 left-0 w-full h-1.5 bg-tertiary"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+            </button>
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Current Password */}
-          <div className="relative">
-            <Input
-              label="Current Password"
-              type={showCurrentPassword ? 'text' : 'password'}
-              name="currentPassword"
-              value={formData.currentPassword}
-              onChange={handleChange}
-              placeholder="Enter current password"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              className="absolute right-3 top-9 text-base-content/50 hover:text-base-content"
-            >
-              {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
+        {/* Bento Panels Grid */}
+        <div className="grid grid-cols-12 gap-1 p-1 bg-outline-variant/10">
+          {/* Content Area Based on Active Tab */}
+          {activeTab === 'profile' && (
+            <>
+              {/* Profile Identity Card */}
+              <div className="col-span-12 lg:col-span-7 bg-surface p-12">
+                <div className="flex items-start justify-between mb-12">
+                  <div>
+                    <h3 className="font-headline font-black text-3xl uppercase tracking-tighter mb-2 italic text-on-surface">
+                      Identity
+                    </h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-outline">
+                      Global Identification parameters
+                    </p>
+                  </div>
+                  {/* Avatar */}
+                  <div className="relative group cursor-pointer">
+                    <div className="w-28 h-28 rounded-none bg-surface-container-highest flex items-center justify-center border-4 border-on-surface rotate-3 hover:rotate-0 transition-transform overflow-hidden shadow-brutalist">
+                      {user?.avatar_url ? (
+                        <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="material-symbols-outlined text-4xl text-on-surface">person</span>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-on-surface/60 rounded-none opacity-0 group-hover:opacity-100 transition-opacity rotate-3 group-hover:rotate-0">
+                      <span className="material-symbols-outlined text-surface text-3xl">add_a_photo</span>
+                    </div>
+                  </div>
+                </div>
 
-          <div className="divider">New Password</div>
+                <div className="space-y-10">
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">
+                        First sequence
+                      </label>
+                      <input
+                        className="w-full h-14 bg-surface-container-highest border-none rounded-xl px-5 font-headline font-black text-sm uppercase tracking-widest text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-on-surface transition-all"
+                        name="first_name"
+                        type="text"
+                        value={formData.first_name}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">
+                        Last sequence
+                      </label>
+                      <input
+                        className="w-full h-14 bg-surface-container-highest border-none rounded-xl px-5 font-headline font-black text-sm uppercase tracking-widest text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-on-surface transition-all"
+                        name="last_name"
+                        type="text"
+                        value={formData.last_name}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-on-surface">
+                    <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">
+                      Biographical Archive
+                    </label>
+                    <textarea
+                      className="w-full bg-surface-container-highest border-none rounded-xl p-5 font-body text-sm text-on-surface focus:ring-2 focus:ring-on-surface resize-none h-32"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleChange}
+                      placeholder="Defining the brutalist architecture of the future system..."
+                    />
+                  </div>
 
-          {/* New Password */}
-          <div className="relative">
-            <Input
-              label="New Password"
-              type={showNewPassword ? 'text' : 'password'}
-              name="newPassword"
-              value={formData.newPassword}
-              onChange={handleChange}
-              placeholder="Enter new password"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-9 text-base-content/50 hover:text-base-content"
-            >
-              {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          {/* Password requirements */}
-          <div className="space-y-1 pl-1">
-            {passwordRequirements.map((req, index) => (
-              <div 
-                key={index} 
-                className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
-                  req.met ? 'text-green-600 font-medium' : 'text-base-content/50'
-                }`}
-              >
-                {req.met ? (
-                  <Check size={12} className="stroke-2" />
-                ) : (
-                  <Circle size={8} fill="currentColor" className="opacity-40" />
-                )}
-                <span>{req.text}</span>
+                  {/* Save Button */}
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="h-14 px-12 bg-black dark:bg-white text-white dark:text-black rounded-none font-headline font-black text-sm uppercase tracking-[0.3em] hover:bg-tertiary dark:hover:bg-tertiary dark:hover:text-white hover:scale-[1.05] active:scale-95 transition-all shadow-[8px_8px_0_0_rgba(0,0,0,0.1)] primary-btn-glow disabled:opacity-50"
+                  >
+                    {saving ? 'Archiving...' : 'Commit Changes'}
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
 
-          {/* Confirm Password */}
-          <div>
-            <Input
-              label="Confirm New Password"
-              type={showNewPassword ? 'text' : 'password'}
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm new password"
-              required
-            />
-            {formData.confirmPassword && (
-              <p className={`text-xs mt-1 ${passwordsMatch ? 'text-success' : 'text-error'}`}>
-                {passwordsMatch ? '✓ Passwords match' : 'Passwords do not match'}
-              </p>
-            )}
-          </div>
+              {/* Right Column: System + Privacy */}
+              <div className="col-span-12 lg:col-span-5 space-y-1 bg-outline-variant/10 flex flex-col">
+                {/* System Toggles */}
+                <div className="bg-surface p-12 flex-1">
+                  <h3 className="font-headline font-black text-5xl uppercase tracking-tighter mb-10 italic text-on-surface">
+                    System
+                  </h3>
+                  <div className="space-y-10">
+                    {/* Dark Mode */}
+                    <Toggle 
+                       checked={theme === 'dark'} 
+                       onChange={toggleTheme} 
+                       label="Obsidian Mode" 
+                       sublabel="Switch to the void" 
+                    />
 
-          {/* Message */}
-          {message.text && (
-            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'} text-sm py-2`}>
-              {message.text}
+                    {/* Kinetic FX Toggle */}
+                    <Toggle 
+                      checked={kineticFx} 
+                      onChange={toggleKineticFx} 
+                      label="Kinetic FX" 
+                      sublabel="Smooth structural transitions" 
+                    />
+                  </div>
+                </div>
+
+                {/* Security/Privacy */}
+                <div className="bg-on-surface text-surface p-12 min-h-[250px] flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-headline font-black text-5xl uppercase tracking-tighter mb-4 italic">
+                      Security
+                    </h3>
+                    <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-surface/50 leading-relaxed max-w-xs">
+                      Your data is fragmented across secure editorial nodes. We maintain total protocol integrity.
+                    </p>
+                  </div>
+                  <button
+                    className="mt-10 h-14 bg-surface text-on-surface px-8 py-4 font-headline font-black uppercase text-xs tracking-[0.3em] hover:scale-[1.05] transition-transform flex items-center justify-between group"
+                  >
+                    Archive Records
+                    <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">
+                      download
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'security' && (
+            <div className="col-span-12 bg-surface p-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                {/* Change Password */}
+                <div className="space-y-10">
+                  <div>
+                    <h3 className="font-headline font-black text-3xl uppercase tracking-tighter mb-2 italic text-on-surface">
+                      Security Sequence
+                    </h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-outline">
+                      Update your primary access key
+                    </p>
+                  </div>
+                  <form onSubmit={handleChangePassword} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">Current Key</label>
+                      <input
+                        className="w-full h-14 bg-surface-container-highest border-none rounded-xl px-5 font-headline font-black text-sm uppercase tracking-widest text-on-surface focus:ring-2 focus:ring-on-surface transition-all"
+                        name="currentPassword" type="password" value={securityData.currentPassword} onChange={handleSecurityChange} required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">New Key</label>
+                      <input
+                        className="w-full h-14 bg-surface-container-highest border-none rounded-xl px-5 font-headline font-black text-sm uppercase tracking-widest text-on-surface focus:ring-2 focus:ring-on-surface transition-all"
+                        name="newPassword" type="password" value={securityData.newPassword} onChange={handleSecurityChange} required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">Confirm New Key</label>
+                      <input
+                        className="w-full h-14 bg-surface-container-highest border-none rounded-xl px-5 font-headline font-black text-sm uppercase tracking-widest text-on-surface focus:ring-2 focus:ring-on-surface transition-all"
+                        name="confirmPassword" type="password" value={securityData.confirmPassword} onChange={handleSecurityChange} required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="h-14 px-12 bg-black dark:bg-white text-white dark:text-black rounded-none font-headline font-black text-sm uppercase tracking-[0.3em] hover:bg-tertiary transition-all disabled:opacity-50"
+                    >
+                      Update Sequence
+                    </button>
+                  </form>
+                </div>
+
+                {/* Change Email */}
+                <div className="space-y-10">
+                  <div>
+                    <h3 className="font-headline font-black text-3xl uppercase tracking-tighter mb-2 italic text-on-surface">
+                      Digital ID
+                    </h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-outline">
+                      Modify your network coordinates
+                    </p>
+                  </div>
+                  <form onSubmit={handleChangeEmail} className="space-y-6">
+                    <div className="space-y-4 p-6 bg-surface-container-highest rounded-xl">
+                      <p className="text-[10px] font-black uppercase text-outline">Current Active ID</p>
+                      <p className="font-headline font-black text-xl text-on-surface">{user?.email}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">New Identity Email</label>
+                      <input
+                        className="w-full h-14 bg-surface-container-highest border-none rounded-xl px-5 font-headline font-black text-sm uppercase tracking-widest text-on-surface focus:ring-2 focus:ring-on-surface transition-all"
+                        name="newEmail" type="email" value={securityData.newEmail} onChange={handleSecurityChange} required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-black uppercase tracking-[0.3em] text-outline ml-1">Authorization Password</label>
+                      <input
+                        className="w-full h-14 bg-surface-container-highest border-none rounded-xl px-5 font-headline font-black text-sm uppercase tracking-widest text-on-surface focus:ring-2 focus:ring-on-surface transition-all"
+                        name="emailPassword" type="password" value={securityData.emailPassword} onChange={handleSecurityChange} required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="h-14 px-12 border-4 border-black dark:border-white text-on-surface rounded-none font-headline font-black text-sm uppercase tracking-[0.3em] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all disabled:opacity-50"
+                    >
+                      Initiate Change
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           )}
 
-          <div className="flex justify-end">
-            <Button 
-              type="submit" 
-              variant="primary" 
-              loading={loading}
-              disabled={!isPasswordValid || !passwordsMatch || !formData.currentPassword}
-            >
-              <Lock size={16} />
-              Change Password
-            </Button>
-          </div>
-        </form>
-      </div>
-    </Panel>
-  )
-}
+          {activeTab === 'sessions' && (
+            <div className="col-span-12 bg-surface p-12">
+              <div className="flex justify-between items-end mb-12">
+                <div>
+                  <h3 className="font-headline font-black text-3xl uppercase tracking-tighter mb-2 italic text-on-surface">
+                    Active Sessions
+                  </h3>
+                  <p className="text-xs font-bold uppercase tracking-widest text-outline">
+                    Connected nodes across the network
+                  </p>
+                </div>
+                <button
+                  onClick={() => terminateAllSessions(true)}
+                  className="px-6 py-3 border-2 border-tertiary text-tertiary font-headline font-black text-[10px] uppercase tracking-widest hover:bg-tertiary hover:text-white transition-all"
+                >
+                  Terminate All Others
+                </button>
+              </div>
 
-/**
- * Sessions Tab
- */
-function SessionsTab() {
-  const [sessions, setSessions] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(null)
+              <div className="space-y-4">
+                {sessions.map((session) => (
+                  <div key={session.sid} className={`p-8 flex items-center justify-between transition-all ${session.isCurrent ? 'bg-on-surface text-surface' : 'bg-surface-container-low hover:bg-surface-container-high'}`}>
+                    <div className="flex items-center gap-8">
+                      <span className="material-symbols-outlined text-4xl">
+                        {session.deviceType === 'mobile' ? 'smartphone' : 'desktop_windows'}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-3 mb-1">
+                          <h4 className="font-headline font-black text-xl uppercase tracking-tight">{session.browser} on {session.os}</h4>
+                          {session.isCurrent && (
+                            <span className="bg-tertiary text-white text-[9px] font-black px-2 py-0.5 uppercase tracking-widest">Active Node</span>
+                          )}
+                        </div>
+                        <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${session.isCurrent ? 'text-surface/60' : 'text-outline'}`}>
+                          IP: {session.ipAddress} • Last sync: {new Date(session.lastActivityAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    {!session.isCurrent && (
+                      <button
+                        onClick={() => handleTerminateSession(session.sid)}
+                        className="h-12 w-12 flex items-center justify-center text-outline hover:text-tertiary transition-colors"
+                      >
+                        <span className="material-symbols-outlined">logout</span>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-  const fetchSessions = async () => {
-    try {
-      setLoading(true)
-      const response = await sessionsApi.getAll()
-      setSessions(response.data.sessions)
-    } catch (error) {
-      console.error('Failed to fetch sessions:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+          {activeTab === 'notifications' && (
+             <div className="col-span-12 bg-surface p-12">
+                <h3 className="font-headline font-black text-5xl uppercase tracking-tighter mb-10 italic text-on-surface">
+                  Alert Protocols
+                </h3>
+                <p className="text-sm font-medium text-outline uppercase tracking-widest italic">
+                  Notification system integration in progress.
+                </p>
+             </div>
+          )}
 
-  useEffect(() => {
-    fetchSessions()
-  }, [])
-
-  const handleDeleteSession = async (sessionId) => {
-    if (!confirm('Terminate this session?')) return
-
-    try {
-      setActionLoading(sessionId)
-      await sessionsApi.deleteSession(sessionId)
-      setSessions(prev => prev.filter(s => s.sid !== sessionId))
-    } catch (error) {
-      alert(error.message || 'Failed to terminate session')
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const handleLogoutAll = async () => {
-    if (!confirm('Log out from all other devices?')) return
-
-    try {
-      setActionLoading('all')
-      await sessionsApi.logoutAll(true) // Keep current session
-      await fetchSessions()
-    } catch (error) {
-      alert(error.message || 'Failed to logout from all devices')
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  const getDeviceIcon = (deviceType) => {
-    switch (deviceType?.toLowerCase()) {
-      case 'mobile':
-        return <Smartphone size={20} />
-      case 'tablet':
-        return <Smartphone size={20} />
-      default:
-        return <Monitor size={20} />
-    }
-  }
-
-  return (
-    <Panel>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold mb-1">Active Sessions</h2>
-            <p className="text-sm text-base-content/60">
-              Manage your active sessions across devices
+          {/* Footer Bento: Security Score + Support */}
+          <div className="col-span-12 lg:col-span-4 bg-surface-container p-12">
+            <div className="flex items-center gap-4 mb-8">
+              <span className="material-symbols-outlined text-tertiary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                shield
+              </span>
+              <h4 className="font-headline font-black text-2xl uppercase tracking-tighter italic text-on-surface">
+                Protocol Integrity
+              </h4>
+            </div>
+            <div className="w-full bg-on-surface/5 h-3 rounded-none mb-4 overflow-hidden">
+              <div className="bg-tertiary w-3/4 h-full" />
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface/40">
+              THREAT LEVEL: NEGLIGIBLE
             </p>
           </div>
-          {sessions.length > 1 && (
-            <Button 
-              variant="error" 
-              size="sm"
-              onClick={handleLogoutAll}
-              loading={actionLoading === 'all'}
-            >
-              <LogOut size={14} />
-              Logout Others
-            </Button>
-          )}
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <Spinner />
-          </div>
-        ) : sessions.length === 0 ? (
-          <div className="text-center py-8 text-base-content/60">
-            No active sessions found
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sessions.map((session) => (
-              <div
-                key={session.sid}
-                className={`p-4 rounded-lg border ${
-                  session.isCurrent 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-base-300 bg-base-100'
-                }`}
+          <div className="col-span-12 lg:col-span-8 bg-surface p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="max-w-md">
+              <h4 className="font-headline font-black text-2xl uppercase tracking-tighter mb-2 italic text-on-surface">
+                Support Node
+              </h4>
+              <p className="text-[10px] uppercase font-bold tracking-[0.1em] text-outline">
+                Our editorial response team is available for total system restoration 24/7.
+              </p>
+            </div>
+            <div className="flex gap-6">
+              <button className="px-8 py-4 border-4 border-on-surface text-on-surface font-headline font-black text-xs uppercase tracking-widest hover:bg-on-surface hover:text-surface transition-all">
+                Restoration
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-8 py-4 bg-tertiary text-white font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.05] transition-all"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex gap-3">
-                    <div className="text-base-content/60 mt-1">
-                      {getDeviceIcon(session.deviceType)}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">
-                          {session.browser || 'Unknown Browser'}
-                        </span>
-                        {session.isCurrent && (
-                          <span className="badge badge-primary badge-sm">Current</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-base-content/60">
-                        {session.os || 'Unknown OS'} • {session.deviceType || 'Desktop'}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-base-content/50">
-                        <Globe size={12} />
-                        <span>{session.ipAddress || 'Unknown IP'}</span>
-                      </div>
-                      <p className="text-xs text-base-content/50 mt-1">
-                        Last active: {formatDate(session.lastActivityAt)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {!session.isCurrent && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteSession(session.sid)}
-                      loading={actionLoading === session.sid}
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+                Terminate
+              </button>
+            </div>
           </div>
-        )}
+        </div>
       </div>
-    </Panel>
+
+      {/* Background oversized vertical text */}
+      <span className="fixed top-1/2 right-12 font-headline font-black text-[8rem] text-on-surface/[0.02] rotate-90 uppercase pointer-events-none select-none z-0">
+        PARAM
+      </span>
+    </div>
   )
 }
