@@ -25,6 +25,8 @@ import DeclineInvitationView from './views/DeclineInvitationView'
 import InvitationConfirmationView from './views/InvitationConfirmationView'
 import LandingView from './views/LandingView'
 
+// Commit 1: Minor update
+
 
 
 
@@ -81,6 +83,14 @@ function AppRoutes() {
       {/* ========== Public Routes ========== */}
       <Route
         path="/auth"
+        element={
+          <PublicRoute>
+            <AuthView />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/login"
         element={
           <PublicRoute>
             <AuthView />
