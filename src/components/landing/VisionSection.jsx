@@ -27,11 +27,11 @@ const VisionSection = ({ isDark }) => (
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
         className="min-w-0"
       >
-        <span className="uppercase tracking-[0.4em] text-[13px] sm:text-[15px] font-black text-primary mb-5 sm:mb-6 block">
+        <span className="uppercase tracking-[0.4em] text-[13px] sm:text-[15px] font-black/50 text-primary mb-5 sm:mb-6 block">
           DESIGN PHILOSOPHY
         </span>
         <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase leading-[0.85] mb-6 sm:mb-8 text-on-background">
-          ELIMINATE<br />THE <span className="text-primary">EXCESS</span>
+          ELIMINATE<br />THE <span className="text-primary dark:text-secondary">EXCESS</span>
         </h2>
         <p className="text-on-surface-variant text-base sm:text-lg leading-relaxed mb-8 sm:mb-10 opacity-70">
           Most tools are built to keep you busy. We are built to get you finished. WabbitWorks is an uncompromising blade for serious engineers.

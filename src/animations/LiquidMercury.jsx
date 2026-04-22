@@ -45,6 +45,10 @@ export const LiquidMercury = () => {
   }, []);
 
   useEffect(() => {
+    // Reset state on viewport change to allow "reload"
+    setInitialized(false);
+    pendingUpdate.current = false;
+
     // Initialize particles in worker
     worker.postMessage({
       type: "init",
@@ -63,7 +67,7 @@ export const LiquidMercury = () => {
         meshRef.current.instanceMatrix.needsUpdate = true;
         
         // Only show after the first buffer is actually applied
-        if (!meshRef.current.visible) {
+        if (!meshRef.current.visible || !initialized) {
             meshRef.current.visible = true;
             setInitialized(true);
         }
@@ -74,9 +78,16 @@ export const LiquidMercury = () => {
     worker.addEventListener("message", handleMessage);
     return () => {
       worker.removeEventListener("message", handleMessage);
-      worker.terminate();
+      // Removed worker.terminate() from here to prevent hang on resize
     };
   }, [worker, count, viewport.width, viewport.height]);
+
+  // Separate effect for worker termination on component unmount
+  useEffect(() => {
+    return () => {
+      worker.terminate();
+    };
+  }, [worker]);
 
   // Click Handler - optimized to use passive listener
   useEffect(() => {

@@ -10,6 +10,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    /* Reduced global scale by exactly 30% (70% of original) to prevent "too big" feel on deployment */
+    font-size: 70%; 
   }
 
   body {
