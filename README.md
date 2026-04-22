@@ -326,6 +326,160 @@ Runs ESLint to check code quality and style consistency
 - Safari (latest)
 - Responsive design for mobile devices
 
+## Animations and Graphics
+
+### Animation Framework
+
+The frontend implements sophisticated animations using **Framer Motion**, a production-ready animation library built on top of React. Animations are organized into reusable variants and transitions stored in the `src/animations/` directory.
+
+#### Framer Motion Variants
+
+**Authentication Transitions** (`authVariants.js`):
+- Card entrance/exit with 3D flip effects (rotateX transforms)
+- Scale and opacity transforms for smooth appearance
+- Staggered form field animations (0.06s stagger)
+- Exit animations with reverse stagger timing
+- Custom easing curves for brutalist design feel
+
+**Page Transitions** (`variants.js`):
+- "Building effect" page entry with rotateX and scale
+- Modern brutalist easing functions: `[0.23, 1, 0.32, 1]` for snappy starts and smooth finishes
+- Shutter/wipe transitions for high-impact page changes
+- Staggered child animations for sequential element appearance
+- Exit animations with inverse transforms
+
+**Transition Configurations** (`transitions.js`):
+- Fast (150ms) transitions for UI feedback
+- Normal (200ms) for standard interactions
+- Smooth (300ms) for content changes
+- Slow smooth (500ms) for emphasis
+- Spring physics with configurable damping and stiffness
+- Gentle spring for subtle bounce effects
+- Bouncy spring for energetic interactions
+
+#### Heavy Graphics - Three.js Liquid Mercury Component
+
+The **LiquidMercury** (`LiquidMercury.jsx`) is a sophisticated WebGL component featuring advanced physics simulations rendered with Three.js:
+
+**Technical Specifications**:
+- Particle System: 16,000 particles rendered in real-time
+- Physics Engine:
+  - Repulsion forces with 1.5 unit radius
+  - Spring dynamics with 0.08 stiffness and 0.85 damping
+  - Perlin noise-based flow fields
+  - Wave propagation with configurable amplitude and frequency
+  - Velocity clamping (max speed: 0.15 units/frame)
+
+**Advanced Features**:
+- Simplex noise (3D) for natural flow generation
+- Ray-casting for mouse interaction
+- Click-based particle repulsion with decay
+- Viewport-aware particle generation
+- Phase-offset particle motion for organic movement
+- Origin spring-back for particle clustering
+
+**Rendering Pipeline**:
+- Canvas-based Three.js renderer with React Three Fiber
+- Particle instancing for performance optimization
+- Custom shader-based particle updates
+- Environmental lighting integration
+- Real-time frame updates (useFrame hook)
+
+**Performance Characteristics**:
+- 60fps target with GPU acceleration
+- Particle batching reduces draw calls
+- Efficient memory management with reusable Object3D instances
+- Adaptive scaling based on viewport dimensions
+
+### Visual Graphics Components
+
+#### TaskSchematic (`TaskSchematic.jsx`)
+
+Minimalist task matrix visualization:
+- Grid-based layout (12 cells in 4x3 configuration)
+- Animated pulse indicator on select cells
+- Responsive sizing with `clamp()` for fluid scaling
+- Hover scale transform (1.02x) for interactivity
+- Typography overlay with "MATRIX" text
+- Border styling with theme-aware colors
+- Background gradient effects
+
+#### TeamSchematic (`TeamSchematic.jsx`)
+
+Team engine visualization with motion:
+- Avatar cluster display with negative margin overlap
+- Animated "SYNCED" status badge with pulse effect
+- Framer Motion progress bar with infinite reverse animation
+- Throughput percentage display with dynamic calculations
+- Abstract geometric corner accent (border-based)
+- Responsive layout adapting to screen sizes
+- Horizontal flow animation representing team synchronization
+
+#### LampComputer (`LampComputer.jsx`)
+
+Stylized brutalist terminal aesthetic:
+- CSS-based lamp neck structure with border styling
+- Terminal screen with:
+  - Realistic scan lines using CSS gradients
+  - RGB color channel separation effect
+  - Glow overlay for CRT monitor feel
+  - System status header with animated indicator
+  - Multiple rectangular panel placeholders
+  - Monospace typography for authentic terminal look
+- Motion entry animation (fade + y-offset)
+- Shadow effects for depth
+- Theme-aware color schemes
+- Fully responsive sizing using `clamp()` for fluidity
+
+### CSS Visual Effects
+
+**Scan Lines Effect**:
+```css
+background: linear-gradient(
+  rgba(18,16,16,0) 50%,
+  rgba(0,0,0,0.25) 50%
+),
+linear-gradient(
+  90deg,
+  rgba(255,0,0,0.06),
+  rgba(0,255,0,0.02),
+  rgba(0,0,255,0.06)
+)
+```
+Creates authentic CRT monitor scan line appearance with RGB separation.
+
+**Animations Applied**:
+- `animate-pulse` - Pulsing opacity for status indicators
+- Custom Framer Motion sequences for staggered reveals
+- Hover transforms for interactive feedback
+- Gradient background shifts for hover states
+
+### Animation Performance Optimization
+
+**Techniques Implemented**:
+- GPU-accelerated transforms (transform, opacity)
+- Reduced motion media query support
+- Particle batching in Three.js rendering
+- Frame throttling with Framer Motion's frame-based timing
+- Lazy loading of heavy graphics components
+- Conditional rendering based on viewport visibility
+
+**Best Practices**:
+- Use `will-change` CSS property for animated elements
+- Prefer `transform` and `opacity` over box-model properties
+- Maintain 60fps target with frame budgeting
+- Implement motion preferences for accessibility
+- Monitor GPU usage in dev tools
+
+### User Experience with Motion
+
+Animations serve functional purposes:
+- **Loading States**: Subtle pulse animations indicate pending actions
+- **Feedback**: Scale and opacity changes confirm user interactions
+- **Guidance**: Staggered animations draw attention to sequential steps
+- **Hierarchy**: Motion emphasis highlights important elements
+- **Polish**: Micro-interactions create refined, professional feel
+
 ## Performance Considerations
 
 - Code splitting at route level
