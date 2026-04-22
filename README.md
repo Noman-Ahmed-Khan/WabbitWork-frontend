@@ -362,13 +362,13 @@ The frontend implements sophisticated animations using **Framer Motion**, a prod
 The **LiquidMercury** (`LiquidMercury.jsx`) is a sophisticated WebGL component featuring advanced physics simulations rendered with Three.js:
 
 **Technical Specifications**:
-- Particle System: 16,000 particles rendered in real-time
-- Physics Engine:
-  - Repulsion forces with 1.5 unit radius
-  - Spring dynamics with 0.08 stiffness and 0.85 damping
-  - Perlin noise-based flow fields
-  - Wave propagation with configurable amplitude and frequency
-  - Velocity clamping (max speed: 0.15 units/frame)
+- **Multi-Threaded Physics**: Offloaded to dedicated [Web Workers](src/animations/physics.worker.js) to keep the main UI thread responsive.
+- **Particle System**: Dynamic scaling (10,000+ for Desktop, ~800 for Mobile) using instanced meshes.
+- **Physics Engine**:
+  - Zero-copy data transfer via **Transferable Objects** (ArrayBuffers) at 60Hz.
+  - Repulsion forces with 1.5 unit radius and spring-back dynamics.
+  - 3D Simplex noise flow fields and organic wave propagation.
+  - "Void Entry" system: Particles spawn in the deep background ($z = -100$) for a premium entry effect.
 
 **Advanced Features**:
 - Simplex noise (3D) for natural flow generation
@@ -386,10 +386,13 @@ The **LiquidMercury** (`LiquidMercury.jsx`) is a sophisticated WebGL component f
 - Real-time frame updates (useFrame hook)
 
 **Performance Characteristics**:
-- 60fps target with GPU acceleration
-- Particle batching reduces draw calls
-- Efficient memory management with reusable Object3D instances
-- Adaptive scaling based on viewport dimensions
+- **Consistent 60 FPS**: Achieved through multi-threading and GPU-accelerated rendering.
+- **Hardware-Aware Scaling**: Automatic adjustment of geometry quality and particle count based on CPU core count.
+- **Mobile-Specific Tuning**: 
+  - `mediump` precision fragment shaders for faster mobile pixel processing.
+  - Locked Device Pixel Ratio (DPR=1.0) on mobile to prevent GPU thermal throttling.
+  - Antialiasing disabled on high-PPI screens to reduce fragment shader overhead.
+- **Efficient Memory**: Reusable geometries and memoized materials to minimize Garbage Collection (GC) pauses.
 
 ### Visual Graphics Components
 
@@ -456,20 +459,18 @@ Creates authentic CRT monitor scan line appearance with RGB separation.
 
 ### Animation Performance Optimization
 
-**Techniques Implemented**:
-- GPU-accelerated transforms (transform, opacity)
-- Reduced motion media query support
-- Particle batching in Three.js rendering
-- Frame throttling with Framer Motion's frame-based timing
-- Lazy loading of heavy graphics components
-- Conditional rendering based on viewport visibility
+The application implements a "Performance-First" architecture for its sophisticated visual elements.
 
-**Best Practices**:
-- Use `will-change` CSS property for animated elements
-- Prefer `transform` and `opacity` over box-model properties
-- Maintain 60fps target with frame budgeting
-- Implement motion preferences for accessibility
-- Monitor GPU usage in dev tools
+**Techniques Implemented**:
+- **Web Worker Offloading**: All heavy physics and matrix calculations for the Liquid Mercury system are moved to a background thread.
+- **Zero-Copy Transfers**: Uses `ArrayBuffer` transfers between threads to eliminate serialization overhead.
+- **Device-Based Degradation**: Real-time detection of low-power devices to scale down animation complexity.
+- **GPU Acceleration**: Heavy reliance on CSS `transform` and WebGL shaders to ensure smooth 60fps movement.
+- **Lazy Loading & Suspense**: 3D assets and heavy components are loaded only when needed, ensuring the main UI is interactive instantly.
+- **Resource Pooling**: Geometries and materials are cached and reused across the application.
+- **Reduced Motion Support**: Full compliance with `prefers-reduced-motion` media queries.
+
+For a deep dive into the technical implementation of these optimizations, see the [Optimization Report](OPTIMIZATION_REPORT.md).
 
 ### User Experience with Motion
 

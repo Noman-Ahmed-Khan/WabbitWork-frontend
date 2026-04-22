@@ -43,9 +43,9 @@ export default function Dock() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-stone-200 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-2xl border-t border-outline-variant/30 md:hidden shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
       <motion.div
-        className="px-4 h-15 flex items-center justify-around"
+        className="px-6 h-16 flex items-center justify-between"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -56,8 +56,8 @@ export default function Dock() {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`relative flex flex-col items-center justify-center gap-1 min-w-[64px] py-3 transition-all ${
-                isActive ? 'text-black' : 'text-stone-400'
+              className={`relative flex flex-col items-center justify-center gap-1 min-w-[60px] py-2 transition-all ${
+                isActive ? 'text-on-surface' : 'text-outline hover:text-on-surface'
               }`}
             >
               <span className={`material-symbols-outlined text-2xl ${isActive ? 'scale-110' : ''} transition-transform`}>
@@ -86,8 +86,8 @@ export default function Dock() {
         {/* Profile */}
         <button 
           onClick={() => navigate('/profile')}
-          className={`flex flex-col items-center justify-center gap-1 min-w-[64px] py-3 transition-all ${
-            location.pathname === '/profile' ? 'text-black' : 'text-stone-400'
+          className={`relative flex flex-col items-center justify-center gap-1 min-w-[60px] py-2 transition-all ${
+            location.pathname === '/profile' ? 'text-on-surface' : 'text-outline'
           }`}
         >
           <ProfileAvatar
@@ -109,7 +109,7 @@ export default function Dock() {
         {/* Logout */}
         <button 
           onClick={handleLogout}
-          className="flex flex-col items-center justify-center p-3 text-stone-400 hover:text-tertiary transition-colors"
+          className="flex flex-col items-center justify-center p-3 text-outline hover:text-tertiary transition-colors"
         >
           <span className="material-symbols-outlined text-2xl">logout</span>
         </button>

@@ -20,7 +20,7 @@ export default function TopNavBar() {
   const { scope, searchQuery, setSearchQuery, clearSearchQuery } = useRouteSearch()
 
   return (
-    <header className="w-full h-14 sticky top-0 z-40 bg-transparent flex justify-between items-center px-4 md:px-8 py-4">
+    <header className="w-full h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/20 flex justify-between items-center px-4 md:px-8 transition-all duration-300">
       {/* Menu Toggle (Mobile Only) */}
       <motion.button
         variants={buttonVariants}
@@ -42,7 +42,7 @@ export default function TopNavBar() {
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-          className="relative w-full max-w-sm md:max-w-lg group"
+          className="relative w-full max-w-[180px] sm:max-w-sm md:max-w-lg group"
         >
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm transition-colors group-focus-within:text-tertiary">
             search
@@ -83,7 +83,7 @@ export default function TopNavBar() {
         initial={{ opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-        className="flex items-center gap-6"
+        className="flex items-center gap-2 md:gap-6"
       >
         <motion.button
           variants={buttonVariants}
