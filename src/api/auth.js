@@ -1,4 +1,7 @@
 import client from './client'
+import config from '../config/env'
+
+// Commit 6: Minor update
 
 /**
  * Authentication API methods
@@ -31,6 +34,23 @@ export const authApi = {
     return response.data
   },
 
+  /**
+   * Retrieve the currently authenticated user profile
+   */
+  getMe: async () => {
+    const response = await client.get('/auth/me')
+    return response.data
+  },
+
+  /**
+   * Initiate Google OAuth login
+   * Redirects to Google OAuth authorization endpoint
+   */
+  googleLogin: () => {
+    const backendUrl = config.api.baseURL.replace(/\/api\/?$/, '')
+    window.location.href = `${backendUrl}/api/auth/google`
+  },
+
   // Logout user
   logout: async () => {
     const response = await client.post('/auth/logout')
@@ -46,6 +66,35 @@ export const authApi = {
   // Check authentication status
   checkStatus: async () => {
     const response = await client.get('/auth/status')
+    return response.data
+  },
+
+  /**
+   * Update the authenticated user's avatar
+   * Supports file uploads and URL-based updates.
+   */
+  updateAvatar: async ({ file, avatarUrl, avatar_url } = {}) => {
+    const resolvedAvatarUrl = avatarUrl ?? avatar_url
+
+    if (file) {
+      const formData = new FormData()
+      formData.append('avatar', file)
+
+      const response = await client.patch('/auth/me/avatar', formData)
+      return response.data
+    }
+
+    const response = await client.patch('/auth/me/avatar', {
+      avatar_url: resolvedAvatarUrl,
+    })
+    return response.data
+  },
+
+  /**
+   * Remove the authenticated user's avatar
+   */
+  removeAvatar: async () => {
+    const response = await client.delete('/auth/me/avatar')
     return response.data
   },
 
