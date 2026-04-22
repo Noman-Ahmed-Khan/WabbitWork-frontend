@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, forwardRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import useNotificationStore from '../../stores/notificationStore'
@@ -9,7 +9,7 @@ import Spinner from '../primitives/Spinner'
  * Notification dropdown panel - Brutalist Editorial Design
  * Glass panel dropdown with editorial styling
  */
-export default function NotificationDropdown({ onClose }) {
+const NotificationDropdown = forwardRef(({ onClose }, ref) => {
   const navigate = useNavigate()
   const [filter, setFilter] = useState('all')
   
@@ -67,23 +67,24 @@ export default function NotificationDropdown({ onClose }) {
 
   const handleViewAll = () => {
     navigate('/notifications')
-    onClose()
+    onClose?.()
   }
 
   const handleSettings = () => {
     navigate('/profile?tab=notifications')
-    onClose()
+    onClose?.()
   }
 
   const filteredNotifications = notifications
 
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: -10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
       transition={{ duration: 0.15 }}
-      className="absolute right-0 top-full mt-2 w-96 max-w-[calc(100vw-1.5rem)] bg-surface-container-lowest rounded-xl shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] overflow-hidden z-50"
+      className="absolute right-[-4rem] sm:right-0 top-full mt-4 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-surface-container-high rounded-xl shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] overflow-hidden z-50 border border-outline-variant/20"
     >
       {/* Header */}
       <div className="p-4 bg-surface-container-low/50">
@@ -91,26 +92,32 @@ export default function NotificationDropdown({ onClose }) {
           <h3 className="font-headline font-black text-sm uppercase tracking-widest">Notifications</h3>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleSettings}
-              className="p-1.5 rounded-lg hover:bg-surface-container-highest transition-colors"
+              className="p-1.5 rounded-lg hover:bg-surface-container-highest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
               title="Notification settings"
+              aria-label="Notification settings"
             >
               <span className="material-symbols-outlined text-sm">settings</span>
             </button>
             {unreadCount > 0 && (
               <button
+                type="button"
                 onClick={handleMarkAllRead}
-                className="p-1.5 rounded-lg hover:bg-surface-container-highest transition-colors"
+                className="p-1.5 rounded-lg hover:bg-surface-container-highest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 title="Mark all as read"
+                aria-label="Mark all notifications as read"
               >
                 <span className="material-symbols-outlined text-sm">done_all</span>
               </button>
             )}
             {notifications.length > 0 && (
               <button
+                type="button"
                 onClick={handleDeleteAll}
-                className="p-1.5 rounded-lg hover:bg-tertiary/10 hover:text-tertiary transition-colors"
+                className="p-1.5 rounded-lg hover:bg-tertiary/10 hover:text-tertiary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 title="Delete all"
+                aria-label="Delete all notifications"
               >
                 <span className="material-symbols-outlined text-sm">delete_outline</span>
               </button>
@@ -121,8 +128,10 @@ export default function NotificationDropdown({ onClose }) {
         {/* Filter tabs */}
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setFilter('all')}
-            className={`text-[10px] px-3 py-1 font-headline font-bold uppercase tracking-widest transition-all ${
+            aria-pressed={filter === 'all'}
+            className={`text-[10px] px-3 py-1 font-headline font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 ${
               filter === 'all'
                 ? 'bg-black text-white'
                 : 'bg-surface-container-highest text-on-surface-variant hover:bg-black hover:text-white'
@@ -131,8 +140,10 @@ export default function NotificationDropdown({ onClose }) {
             All ({notifications.length})
           </button>
           <button
+            type="button"
             onClick={() => setFilter('unread')}
-            className={`text-[10px] px-3 py-1 font-headline font-bold uppercase tracking-widest transition-all ${
+            aria-pressed={filter === 'unread'}
+            className={`text-[10px] px-3 py-1 font-headline font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 ${
               filter === 'unread'
                 ? 'bg-black text-white'
                 : 'bg-surface-container-highest text-on-surface-variant hover:bg-black hover:text-white'
@@ -179,8 +190,9 @@ export default function NotificationDropdown({ onClose }) {
       {notifications.length > 0 && (
         <div className="p-3 border-t border-stone-100">
           <button
+            type="button"
             onClick={handleViewAll}
-            className="w-full py-2 text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant hover:text-black hover:bg-surface-container-highest transition-all rounded-lg"
+            className="w-full py-2 text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant hover:text-black hover:bg-surface-container-highest transition-all rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
           >
             View All Notifications
           </button>
@@ -188,4 +200,8 @@ export default function NotificationDropdown({ onClose }) {
       )}
     </motion.div>
   )
-}
+})
+
+NotificationDropdown.displayName = 'NotificationDropdown'
+
+export default NotificationDropdown

@@ -11,8 +11,10 @@ export default function InvitationBadge({ className = '' }) {
 
   return (
     <motion.button
+      type="button"
       onClick={() => navigate('/invitations')}
-      className={`relative p-2 rounded-lg transition-colors duration-200 text-on-surface-variant hover:bg-surface-container-highest hover:text-black ${className}`}
+      aria-label={`Open invitations${pendingCount > 0 ? `, ${pendingCount} pending` : ''}`}
+      className={`relative p-2 rounded-lg transition-colors duration-200 text-on-surface-variant hover:bg-surface-container-highest hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 ${className}`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       title="Invitations"

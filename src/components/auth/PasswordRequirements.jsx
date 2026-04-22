@@ -24,7 +24,7 @@ export default function PasswordRequirements({ password }) {
       {requirements.map((req, index) => (
         <motion.span 
           key={index} 
-          className={`text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors duration-200 ${
+          className={`text-[9px] font-black normal-case tracking-wider flex items-center gap-1 transition-colors duration-200 ${
             req.met ? 'text-green-600 dark:text-green-400' : 'text-neutral-400 dark:text-neutral-500'
           }`}
           variants={requirementItemVariants}

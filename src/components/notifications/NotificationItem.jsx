@@ -51,15 +51,30 @@ export default function NotificationItem({ notification, onClose }) {
     }
   }
 
+  const isInteractive = Boolean(notification.action_url || !notification.is_read)
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
-      className={`relative group border-b border-stone-100 transition-colors cursor-pointer ${
+      role={isInteractive ? 'button' : undefined}
+      tabIndex={isInteractive ? 0 : -1}
+      aria-disabled={!isInteractive}
+      aria-label={`Notification: ${notification.title || notification.message || 'Item'}`}
+      onKeyDown={(e) => {
+        if (!isInteractive) return
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      }}
+      className={`relative group border-b border-stone-100 transition-colors ${
+        isInteractive ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-inset' : ''
+      } ${
         notification.is_read 
-          ? 'bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low/50' 
-          : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-low'
+          ? 'bg-surface-container-low/50 text-on-surface-variant hover:bg-surface-container-high/50' 
+          : 'bg-surface-container-low text-on-surface hover:bg-surface-container-high'
       }`}
       onClick={handleClick}
     >
@@ -103,8 +118,10 @@ export default function NotificationItem({ notification, onClose }) {
 
       {/* Delete button (visible on hover) */}
       <button
+        type="button"
         onClick={handleDelete}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-tertiary/10 hover:text-tertiary transition-all"
+        aria-label="Delete notification"
+        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-tertiary/10 hover:text-tertiary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
         title="Delete notification"
       >
         <span className="material-symbols-outlined text-sm">delete_outline</span>

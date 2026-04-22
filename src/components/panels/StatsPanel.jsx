@@ -16,6 +16,9 @@ export default function StatsPanel({ stats, loading }) {
     )
   }
 
+  const completedCount = stats?.completed ?? stats?.by_status?.completed ?? 0
+  const totalCount = stats?.total ?? 0
+
   const statCards = [
     { 
       label: 'Pending', 
@@ -34,7 +37,7 @@ export default function StatsPanel({ stats, loading }) {
     },
     { 
       label: 'Velocity', 
-      value: `${stats?.total ? Math.round((stats.completed / stats.total) * 100) : 0}%`, 
+      value: `${totalCount ? Math.round((completedCount / totalCount) * 100) : 0}%`, 
       color: 'bg-white',
       inverse: true
     },

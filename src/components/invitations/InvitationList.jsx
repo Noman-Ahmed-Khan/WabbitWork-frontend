@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useInvitationStore from '../../stores/invitationStore'
+import useRouteSearch from '../../hooks/useRouteSearch'
 import InvitationCard from './InvitationCard'
 import Spinner from '../primitives/Spinner'
+import { filterBySearch } from '../../utils/search'
 
 /**
  * List of received invitations - Brutalist Editorial Design
@@ -10,6 +12,7 @@ import Spinner from '../primitives/Spinner'
  */
 export default function InvitationList() {
   const [statusFilter, setStatusFilter] = useState('')
+  const { searchQuery, clearSearchQuery, hasSearchQuery } = useRouteSearch()
   
   const { 
     receivedInvitations, 
@@ -21,11 +24,22 @@ export default function InvitationList() {
     fetchReceived(statusFilter || undefined)
   }, [fetchReceived, statusFilter])
 
+  const filteredInvitations = filterBySearch(receivedInvitations, searchQuery, (invitation) => [
+    invitation.team_name,
+    invitation.inviter_first_name,
+    invitation.inviter_last_name,
+    invitation.invited_email,
+    invitation.role,
+    invitation.status,
+    invitation.message,
+  ])
+
   const statusOptions = [
     { value: '', label: 'All' },
     { value: 'pending', label: 'Pending' },
     { value: 'accepted', label: 'Accepted' },
     { value: 'declined', label: 'Declined' },
+    { value: 'cancelled', label: 'Cancelled' },
   ]
 
   return (
@@ -37,8 +51,10 @@ export default function InvitationList() {
           {statusOptions.map((opt) => (
             <button
               key={opt.value}
+              type="button"
               onClick={() => setStatusFilter(opt.value)}
-              className={`px-3 py-1 text-[10px] font-headline font-bold uppercase tracking-widest transition-all ${
+              aria-pressed={statusFilter === opt.value}
+              className={`px-3 py-1 text-[10px] font-headline font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 ${
                 statusFilter === opt.value
                   ? 'bg-black text-white'
                   : 'bg-surface-container-highest text-on-surface-variant hover:bg-black hover:text-white'
@@ -57,14 +73,27 @@ export default function InvitationList() {
         </div>
       ) : receivedInvitations.length === 0 ? (
         <div className="text-center py-20">
-          <div className="font-headline font-black text-6xl leading-[0.9] text-on-surface-variant/20 italic select-none mb-8">
+          <div className="font-headline font-black text-6xl leading-[0.9] text-on-surface-variant/20 italic select-none mb-8" aria-hidden="true">
             NO<br />INVITES<br />YET
           </div>
           <p className="text-on-surface-variant text-sm font-medium">
-            {statusFilter 
-              ? `No ${statusFilter} invitations found`
-              : 'Your inbox is empty. The void awaits.'}
+            {hasSearchQuery
+              ? `No invitations match "${searchQuery.trim()}".`
+              : statusFilter 
+                ? `No ${statusFilter} invitations found`
+                : 'Your inbox is empty. The void awaits.'}
           </p>
+          {hasSearchQuery && (
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={clearSearchQuery}
+              className="mt-6 font-headline text-xs uppercase tracking-widest border-b-2 border-on-surface text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
+            >
+              Clear Search
+            </motion.button>
+          )}
         </div>
       ) : (
         <motion.div 
@@ -73,7 +102,22 @@ export default function InvitationList() {
           animate={{ opacity: 1 }}
         >
           <AnimatePresence mode="popLayout">
-            {receivedInvitations.map((invitation, index) => (
+            {filteredInvitations.length === 0 && hasSearchQuery ? (
+              <div className="md:col-span-12 text-center py-20 border border-dashed border-outline-variant/30 bg-surface-container-highest">
+                <p className="text-on-surface-variant text-sm font-medium">
+                  No invitations match "{searchQuery.trim()}".
+                </p>
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={clearSearchQuery}
+                  className="mt-6 font-headline text-xs uppercase tracking-widest border-b-2 border-on-surface text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
+                >
+                  Clear Search
+                </motion.button>
+              </div>
+            ) : filteredInvitations.map((invitation, index) => (
               <div
                 key={invitation.id}
                 className={

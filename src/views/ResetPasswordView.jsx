@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import authApi from '../api/auth'
-import Input from '../components/primitives/Input'
 import Spinner from '../components/primitives/Spinner'
 import config from '../config/env'
 
@@ -24,13 +23,13 @@ export default function ResetPasswordView() {
   const [error, setError] = useState('')
 
   const passwordRequirements = [
-    { met: password.length >= 8, text: "At least 8 characters" },
-    { met: /[A-Z]/.test(password), text: "Uppercase letter" },
-    { met: /[a-z]/.test(password), text: "Lowercase letter" },
-    { met: /[0-9]/.test(password), text: "At least one number" },
+    { met: password.length >= 8, text: 'At least 8 characters' },
+    { met: /[A-Z]/.test(password), text: 'Uppercase letter' },
+    { met: /[a-z]/.test(password), text: 'Lowercase letter' },
+    { met: /[0-9]/.test(password), text: 'At least one number' },
   ]
 
-  const isPasswordValid = passwordRequirements.every(req => req.met)
+  const isPasswordValid = passwordRequirements.every((req) => req.met)
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0
 
   useEffect(() => {
@@ -39,6 +38,7 @@ export default function ResetPasswordView() {
         setValidating(false)
         return
       }
+
       try {
         await authApi.validateResetToken(token)
         setTokenValid(true)
@@ -49,6 +49,7 @@ export default function ResetPasswordView() {
         setValidating(false)
       }
     }
+
     validateToken()
   }, [token])
 
@@ -62,6 +63,7 @@ export default function ResetPasswordView() {
       setError('Passwords do not match')
       return
     }
+
     try {
       setLoading(true)
       setError('')
@@ -74,8 +76,15 @@ export default function ResetPasswordView() {
     }
   }
 
-  // State card wrapper — consistent grain + glass pattern
-  const StateCard = ({ icon, iconColor, bgColor, title, message, buttonText, onButtonClick }) => (
+  const StateCard = ({
+    icon,
+    iconColor,
+    bgColor,
+    title,
+    message,
+    buttonText,
+    onButtonClick,
+  }) => (
     <div className="brutalist-grain-bg min-h-screen flex items-center justify-center p-6 font-body text-on-background">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -87,9 +96,13 @@ export default function ResetPasswordView() {
           <div className={`w-16 h-16 rounded-full ${bgColor} flex items-center justify-center mx-auto mb-6`}>
             <span className={`material-symbols-outlined text-3xl ${iconColor}`}>{icon}</span>
           </div>
-          <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">{title}</h2>
-          <p className="text-sm text-on-surface-variant mb-8 font-body leading-relaxed">{message}</p>
-          <button 
+          <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-3">
+            {title}
+          </h2>
+          <p className="text-sm text-on-surface-variant mb-8 font-body leading-relaxed">
+            {message}
+          </p>
+          <button
             onClick={onButtonClick}
             className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
           >
@@ -105,22 +118,54 @@ export default function ResetPasswordView() {
       <div className="brutalist-grain-bg min-h-screen flex items-center justify-center p-6">
         <div className="text-center">
           <Spinner />
-          <p className="text-sm text-on-surface-variant mt-4 font-label uppercase tracking-widest">Validating reset link...</p>
+          <p className="text-sm text-on-surface-variant mt-4 font-label uppercase tracking-widest">
+            Validating reset link...
+          </p>
         </div>
       </div>
     )
   }
 
   if (!token) {
-    return <StateCard icon="warning" iconColor="text-tertiary" bgColor="bg-tertiary/10" title="Invalid Reset Link" message="No reset token provided. Please request a new password reset." buttonText="Back to Sign In" onButtonClick={() => navigate('/auth')} />
+    return (
+      <StateCard
+        icon="warning"
+        iconColor="text-tertiary"
+        bgColor="bg-tertiary/10"
+        title="Invalid Reset Link"
+        message="No reset token provided. Please request a new password reset."
+        buttonText="Back to Sign In"
+        onButtonClick={() => navigate('/auth')}
+      />
+    )
   }
 
   if (!tokenValid && !validating) {
-    return <StateCard icon="timer_off" iconColor="text-tertiary" bgColor="bg-tertiary/10" title="Link Expired" message="This password reset link has expired or is invalid. Please request a new one." buttonText="Back to Sign In" onButtonClick={() => navigate('/auth')} />
+    return (
+      <StateCard
+        icon="timer_off"
+        iconColor="text-tertiary"
+        bgColor="bg-tertiary/10"
+        title="Link Expired"
+        message="This password reset link has expired or is invalid. Please request a new one."
+        buttonText="Back to Sign In"
+        onButtonClick={() => navigate('/auth')}
+      />
+    )
   }
 
   if (success) {
-    return <StateCard icon="check_circle" iconColor="text-green-700" bgColor="bg-green-100" title="Password Reset!" message="Your password has been successfully reset. You can now sign in with your new password." buttonText="Sign In" onButtonClick={() => navigate('/auth')} />
+    return (
+      <StateCard
+        icon="check_circle"
+        iconColor="text-green-700"
+        bgColor="bg-green-100"
+        title="Password Reset!"
+        message="Your password has been successfully reset. You can now sign in with your new password."
+        buttonText="Sign In"
+        onButtonClick={() => navigate('/auth')}
+      />
+    )
   }
 
   return (
@@ -139,10 +184,16 @@ export default function ResetPasswordView() {
         <div className="glass-panel rounded-xl p-8 md:p-12 shadow-[40px_0_40px_-20px_rgba(0,0,0,0.06)]">
           <div className="text-center mb-8">
             <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-on-surface" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+              <span className="material-symbols-outlined text-on-surface" style={{ fontVariationSettings: "'FILL' 1" }}>
+                lock
+              </span>
             </div>
-            <h2 className="font-headline font-black text-2xl uppercase tracking-tighter">Reset Password</h2>
-            <p className="text-sm text-on-surface-variant mt-2">Enter your new password below</p>
+            <h2 className="font-headline font-black text-2xl uppercase tracking-tighter">
+              Reset Password
+            </h2>
+            <p className="text-sm text-on-surface-variant mt-2">
+              Enter your new password below
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -173,8 +224,8 @@ export default function ResetPasswordView() {
             {/* Password requirements */}
             <div className="space-y-1.5 pl-1">
               {passwordRequirements.map((req, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
                     req.met ? 'text-green-700 font-medium' : 'text-on-surface-variant/50'
                   }`}
@@ -202,7 +253,7 @@ export default function ResetPasswordView() {
               />
               {confirmPassword && (
                 <p className={`text-xs mt-2 font-bold ${passwordsMatch ? 'text-green-700' : 'text-tertiary'}`}>
-                  {passwordsMatch ? '✓ Passwords match' : 'Passwords do not match'}
+                  {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
                 </p>
               )}
             </div>
@@ -224,7 +275,9 @@ export default function ResetPasswordView() {
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    lock
+                  </span>
                   <span>Reset Password</span>
                 </>
               )}

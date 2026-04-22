@@ -4,7 +4,7 @@ import useAuthStore from '../../stores/authStore'
 import useUIStore from '../../stores/uiStore'
 import NotificationBell from '../notifications/NotificationBell'
 import InvitationBadge from '../invitations/InvitationBadge'
-import config from '../../config/env'
+import ProfileAvatar from '../profile/ProfileAvatar'
 
 /**
  * Bottom navigation dock - Brutalist Editorial Design
@@ -14,6 +14,7 @@ export default function Dock() {
   const location = useLocation()
   const navigate = useNavigate()
   const logout = useAuthStore((state) => state.logout)
+  const user = useAuthStore((state) => state.user)
   const { theme, toggleTheme } = useUIStore()
 
   const navItems = [
@@ -89,7 +90,12 @@ export default function Dock() {
             location.pathname === '/profile' ? 'text-black' : 'text-stone-400'
           }`}
         >
-          <span className="material-symbols-outlined text-2xl">person</span>
+          <ProfileAvatar
+            user={user}
+            size="xs"
+            className="border border-stone-200 shadow-sm"
+            fallbackClassName="text-[9px]"
+          />
           <span className="text-[9px] font-headline font-black uppercase tracking-widest">Profile</span>
           {location.pathname === '/profile' && (
             <motion.div

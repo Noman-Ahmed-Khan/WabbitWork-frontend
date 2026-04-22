@@ -13,10 +13,33 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
 
   return (
     <motion.div 
-      className="bg-surface-container-low/50 rounded-xl p-5 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 relative group"
+      className="bg-surface-container-low/50 rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform-gpu will-change-transform transition-[transform,box-shadow,background-color] duration-300 ease-out relative group overflow-hidden"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
     >
+      <div className="pointer-events-none absolute inset-0 z-20 translate-y-1 scale-[0.99] opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100">
+        <div className="absolute inset-0 bg-surface-container-high/80 backdrop-blur-lg" />
+        <div className="relative flex h-full flex-col justify-between p-5">
+          <div className="space-y-3 pr-10">
+            <span className="block text-[10px] font-black uppercase tracking-[0.5em] text-on-surface/80">
+              Quick Preview
+            </span>
+            <h4 className="font-headline text-lg font-black uppercase tracking-tight leading-tight text-on-surface break-words line-clamp-3">
+              {task.title}
+            </h4>
+            {task.description ? (
+              <p className="text-sm text-on-surface/95 leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto pr-2">
+                {task.description}
+              </p>
+            ) : (
+              <p className="text-sm text-on-surface/80 leading-relaxed">
+                No description provided for this task.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Editorial Priority Tag */}
       <div className="absolute top-0 right-5 -translate-y-1/2">
          <Badge variant={priorityConfig.color} size="sm">
@@ -25,8 +48,8 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
       </div>
 
       {/* Header */}
-      <div className="mb-4">
-        <h3 className="font-headline font-black text-lg uppercase tracking-tight leading-tight mb-1 group-hover:text-tertiary transition-colors">
+      <div className="mb-4 relative z-10 transition-opacity duration-150 ease-out group-hover:opacity-0 group-focus-within:opacity-0">
+        <h3 className="font-headline font-black text-lg uppercase tracking-tight leading-tight mb-1 group-hover:text-tertiary transition-colors break-words line-clamp-2">
           {task.title}
         </h3>
         {showTeam && task.team_name && (
@@ -39,13 +62,13 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
 
       {/* Description */}
       {task.description && (
-        <p className="text-sm font-body text-on-surface-variant/80 line-clamp-2 mb-5 leading-relaxed">
+        <p className="text-sm font-body text-on-surface-variant/80 line-clamp-2 mb-5 leading-relaxed break-words relative z-10">
           {task.description}
         </p>
       )}
 
       {/* Meta grid */}
-      <div className="grid grid-cols-2 gap-4 mb-6 pt-4 border-t border-stone-200/50">
+      <div className="grid grid-cols-2 gap-4 mb-6 pt-4 border-t border-stone-200/50 relative z-10">
         <div className="space-y-3">
           <div className="flex flex-col gap-1">
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400">Status</span>
@@ -73,7 +96,7 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
 
       {/* Assignee if exists */}
       {task.assignee_first_name && (
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex items-center gap-2 mb-6 relative z-10">
            <div className="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center border border-white">
               <span className="material-symbols-outlined text-xs">person</span>
            </div>
@@ -84,18 +107,22 @@ export default function TaskPanel({ task, onEdit, onDelete, showTeam = true }) {
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity relative z-10">
         <button
+          type="button"
           onClick={() => onEdit(task)}
-          className="p-2 rounded-lg hover:bg-stone-100 transition-colors"
+          className="p-2 rounded-lg hover:bg-stone-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
           title="Edit Task"
+          aria-label={`Edit task ${task.title}`}
         >
           <span className="material-symbols-outlined text-xl">edit_note</span>
         </button>
         <button
+          type="button"
           onClick={() => onDelete(task.id)}
-          className="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-500 transition-colors"
+          className="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
           title="Delete Task"
+          aria-label={`Delete task ${task.title}`}
         >
           <span className="material-symbols-outlined text-xl">delete_outline</span>
         </button>

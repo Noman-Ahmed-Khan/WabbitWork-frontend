@@ -100,8 +100,9 @@ export default function AcceptInvitationView() {
                 You have successfully joined the team. Redirecting you...
               </p>
               <button 
+                type="button"
                 onClick={() => navigate('/dashboard')}
-                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
               >
                 Go to Dashboard Now
               </button>
@@ -123,8 +124,9 @@ export default function AcceptInvitationView() {
                 </p>
               </div>
               <button 
+                type="button"
                 onClick={() => navigate(isAuthenticated ? '/dashboard' : `/auth?returnUrl=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
-                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
               >
                 {isAuthenticated ? 'Go to Dashboard' : 'Sign In to Proceed'}
               </button>

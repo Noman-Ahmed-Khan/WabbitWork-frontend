@@ -20,7 +20,7 @@ export default function ForgotPasswordForm({ onBack }) {
       await authApi.forgotPassword(email)
       setSuccess(true)
     } catch (err) {
-      setSuccess(true)
+      setError(err.message || 'Failed to send reset link')
     } finally {
       setLoading(false)
     }
@@ -35,7 +35,7 @@ export default function ForgotPasswordForm({ onBack }) {
         </div>
         <h2 className="font-headline font-black text-2xl uppercase tracking-tighter mb-4 italic">Check Inbox</h2>
         <p className="font-body text-xs text-stone-500 mb-10 leading-relaxed max-w-xs mx-auto">
-          If an account exists for <strong className="text-black">{email}</strong>, we've dispatched password reset protocols.
+          If an account exists for <strong className="text-on-surface">{email}</strong>, we have dispatched password reset instructions.
         </p>
         <button 
           onClick={onBack}

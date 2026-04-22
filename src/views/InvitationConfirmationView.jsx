@@ -57,14 +57,16 @@ export default function InvitationConfirmationView() {
               </div>
               <div className="space-y-3">
                 <button
+                  type="button"
                   onClick={() => navigate('/teams')}
-                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 >
                   View Teams
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all"
+                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 >
                   Go to Dashboard
                 </button>
@@ -87,14 +89,16 @@ export default function InvitationConfirmationView() {
               </div>
               <div className="space-y-3">
                 <button
+                  type="button"
                   onClick={() => navigate('/invitations')}
-                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 >
                   View Invitations
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all"
+                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 >
                   Go to Dashboard
                 </button>
@@ -117,14 +121,16 @@ export default function InvitationConfirmationView() {
               </div>
               <div className="space-y-3">
                 <button
+                  type="button"
                   onClick={() => navigate('/dashboard')}
-                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                  className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 >
                   Home
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/invitations')}
-                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all"
+                  className="w-full border-2 border-black text-black py-4 font-headline font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
                 >
                   View Invitations
                 </button>
@@ -136,7 +142,7 @@ export default function InvitationConfirmationView() {
         {/* Footer */}
         <div className="text-center mt-8 opacity-40">
           <p className="font-label text-[10px] uppercase tracking-[0.3em] text-on-surface-variant">
-            Need help? Contact support@{config.app.domain}
+            Need help? Contact support.
           </p>
         </div>
       </div>

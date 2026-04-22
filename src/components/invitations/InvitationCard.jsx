@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import useInvitationStore from '../../stores/invitationStore'
+import ProfileAvatar from '../profile/ProfileAvatar'
 import { formatDate } from '../../utils/formatDate'
 
 /**
@@ -82,6 +83,22 @@ export default function InvitationCard({ invitation, type = 'received' }) {
   const isExpired = new Date(invitation.expires_at) < new Date()
   const statusKey = isExpired && isPending ? 'expired' : invitation.status
   const status = statusConfig[statusKey] || statusConfig.pending
+  const avatarUser = type === 'received'
+    ? {
+        first_name: invitation.inviter_first_name,
+        last_name: invitation.inviter_last_name,
+        email: invitation.inviter_email,
+        avatar_url: invitation.inviter_avatar_url,
+      }
+    : {
+        first_name: invitation.invited_first_name,
+        last_name: invitation.invited_last_name,
+        email: invitation.invited_email,
+        avatar_url: invitation.invited_avatar_url,
+      }
+  const avatarAlt = type === 'received'
+    ? `${invitation.inviter_first_name || invitation.inviter_email || 'Inviter'} avatar`
+    : `${invitation.invited_first_name || invitation.invited_email || 'Invitee'} avatar`
 
   return (
     <motion.div
@@ -96,12 +113,14 @@ export default function InvitationCard({ invitation, type = 'received' }) {
       {/* Header Row */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-4 flex-1 min-w-0">
-          {/* Inviter Avatar Placeholder */}
-          <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
-            <span className="material-symbols-outlined text-on-surface-variant">
-              {type === 'received' ? 'person' : 'send'}
-            </span>
-          </div>
+          {/* Member Avatar */}
+          <ProfileAvatar
+            user={avatarUser}
+            size="sm"
+            alt={avatarAlt}
+            className="h-12 w-12 flex-shrink-0 border-2 border-white shadow-sm"
+            fallbackClassName="text-[10px]"
+          />
           <div className="min-w-0">
             <h3 className="font-headline font-black text-xl uppercase tracking-tighter truncate">
               {invitation.team_name}
@@ -156,23 +175,27 @@ export default function InvitationCard({ invitation, type = 'received' }) {
 
         {/* Received Pending Actions */}
         {type === 'received' && isPending && !isExpired && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             <button
+              type="button"
               onClick={handleDecline}
               disabled={loading}
-              className="px-4 py-2 border border-black text-[10px] font-black uppercase tracking-widest hover:bg-error/10 active:scale-95 transition-all disabled:opacity-50"
+              aria-label={`Decline invitation to ${invitation.team_name}`}
+              className="px-3 md:px-4 py-1.5 md:py-2 border border-black text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-error/10 active:scale-95 transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
             >
               Decline
             </button>
             <button
+              type="button"
               onClick={handleAccept}
               disabled={loading}
-              className="px-4 py-2 bg-black text-white text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform disabled:opacity-50 flex items-center gap-2"
+              aria-label={`Accept invitation to ${invitation.team_name}`}
+              className="px-3 md:px-4 py-1.5 md:py-2 bg-black text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform disabled:opacity-50 flex items-center gap-1 md:gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
             >
               {loading && (
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               )}
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <span className="material-symbols-outlined text-xs md:text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
                 check_circle
               </span>
               Accept
@@ -182,18 +205,22 @@ export default function InvitationCard({ invitation, type = 'received' }) {
 
         {/* Sent Pending Actions */}
         {type === 'sent' && isPending && !isExpired && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             <button
+              type="button"
               onClick={handleResend}
               disabled={loading}
-              className="px-4 py-2 bg-transparent text-[10px] font-black uppercase tracking-widest underline hover:text-tertiary transition-colors disabled:opacity-50"
+              aria-label={`Resend invitation to ${invitation.invited_email}`}
+              className="px-3 md:px-4 py-1.5 md:py-2 bg-transparent text-[9px] md:text-[10px] font-black uppercase tracking-widest underline hover:text-tertiary transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
             >
               Resend
             </button>
             <button
+              type="button"
               onClick={handleCancel}
               disabled={loading}
-              className="px-4 py-2 border border-stone-400 text-[10px] font-black uppercase tracking-widest hover:border-black transition-colors disabled:opacity-50"
+              aria-label={`Cancel invitation to ${invitation.invited_email}`}
+              className="px-3 md:px-4 py-1.5 md:py-2 border border-stone-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:border-black transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
             >
               Cancel
             </button>

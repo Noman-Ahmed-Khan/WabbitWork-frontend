@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import useNotificationStore from '../../stores/notificationStore'
 import Spinner from '../primitives/Spinner'
 import Panel from '../../layouts/Panel'
@@ -27,17 +28,25 @@ export default function NotificationPreferences() {
   useEffect(() => { fetchPreferences() }, [fetchPreferences])
 
   useEffect(() => {
-    if (preferences) { setLocalPreferences(preferences) }
+    if (preferences) {
+      setLocalPreferences({ ...preferences })
+    }
   }, [preferences])
 
   const handleToggle = (key) => {
-    setLocalPreferences(prev => ({
-      ...prev,
-      [key]: !prev[key],
-    }))
+    setLocalPreferences(prev => {
+      const current = prev || {}
+
+      return {
+        ...current,
+        [key]: !current[key],
+      }
+    })
   }
 
   const handleSave = async () => {
+    if (!localPreferences) return
+
     try {
       setSaving(true)
       await updatePreferences(localPreferences)
@@ -48,7 +57,7 @@ export default function NotificationPreferences() {
     }
   }
 
-  const hasChanges = JSON.stringify(preferences) !== JSON.stringify(localPreferences)
+  const hasChanges = Boolean(localPreferences) && JSON.stringify(preferences) !== JSON.stringify(localPreferences)
 
   if (loading && !preferences) {
     return (
@@ -67,15 +76,25 @@ export default function NotificationPreferences() {
           checked={checked} 
           onChange={onChange} 
         />
-        <div className="toggle-bg block w-10 h-6 bg-surface-container-highest rounded-full transition-colors border-2 border-stone-100 group-hover:border-stone-400" />
-        <div className="toggle-dot absolute left-1 top-1 bg-black w-4 h-4 rounded-full transition-transform duration-300 shadow-sm" />
+        <div
+          className={`toggle-bg block w-10 h-6 rounded-full transition-colors border-2 border-stone-100 group-hover:border-stone-400 ${
+            checked ? 'bg-tertiary' : 'bg-surface-container-highest'
+          }`}
+        />
+        <motion.div
+          animate={{ x: checked ? 16 : 0 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          className={`toggle-dot absolute left-1 top-1 w-4 h-4 rounded-full transition-colors duration-300 shadow-sm ${
+            checked ? 'bg-white' : 'bg-black'
+          }`}
+        />
       </div>
       {label && <span className="ml-3 text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant">{label}</span>}
     </label>
   )
 
   return (
-    <Panel className="overflow-hidden">
+    <Panel className="overflow-visible">
       <div className="mb-10">
         <h2 className="font-headline font-black text-3xl uppercase tracking-tighter mb-2 italic">Notification Hub</h2>
         <p className="font-label text-xs font-medium text-stone-400 uppercase tracking-[0.2em]">Refine your communication protocols</p>
@@ -113,19 +132,21 @@ export default function NotificationPreferences() {
 
       {/* Sticky Save Bar */}
       {hasChanges && (
-        <motion.div 
-          className="mt-12 sticky bottom-0 bg-white/90 backdrop-blur-md p-6 -mx-8 -mb-8 border-t-4 border-black flex justify-between items-center"
+        <motion.div
+          className="mt-12 sticky bottom-0 bg-surface/95 backdrop-blur-md p-6 -mx-6 -mb-6 border-t-4 border-outline-variant/20 flex justify-between items-center text-on-surface"
           initial={{ y: 100 }}
           animate={{ y: 0 }}
         >
-           <p className="font-headline font-black text-xs uppercase tracking-widest italic">Unsaved Modifications Detected</p>
-           <button
-             onClick={handleSave}
-             disabled={saving}
-             className="h-14 px-10 bg-black text-white rounded-none font-headline font-black text-sm uppercase tracking-[0.2em] hover:bg-tertiary hover:scale-[1.05] transition-all flex items-center gap-3"
-           >
-             {saving ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Apply Protocols'}
-           </button>
+          <p className="font-headline font-black text-xs uppercase tracking-widest italic">Unsaved Modifications Detected</p>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            aria-busy={saving}
+            className="h-14 px-10 bg-black text-white rounded-none font-headline font-black text-sm uppercase tracking-[0.2em] hover:bg-tertiary hover:scale-[1.05] transition-all flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
+          >
+            {saving ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Apply Protocols'}
+          </button>
         </motion.div>
       )}
     </Panel>

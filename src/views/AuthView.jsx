@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sun, Moon } from 'lucide-react'
@@ -21,9 +21,10 @@ export default function AuthView() {
   const navigate = useNavigate()
   const returnUrl = searchParams.get('returnUrl')
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'
+  const authError = searchParams.get('error')
   
   const [mode, setMode] = useState(initialMode) 
-  const { login, register, loading, error, clearError } = useAuthStore()
+  const { login, register, isAuthenticated, loading, error, clearError, setError } = useAuthStore()
   const { theme, toggleTheme } = useUIStore()
 
   const [formData, setFormData] = useState({
@@ -32,6 +33,20 @@ export default function AuthView() {
     first_name: '',
     last_name: '',
   })
+
+  // Handle OAuth redirect
+  useEffect(() => {
+    if (authError === 'auth_failed') {
+      setError('Google authentication failed. Please try again.')
+    }
+  }, [authError, setError])
+
+  // Redirect if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(returnUrl || '/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, navigate, returnUrl])
 
   const isPasswordValid = 
     formData.password.length >= 8 &&
@@ -53,7 +68,7 @@ export default function AuthView() {
         if (!isPasswordValid) return
         await register({ ...formData })
       }
-      navigate(returnUrl || '/dashboard')
+      navigate(returnUrl || '/dashboard', { replace: true })
     } catch (err) {
       console.error('Auth error:', err)
     }
@@ -81,10 +96,10 @@ export default function AuthView() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.15, duration: 0.4 }}
       >
-        <span className="font-black text-xl tracking-tighter uppercase text-neutral-900 dark:text-white leading-none">
-          TaskMaster
+        <span className="font-black text-2xl tracking-tighter uppercase text-neutral-900 dark:text-white leading-none">
+          WabbitWorks
         </span>
-        <span className="font-semibold text-[7px] tracking-[0.25em] uppercase text-neutral-400 dark:text-neutral-500">
+        <span className="font-semibold text-[10px] tracking-[0.25em] uppercase text-neutral-400 dark:text-neutral-500">
           Brutalist Edition
         </span>
       </motion.div>

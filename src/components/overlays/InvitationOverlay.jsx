@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Send, Mail, Shield, MessageSquare } from 'lucide-react'
+import { X, Send, Mail, Shield, MessageSquare, Users2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useInvitationStore from '../../stores/invitationStore'
 import Panel from '../../layouts/Panel'
@@ -10,33 +10,63 @@ import Button from '../primitives/Button'
 /**
  * Invite member overlay modal
  */
-export default function InvitationOverlay({ team, onClose }) {
+export default function InvitationOverlay({
+  team = null,
+  teams = [],
+  defaultTeamId = '',
+  onClose,
+  onSuccess,
+}) {
+  const initialTeamId = team?.id || defaultTeamId || (teams.length === 1 ? teams[0].id : '')
+
   const [formData, setFormData] = useState({
     email: '',
     role: 'member',
     message: '',
+    team_id: initialTeamId,
   })
   const [success, setSuccess] = useState(false)
+  const [validationError, setValidationError] = useState('')
 
   const { createInvitation, loading, error, clearError } = useInvitationStore()
+  const selectedTeam = team || teams.find(t => t.id === formData.team_id) || null
+  const teamOptions = teams.map((t) => ({
+    value: t.id,
+    label: t.name,
+  }))
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
+    setValidationError('')
     clearError()
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setValidationError('')
 
     try {
-      await createInvitation(team.id, formData)
+      const targetTeamId = team?.id || formData.team_id
+      const targetTeam = team || teams.find(t => t.id === targetTeamId) || null
+
+      if (!targetTeamId || !targetTeam) {
+        setValidationError('Please choose a team first.')
+        return
+      }
+
+      await createInvitation(targetTeamId, {
+        email: formData.email,
+        role: formData.role,
+        message: formData.message,
+      })
+
       setSuccess(true)
-      
-      // Reset form
-      setFormData({ email: '', role: 'member', message: '' })
-      
-      // Close after delay or let user close
+
+      Promise.resolve(onSuccess?.(targetTeam)).catch((handlerError) => {
+        console.error('Invitation success handler failed:', handlerError)
+      })
+
       setTimeout(() => {
         onClose()
       }, 2000)
@@ -64,7 +94,7 @@ export default function InvitationOverlay({ team, onClose }) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', duration: 0.3 }}
-          className="w-full max-w-md"
+          className="w-full max-w-lg"
           onClick={(e) => e.stopPropagation()}
         >
           <Panel>
@@ -72,9 +102,12 @@ export default function InvitationOverlay({ team, onClose }) {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-lg font-bold">Invite to Team</h2>
-                <p className="text-sm text-base-content/60">{team.name}</p>
+                <p className="text-sm text-base-content/60">
+                  {selectedTeam?.name || 'Choose a team to continue'}
+                </p>
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 className="btn btn-ghost btn-sm btn-circle"
               >
@@ -95,10 +128,30 @@ export default function InvitationOverlay({ team, onClose }) {
                 <h3 className="font-semibold text-lg mb-1">Invitation Sent!</h3>
                 <p className="text-sm text-base-content/60">
                   An email has been sent to {formData.email}
+                  {selectedTeam?.name ? ` for ${selectedTeam.name}` : ''}
                 </p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {!team && (
+                  <div>
+                    <label className="label">
+                      <span className="label-text flex items-center gap-2">
+                        <Users2 size={14} />
+                        Team
+                      </span>
+                    </label>
+                    <Select
+                      name="team_id"
+                      value={formData.team_id}
+                      onChange={handleChange}
+                      options={teamOptions}
+                      placeholder={teamOptions.length > 0 ? 'Choose a team' : 'No teams available'}
+                      disabled={teamOptions.length === 0}
+                    />
+                  </div>
+                )}
+
                 {/* Email */}
                 <div>
                   <label className="label">
@@ -155,9 +208,9 @@ export default function InvitationOverlay({ team, onClose }) {
                 </div>
 
                 {/* Error message */}
-                {error && (
+                {(error || validationError) && (
                   <div className="alert alert-error text-sm py-2">
-                    {error}
+                    {error || validationError}
                   </div>
                 )}
 
@@ -174,6 +227,7 @@ export default function InvitationOverlay({ team, onClose }) {
                     type="submit"
                     variant="primary"
                     loading={loading}
+                    disabled={loading || (!team && (!selectedTeam || teamOptions.length === 0))}
                   >
                     <Send size={16} />
                     Send Invitation

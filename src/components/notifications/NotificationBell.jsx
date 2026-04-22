@@ -6,7 +6,7 @@ import NotificationDropdown from './NotificationDropdown'
 /**
  * Notification bell - Brutalist Editorial style
  */
-export default function NotificationBell() {
+export default function NotificationBell({ className = '' }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   const buttonRef = useRef(null)
@@ -34,11 +34,14 @@ export default function NotificationBell() {
     <div className="relative">
       <motion.button
         ref={buttonRef}
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative hover:opacity-70 transition-opacity"
+        className={`relative hover:opacity-70 transition-opacity ${className}`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Notifications"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
       >
         <span className="material-symbols-outlined text-black dark:text-white transition-colors duration-300">notifications</span>
 
@@ -58,9 +61,10 @@ export default function NotificationBell() {
       {/* Dropdown */}
       <AnimatePresence>
         {isOpen && (
-          <div ref={dropdownRef}>
-            <NotificationDropdown onClose={() => setIsOpen(false)} />
-          </div>
+          <NotificationDropdown 
+            ref={dropdownRef}
+            onClose={() => setIsOpen(false)} 
+          />
         )}
       </AnimatePresence>
     </div>

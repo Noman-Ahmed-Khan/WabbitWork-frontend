@@ -89,8 +89,9 @@ export default function VerifyEmailView() {
                 }
               </p>
               <button 
+                type="button"
                 onClick={() => navigate(isAuthenticated ? '/dashboard' : '/auth')}
-                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
               >
                 {isAuthenticated ? 'Go to Dashboard' : 'Sign In'}
               </button>
@@ -107,8 +108,9 @@ export default function VerifyEmailView() {
                 {error || 'The verification link is invalid or has expired.'}
               </p>
               <button 
+                type="button"
                 onClick={() => navigate(isAuthenticated ? '/dashboard' : '/auth')}
-                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
+                className="w-full bg-on-tertiary-fixed text-white py-4 font-headline font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2"
               >
                 {isAuthenticated ? 'Go to Dashboard' : 'Sign In'}
               </button>

@@ -1,37 +1,37 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, Key, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Mail, Key, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 import PasswordRequirements from './PasswordRequirements'
 import SocialAuthButtons from './SocialAuthButtons'
-import { 
-  formContainerVariants, 
-  formItemVariants, 
-  glitchRevealVariants 
+import {
+  formContainerVariants,
+  formItemVariants,
+  glitchRevealVariants,
 } from '../../animations/authVariants'
 
 /**
  * Animated form content for login/register
  */
-export default function AuthFormContent({ 
-  mode, 
-  formData, 
-  onChange, 
-  onSubmit, 
+export default function AuthFormContent({
+  mode,
+  formData,
+  onChange,
+  onSubmit,
   onModeChange,
   onForgotPassword,
-  loading, 
+  loading,
   error,
-  isPasswordValid
+  isPasswordValid,
 }) {
   const [showPassword, setShowPassword] = useState(false)
 
-  const inputClasses = "w-full h-10 bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-sm border border-black/8 dark:border-white/10 rounded-lg font-black text-xs uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-neutral-800 dark:focus:ring-white/80 focus:border-transparent transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-neutral-900 dark:text-white"
+  const inputClasses = 'w-full h-10 bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-sm border border-black/8 dark:border-white/10 rounded-lg font-black text-xs uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-neutral-800 dark:focus:ring-white/80 focus:border-transparent transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-neutral-900 dark:text-white'
 
   return (
     <AnimatePresence mode="wait">
-      <motion.form 
+      <motion.form
         key={mode}
-        className="space-y-3" 
+        className="space-y-3"
         onSubmit={onSubmit}
         variants={formContainerVariants}
         initial="hidden"
@@ -41,7 +41,7 @@ export default function AuthFormContent({
         {/* Name Fields - Register Only */}
         <AnimatePresence>
           {mode === 'register' && (
-            <motion.div 
+            <motion.div
               className="grid grid-cols-2 gap-3"
               variants={glitchRevealVariants}
               initial="hidden"
@@ -84,7 +84,10 @@ export default function AuthFormContent({
             Email
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500" strokeWidth={2} />
+            <Mail
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500"
+              strokeWidth={2}
+            />
             <input
               className={`${inputClasses} pl-10 pr-3`}
               name="email"
@@ -104,8 +107,8 @@ export default function AuthFormContent({
               Password
             </label>
             {mode === 'login' && (
-              <motion.button 
-                type="button" 
+              <motion.button
+                type="button"
                 onClick={onForgotPassword}
                 className="text-[8px] font-black text-neutral-400 uppercase tracking-wider hover:text-neutral-900 dark:hover:text-white transition-colors"
                 whileHover={{ x: 2 }}
@@ -116,34 +119,45 @@ export default function AuthFormContent({
             )}
           </div>
           <div className="relative">
-            <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500" strokeWidth={2} />
+            <Key
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500"
+              strokeWidth={2}
+            />
+
             <input
               className={`${inputClasses} pl-10 pr-10`}
               name="password"
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={onChange}
-              placeholder="••••••••"
+              placeholder="********"
               required
             />
-            <motion.button 
-              type="button" 
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 dark:hover:text-white transition-colors"
-              whileTap={{ scale: 0.85 }}
-            >
-              <motion.div
-                initial={false}
-                animate={{ rotateY: showPassword ? 180 : 0 }}
-                transition={{ duration: 0.25 }}
+
+            <div className="absolute right-3 inset-y-0 flex items-center">
+              <motion.button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="inline-flex h-6 w-6 items-center justify-center rounded-full leading-none text-neutral-400 hover:text-neutral-700 dark:hover:text-white transition-colors"
+                whileTap={{ scale: 0.92 }}
+                style={{ transformOrigin: 'center' }}
               >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" strokeWidth={2} />
-                ) : (
-                  <Eye className="w-4 h-4" strokeWidth={2} />
-                )}
-              </motion.div>
-            </motion.button>
+                <motion.div
+                  initial={false}
+                  className="flex h-full w-full items-center justify-center"
+                  animate={{ rotateY: showPassword ? 180 : 0 }}
+                  transition={{ duration: 0.25 }}
+                  // style={{ backfaceVisibility: 'hidden' }}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" strokeWidth={2} />
+                  ) : (
+                    <Eye className="w-4 h-4" strokeWidth={2} />
+                  )}
+                </motion.div>
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 
@@ -164,7 +178,7 @@ export default function AuthFormContent({
         {/* Error */}
         <AnimatePresence>
           {error && (
-            <motion.div 
+            <motion.div
               className="bg-red-500/10 text-red-600 dark:text-red-400 p-3 rounded-lg text-[10px] font-medium border border-red-500/20"
               initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -186,13 +200,14 @@ export default function AuthFormContent({
             whileTap={{ scale: 0.985 }}
           >
             {/* Subtle grain on button */}
-            <div 
+            <div
               className="absolute inset-0 opacity-10 pointer-events-none"
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                backgroundImage:
+                  'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
               }}
             />
-            
+
             {loading ? (
               <span className="loading loading-spinner loading-sm" />
             ) : (
@@ -212,23 +227,24 @@ export default function AuthFormContent({
         </AnimatePresence>
 
         {/* Mode Toggle */}
-        <motion.footer 
-          className="pt-1 text-center"
-          variants={formItemVariants}
-        >
-          <motion.button 
-            type="button" 
+        <motion.footer className="pt-1 text-center" variants={formItemVariants}>
+          <motion.button
+            type="button"
             onClick={onModeChange}
             className="text-[9px] font-black text-neutral-400 uppercase tracking-[0.15em] hover:text-neutral-900 dark:hover:text-white transition-colors inline-flex items-center gap-1"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
             <span>{mode === 'login' ? 'Create Account' : 'Back to Login'}</span>
-            <motion.span 
-              animate={{ x: [0, 3, 0] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+            <motion.span
+              animate={{ x: mode === 'login' ? [0, 3, 0] : [0, -3, 0] }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              {mode === 'login' ? '→' : '←'}
+              {mode === 'login' ? (
+                <ArrowRight className="w-3 h-3" />
+              ) : (
+                <ArrowLeft className="w-3 h-3" />
+              )}
             </motion.span>
           </motion.button>
         </motion.footer>
