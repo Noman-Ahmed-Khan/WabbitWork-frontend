@@ -77,9 +77,13 @@ export default function ForgotPasswordForm({ onBack }) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="USER@SYSTEM.COM"
+                placeholder="user@system.com"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 required
-                className="w-full h-14 pl-12 pr-5 bg-surface-container-highest border-none rounded-xl font-headline font-bold uppercase tracking-widest text-sm text-on-surface focus:ring-2 focus:ring-black transition-all"
+                className="w-full h-14 pl-12 pr-5 bg-surface-container-highest border-none rounded-xl font-headline font-bold tracking-widest text-sm text-on-surface focus:ring-2 focus:ring-black transition-all"
               />
            </div>
         </div>

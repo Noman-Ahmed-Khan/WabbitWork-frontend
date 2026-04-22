@@ -398,7 +398,7 @@ export default function DashboardView() {
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-on-surface text-surface p-4">
+              <div className="bg-on-surface dark:bg-white/30 text-surface p-4">
                 <span className="block text-[10px] font-black uppercase tracking-[0.25em] text-surface/50 mb-1">
                   Avg Members
                 </span>

@@ -25,7 +25,7 @@ export default function AuthFormContent({
 }) {
   const [showPassword, setShowPassword] = useState(false)
 
-  const inputClasses = 'w-full h-10 bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-sm border border-black/8 dark:border-white/10 rounded-lg font-black text-xs uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-neutral-800 dark:focus:ring-white/80 focus:border-transparent transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-neutral-900 dark:text-white'
+  const inputClasses = 'w-full h-10 bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-sm border border-black/8 dark:border-white/10 rounded-lg font-black text-xs tracking-wider focus:outline-none focus:ring-2 focus:ring-neutral-800 dark:focus:ring-white/80 focus:border-transparent transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-neutral-900 dark:text-white'
 
   return (
     <AnimatePresence mode="wait">
@@ -58,6 +58,8 @@ export default function AuthFormContent({
                   value={formData.first_name}
                   onChange={onChange}
                   placeholder="JOHN"
+                  autoComplete="given-name"
+                  autoCapitalize="words"
                   required
                 />
               </motion.div>
@@ -71,6 +73,8 @@ export default function AuthFormContent({
                   value={formData.last_name}
                   onChange={onChange}
                   placeholder="DOE"
+                  autoComplete="family-name"
+                  autoCapitalize="words"
                   required
                 />
               </motion.div>
@@ -94,7 +98,12 @@ export default function AuthFormContent({
               type="email"
               value={formData.email}
               onChange={onChange}
-              placeholder="USER@MAIL.COM"
+              placeholder="user@mail.com"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
               required
             />
           </div>
@@ -131,6 +140,10 @@ export default function AuthFormContent({
               value={formData.password}
               onChange={onChange}
               placeholder="********"
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               required
             />
 

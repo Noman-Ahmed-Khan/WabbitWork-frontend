@@ -6,7 +6,7 @@ const FooterSection = () => (
     <div className="mb-8 md:mb-0">
       <div className="text-xl font-black uppercase text-on-background mb-2">WabbitWorks</div>
       <p className="uppercase tracking-[0.2em] text-[15px] text-on-background/40">
-        (C) 2025 ALL RIGHTS RESERVED. SECURE TERMINAL V4.2
+        (C) 2026 ALL RIGHTS RESERVED. SECURE TERMINAL V4.2
       </p>
     </div>
     <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
