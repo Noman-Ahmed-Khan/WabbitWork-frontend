@@ -1,5 +1,6 @@
+import React, { lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
-import LiquidMercuryCanvas from '../../animations/LiquidMercury'
+const LiquidMercuryCanvas = lazy(() => import('../../animations/LiquidMercury'))
 
 // Commit 3: Minor update
 
@@ -13,7 +14,9 @@ const HeroSection = ({ isDark, handleGetStarted, handleLogin }) => {
 
       {/* Particle canvas */}
       <div className="absolute inset-0 z-0">
-        <LiquidMercuryCanvas isDark={isDark} />
+        <Suspense fallback={<div className="w-full h-full" style={{ background: isDark ? '#010101' : '#f5f3ef' }} />}>
+          <LiquidMercuryCanvas isDark={isDark} />
+        </Suspense>
       </div>
 
       {/* Bottom vignette - fades to matching bg so the seam is invisible */}
