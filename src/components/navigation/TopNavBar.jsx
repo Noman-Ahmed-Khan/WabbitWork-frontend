@@ -91,7 +91,7 @@ export default function TopNavBar() {
           whileHover="hover"
           whileTap="tap"
           onClick={toggleTheme}
-          className="relative flex items-center justify-center p-2 rounded-lg bg-surface-container/30 hover:bg-surface-container/50 transition-colors"
+          className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container/30 hover:bg-surface-container/50 transition-colors"
           title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
         >
           <motion.span 
@@ -105,7 +105,7 @@ export default function TopNavBar() {
           </motion.span>
         </motion.button>
 
-        <NotificationBell />
+        <NotificationBell className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container/30 hover:bg-surface-container/50 transition-colors" />
 
         <motion.button
           type="button"

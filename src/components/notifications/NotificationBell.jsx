@@ -36,14 +36,16 @@ export default function NotificationBell({ className = '' }) {
         ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative hover:opacity-70 transition-opacity ${className}`}
+        className={`relative inline-flex items-center justify-center hover:opacity-70 transition-opacity ${className}`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Notifications"
         aria-haspopup="menu"
         aria-expanded={isOpen}
       >
-        <span className="material-symbols-outlined text-black dark:text-white transition-colors duration-300">notifications</span>
+        <span className="material-symbols-outlined leading-none text-black dark:text-white transition-colors duration-300">
+          notifications
+        </span>
 
         {/* Unread dot */}
         <AnimatePresence>
