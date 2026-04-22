@@ -1,7 +1,7 @@
 /**
  * Centralized environment configuration
  * Validates and exports all environment variables
- * 
+ *
  * @module config/env
  */
 
@@ -13,11 +13,11 @@
  */
 const getEnvVar = (key, defaultValue = '') => {
   const value = import.meta.env[key]
-  
+
   if (value === undefined && !defaultValue) {
-    console.warn(`⚠️  Environment variable ${key} is not set`)
+    console.warn(`Warning: Environment variable ${key} is not set`)
   }
-  
+
   return value || defaultValue
 }
 
@@ -42,7 +42,7 @@ const config = {
 
   // App Configuration
   app: {
-    name: getEnvVar('VITE_APP_NAME', 'Team Task Manager'),
+    name: getEnvVar('VITE_APP_NAME', 'WabbitWorks'),
     version: getEnvVar('VITE_APP_VERSION', '1.0.0'),
   },
 

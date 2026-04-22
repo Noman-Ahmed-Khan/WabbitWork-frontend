@@ -11,9 +11,6 @@ const client = axios.create({
   baseURL: config.api.baseURL,
   timeout: config.api.timeout,
   withCredentials: true, // Required for session cookies
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
 
 

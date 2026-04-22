@@ -1,4 +1,4 @@
-# Team Task Manager - Frontend
+# WabbitWorks - Frontend
 
 A modern, responsive team task management application built with React, Vite, Tailwind CSS, and DaisyUI.
 
