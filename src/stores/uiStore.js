@@ -15,6 +15,7 @@ const useUIStore = create(
       overlayData: null,
       sidebarOpen: false,
       notifications: [],
+      searchQueries: {},
 
       // Theme Actions
       setTheme: (theme) => {
@@ -70,6 +71,35 @@ const useUIStore = create(
 
       setSidebarOpen: (open) => {
         set({ sidebarOpen: open })
+      },
+
+      // Search Actions
+      setSearchQuery: (scope, query = '') => {
+        const scopeKey = scope || 'global'
+        const nextQuery = typeof query === 'string' ? query : ''
+
+        set((state) => {
+          const searchQueries = { ...state.searchQueries }
+
+          if (nextQuery.trim()) {
+            searchQueries[scopeKey] = nextQuery
+          } else {
+            delete searchQueries[scopeKey]
+          }
+
+          return { searchQueries }
+        })
+      },
+
+      clearSearchQuery: (scope) => {
+        const scopeKey = scope || 'global'
+
+        set((state) => {
+          const searchQueries = { ...state.searchQueries }
+          delete searchQueries[scopeKey]
+
+          return { searchQueries }
+        })
       },
 
       // Toast Notification Actions

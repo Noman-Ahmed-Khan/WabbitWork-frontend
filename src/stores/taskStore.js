@@ -21,7 +21,6 @@ const useTaskStore = create((set, get) => ({
     team_id: '',
     status: '',
     priority: '',
-    assigned_to: '',
     assigned_to_me: false,
   },
 
@@ -51,7 +50,6 @@ const useTaskStore = create((set, get) => ({
         team_id: '',
         status: '',
         priority: '',
-        assigned_to: '',
         assigned_to_me: false,
       }
     })
@@ -72,7 +70,6 @@ const useTaskStore = create((set, get) => ({
       if (filters.team_id) params.team_id = filters.team_id
       if (filters.status) params.status = filters.status
       if (filters.priority) params.priority = filters.priority
-      if (filters.assigned_to) params.assigned_to = filters.assigned_to
       if (filters.assigned_to_me) params.assigned_to_me = true
 
       const response = await tasksApi.getAll(params)
@@ -159,7 +156,6 @@ const useTaskStore = create((set, get) => ({
       team_id: '',
       status: '',
       priority: '',
-      assigned_to: '',
       assigned_to_me: false,
     },
   }),

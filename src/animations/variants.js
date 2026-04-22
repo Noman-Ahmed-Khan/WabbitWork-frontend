@@ -3,52 +3,79 @@
  * Centralized animation definitions for consistent, reusable animations
  */
 
-// Page transition variants
+// Modern Brutalist Easing (snappy start, smooth finish)
+const brutalEase = [0.23, 1, 0.32, 1]
+const bounceEase = [0.175, 0.885, 0.32, 1.275]
+
+// Page transition variants - "Building" effect
 export const pageVariants = {
   initial: {
     opacity: 0,
-    y: 10,
+    y: 20,
+    rotateX: 2,
+    scale: 0.98,
   },
   animate: {
     opacity: 1,
     y: 0,
+    rotateX: 0,
+    scale: 1,
     transition: {
-      duration: 0.2,
-      ease: 'easeOut',
+      duration: 0.6,
+      ease: brutalEase,
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
     },
   },
   exit: {
     opacity: 0,
-    y: -10,
+    y: -20,
+    rotateX: -2,
+    scale: 1.02,
     transition: {
-      duration: 0.2,
-      ease: 'easeIn',
+      duration: 0.4,
+      ease: [0.4, 0, 1, 1],
     },
   },
+}
+
+// Shutter/Wipe variants for high-impact transitions
+export const shutterVariants = {
+  initial: { height: "100%" },
+  animate: { 
+    height: "0%",
+    transition: { duration: 0.8, ease: brutalEase }
+  },
+  exit: { 
+    height: "100%",
+    transition: { duration: 0.6, ease: [0.4, 0, 1, 1] }
+  }
 }
 
 // Modal/Overlay variants
 export const modalVariants = {
   initial: {
     opacity: 0,
-    scale: 0.96,
-    y: -10,
+    scale: 0.9,
+    y: 20,
+    rotate: -1,
   },
   animate: {
     opacity: 1,
     scale: 1,
     y: 0,
+    rotate: 0,
     transition: {
-      duration: 0.2,
-      ease: 'easeOut',
+      duration: 0.5,
+      ease: brutalEase,
     },
   },
   exit: {
     opacity: 0,
-    scale: 0.96,
-    y: -10,
+    scale: 0.95,
+    y: 10,
     transition: {
-      duration: 0.15,
+      duration: 0.3,
       ease: 'easeIn',
     },
   },
@@ -58,17 +85,20 @@ export const modalVariants = {
 export const backdropVariants = {
   initial: {
     opacity: 0,
+    backdropFilter: 'blur(0px)',
   },
   animate: {
     opacity: 1,
+    backdropFilter: 'blur(12px)',
     transition: {
-      duration: 0.15,
+      duration: 0.4,
     },
   },
   exit: {
     opacity: 0,
+    backdropFilter: 'blur(0px)',
     transition: {
-      duration: 0.15,
+      duration: 0.3,
     },
   },
 }
@@ -77,15 +107,25 @@ export const backdropVariants = {
 export const cardVariants = {
   initial: {
     opacity: 0,
-    y: 10,
+    y: 30,
+    scale: 0.98,
   },
   animate: {
     opacity: 1,
     y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: brutalEase,
+    },
   },
   exit: {
     opacity: 0,
-    y: -10,
+    y: -30,
+    scale: 0.98,
+    transition: {
+      duration: 0.3,
+    },
   },
 }
 
@@ -95,62 +135,72 @@ export const containerVariants = {
   animate: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.1,
+      staggerChildren: 0.08,
+      delayChildren: 0.2,
     },
   },
   exit: {
     opacity: 0,
     transition: {
-      staggerChildren: 0.02,
+      staggerChildren: 0.05,
+      staggerDirection: -1,
     },
   },
 }
 
-// List item variants (for staggered animations)
+// List item variants (Physical feel)
 export const itemVariants = {
   initial: {
     opacity: 0,
-    y: 8,
+    y: 15,
+    x: -5,
   },
   animate: {
     opacity: 1,
     y: 0,
+    x: 0,
     transition: {
-      duration: 0.2,
-      ease: 'easeOut',
+      duration: 0.4,
+      ease: brutalEase,
     },
   },
   exit: {
     opacity: 0,
-    y: -8,
+    y: -10,
     transition: {
-      duration: 0.15,
+      duration: 0.2,
     },
   },
   hover: {
-    y: -2,
+    y: -4,
+    x: 2,
     transition: {
-      duration: 0.2,
-      ease: 'easeOut',
+      duration: 0.3,
+      ease: bounceEase,
     },
   },
 }
 
-// Button variants
+// Button variants (Physical "Mass")
 export const buttonVariants = {
   rest: {
     scale: 1,
+    y: 0,
+    boxShadow: "0px 0px 0px rgba(0,0,0,0)",
   },
   hover: {
     scale: 1.02,
+    y: -2,
+    boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
     transition: {
-      duration: 0.2,
-      ease: 'easeOut',
+      duration: 0.3,
+      ease: brutalEase,
     },
   },
   tap: {
     scale: 0.98,
+    y: 1,
+    boxShadow: "0px 1px 4px rgba(0,0,0,0.1)",
     transition: {
       duration: 0.1,
     },

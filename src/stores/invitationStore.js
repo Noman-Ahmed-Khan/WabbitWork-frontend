@@ -206,10 +206,6 @@ const useInvitationStore = create((set, get) => ({
     try {
       set({ loading: true, error: null })
       const response = await invitationsApi.create(teamId, data)
-      
-      // Refresh sent invitations
-      await get().fetchSent()
-      
       set({ loading: false })
       return response
     } catch (error) {

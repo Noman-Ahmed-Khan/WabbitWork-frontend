@@ -7,6 +7,15 @@ import teamsApi from '../api/teams'
  * 
  * @module stores/teamStore
  */
+
+const syncSelectedTeam = (set, get, teamId) => {
+  const currentSelectedTeam = get().selectedTeam
+  if (currentSelectedTeam?.id !== teamId) return
+
+  const refreshedTeam = get().teams.find((team) => team.id === teamId) || null
+  set({ selectedTeam: refreshedTeam })
+}
+
 const useTeamStore = create((set, get) => ({
   // State
   teams: [],
@@ -31,6 +40,7 @@ const useTeamStore = create((set, get) => ({
       set({ loading: true, error: null })
       const response = await teamsApi.getAll()
       set({ teams: response.data.teams, loading: false })
+      syncSelectedTeam(set, get, get().selectedTeam?.id)
     } catch (error) {
       set({ error: error.message, loading: false, teams: [] })
       throw error
@@ -92,6 +102,7 @@ const useTeamStore = create((set, get) => ({
       set({ loading: true, error: null })
       await teamsApi.update(id, data)
       await get().loadTeams()
+      syncSelectedTeam(set, get, id)
       set({ loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
@@ -108,9 +119,41 @@ const useTeamStore = create((set, get) => ({
       set({ loading: true, error: null })
       await teamsApi.delete(id)
       await get().loadTeams()
-      if (get().selectedTeam?.id === id) {
-        set({ selectedTeam: null })
-      }
+      syncSelectedTeam(set, get, id)
+      set({ loading: false })
+    } catch (error) {
+      set({ error: error.message, loading: false })
+      throw error
+    }
+  },
+
+  /**
+   * Archive a team
+   * @param {string} id - Team ID
+   */
+  archiveTeam: async (id) => {
+    try {
+      set({ loading: true, error: null })
+      await teamsApi.update(id, { is_active: false })
+      await get().loadTeams()
+      syncSelectedTeam(set, get, id)
+      set({ loading: false })
+    } catch (error) {
+      set({ error: error.message, loading: false })
+      throw error
+    }
+  },
+
+  /**
+   * Restore a team
+   * @param {string} id - Team ID
+   */
+  restoreTeam: async (id) => {
+    try {
+      set({ loading: true, error: null })
+      await teamsApi.update(id, { is_active: true })
+      await get().loadTeams()
+      syncSelectedTeam(set, get, id)
       set({ loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
@@ -163,7 +206,8 @@ const useTeamStore = create((set, get) => ({
       set({ loading: true, error: null })
       await teamsApi.leaveTeam(teamId)
       await get().loadTeams()
-      set({ selectedTeam: null, loading: false })
+      syncSelectedTeam(set, get, teamId)
+      set({ loading: false })
     } catch (error) {
       set({ error: error.message, loading: false })
       throw error

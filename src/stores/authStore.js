@@ -2,22 +2,117 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import authApi from '../api/auth'
 
+// Commit 7: Minor update
+
+const hasOwnProperty = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key)
+
+const getUserFromResponse = (payload) => {
+  if (!payload) return null
+
+  if (payload.user && typeof payload.user === 'object') {
+    return payload.user
+  }
+
+  if (payload.data?.user && typeof payload.data.user === 'object') {
+    return payload.data.user
+  }
+
+  if (
+    hasOwnProperty(payload, 'id') ||
+    hasOwnProperty(payload, 'email') ||
+    hasOwnProperty(payload, 'first_name') ||
+    hasOwnProperty(payload, 'last_name')
+  ) {
+    return payload
+  }
+
+  return null
+}
+
+const getAvatarUpdateFromResponse = (payload) => {
+  if (!payload) return null
+
+  if (payload.user && typeof payload.user === 'object') {
+    return payload.user
+  }
+
+  if (payload.data?.user && typeof payload.data.user === 'object') {
+    return payload.data.user
+  }
+
+  if (hasOwnProperty(payload, 'avatar_url')) {
+    return { avatar_url: payload.avatar_url }
+  }
+
+  if (payload.data && hasOwnProperty(payload.data, 'avatar_url')) {
+    return { avatar_url: payload.data.avatar_url }
+  }
+
+  if (
+    hasOwnProperty(payload, 'id') ||
+    hasOwnProperty(payload, 'email') ||
+    hasOwnProperty(payload, 'first_name') ||
+    hasOwnProperty(payload, 'last_name')
+  ) {
+    return payload
+  }
+
+  return null
+}
+
+const requiresEmailVerification = (user) => {
+  if (!user) return false
+
+  if (hasOwnProperty(user, 'email_verified')) {
+    return !Boolean(user.email_verified)
+  }
+
+  if (hasOwnProperty(user, 'is_active')) {
+    return !Boolean(user.is_active)
+  }
+
+  return false
+}
+
+const isOAuthFailureRoute = () => {
+  if (typeof window === 'undefined') return false
+
+  return new URLSearchParams(window.location.search).get('error') === 'auth_failed'
+}
+
+const getErrorMessage = (error, fallback = 'Request failed') => {
+  return error?.response?.data?.message || error?.message || fallback
+}
+
+const mergeUserUpdates = (set, get, updates) => {
+  const user = get().user ? { ...get().user, ...updates } : null
+
+  set({
+    user,
+    isAuthenticated: !!user,
+    emailVerificationRequired: requiresEmailVerification(user),
+    error: null,
+  })
+
+  return user
+}
+
 const useAuthStore = create(
   persist(
     (set, get) => ({
       // State
       user: null,
       isAuthenticated: false,
-      loading: false,
+      loading: true,
       error: null,
       emailVerificationRequired: false,
 
       // Setters
-      setUser: (user) => set({ 
-        user, 
-        isAuthenticated: !!user, 
-        emailVerificationRequired: user ? !user.email_verified : false,
-        error: null 
+      setUser: (user) => set({
+        user,
+        isAuthenticated: !!user,
+        emailVerificationRequired: requiresEmailVerification(user),
+        error: null,
       }),
       
       setLoading: (loading) => set({ loading }),
@@ -28,7 +123,7 @@ const useAuthStore = create(
        * Mark email as verified (updates local state)
        */
       setEmailVerified: () => set(state => ({
-        user: state.user ? { ...state.user, is_verified: true } : null,
+        user: state.user ? { ...state.user, email_verified: true, is_active: true } : null,
         emailVerificationRequired: false,
       })),
 
@@ -38,34 +133,85 @@ const useAuthStore = create(
       checkAuth: async () => {
         try {
           set({ loading: true, error: null })
-          const response = await authApi.checkStatus()
-          
-          if (response.data.isAuthenticated) {
-            const user = response.data.user
-            set({ 
-              user, 
-              isAuthenticated: true,
-              emailVerificationRequired: !user.email_verified,
-              loading: false 
-            })
-          } else {
-            set({ 
-              user: null, 
+          const response = await authApi.getMe()
+
+          const user = getUserFromResponse(response)
+
+          if (!user) {
+            set({
+              user: null,
               isAuthenticated: false,
               emailVerificationRequired: false,
-              loading: false 
+              loading: false,
+              error: null,
             })
+            return null
           }
+
+          set({
+            user: get().user ? { ...get().user, ...user } : user,
+            isAuthenticated: true,
+            emailVerificationRequired: requiresEmailVerification(user),
+            loading: false,
+            error: null,
+          })
+
+          return response
         } catch (error) {
           console.error('Auth check failed:', error)
+          const status = error?.response?.status ?? error?.status
+          const isAuthFailure = status === 401 || status === 403
+          const preserveError = isAuthFailure && isOAuthFailureRoute()
+
           set({ 
             user: null, 
             isAuthenticated: false,
-            emailVerificationRequired: false, 
+            emailVerificationRequired: false,
             loading: false,
-            error: error.message 
+            error: preserveError ? get().error : (isAuthFailure ? null : getErrorMessage(error, 'Authentication failed'))
           })
+
+          return null
         }
+      },
+
+      /**
+       * Refresh the current user profile without toggling the global loading state
+       */
+      refreshProfile: async () => {
+        try {
+          const response = await authApi.getMe()
+          const user = getUserFromResponse(response)
+
+          if (!user) {
+            set({
+              user: null,
+              isAuthenticated: false,
+              emailVerificationRequired: false,
+              error: null,
+            })
+            return null
+          }
+
+          set({
+            user: get().user ? { ...get().user, ...user } : user,
+            isAuthenticated: true,
+            emailVerificationRequired: requiresEmailVerification(user),
+            error: null,
+          })
+
+          return user
+        } catch (error) {
+          console.error('Profile refresh failed:', error)
+          throw error
+        }
+      },
+
+      /**
+       * Initiate Google OAuth login
+       */
+      googleLogin: () => {
+        authApi.googleLogin()
       },
 
       /**
@@ -75,18 +221,23 @@ const useAuthStore = create(
         try {
           set({ loading: true, error: null })
           const response = await authApi.login(credentials)
-          const user = response.data.user
+
+          const user = getUserFromResponse(response)
+          if (!user) {
+            throw new Error('Invalid authentication response')
+          }
           
-          set({ 
-            user, 
+          set({
+            user: get().user ? { ...get().user, ...user } : user,
             isAuthenticated: true,
-            emailVerificationRequired: !user.email_verified,
-            loading: false 
+            emailVerificationRequired: requiresEmailVerification(user),
+            loading: false,
+            error: null,
           })
           
           return response
         } catch (error) {
-          set({ loading: false, error: error.message })
+          set({ loading: false, error: getErrorMessage(error, 'Login failed') })
           throw error
         }
       },
@@ -98,18 +249,23 @@ const useAuthStore = create(
         try {
           set({ loading: true, error: null })
           const response = await authApi.register(data)
-          const user = response.data.user
+
+          const user = getUserFromResponse(response)
+          if (!user) {
+            throw new Error('Invalid authentication response')
+          }
           
-          set({ 
-            user, 
+          set({
+            user: get().user ? { ...get().user, ...user } : user,
             isAuthenticated: true,
-            emailVerificationRequired: !user.email_verified,
-            loading: false 
+            emailVerificationRequired: requiresEmailVerification(user),
+            loading: false,
+            error: null,
           })
           
           return response
         } catch (error) {
-          set({ loading: false, error: error.message })
+          set({ loading: false, error: getErrorMessage(error, 'Registration failed') })
           throw error
         }
       },
@@ -123,11 +279,12 @@ const useAuthStore = create(
         } catch (error) {
           console.error('Logout error:', error)
         } finally {
-          set({ 
-            user: null, 
+          set({
+            user: null,
             isAuthenticated: false,
-            emailVerificationRequired: false, 
-            error: null 
+            emailVerificationRequired: false,
+            loading: false,
+            error: null,
           })
         }
       },
@@ -142,14 +299,15 @@ const useAuthStore = create(
           
           // Update user verification status
           set(state => ({
-            user: state.user ? { ...state.user, is_verified: true } : null,
+            user: state.user ? { ...state.user, email_verified: true, is_active: true } : null,
             emailVerificationRequired: false,
             loading: false,
+            error: null,
           }))
           
           return response
         } catch (error) {
-          set({ loading: false, error: error.message })
+          set({ loading: false, error: getErrorMessage(error, 'Verification failed') })
           throw error
         }
       },
@@ -164,14 +322,15 @@ const useAuthStore = create(
           
           // Update user verification status
           set(state => ({
-            user: state.user ? { ...state.user, is_verified: true } : null,
+            user: state.user ? { ...state.user, email_verified: true, is_active: true } : null,
             emailVerificationRequired: false,
             loading: false,
+            error: null,
           }))
           
           return response
         } catch (error) {
-          set({ loading: false, error: error.message })
+          set({ loading: false, error: getErrorMessage(error, 'Verification failed') })
           throw error
         }
       },
@@ -191,13 +350,44 @@ const useAuthStore = create(
       /**
        * Update user profile in store
        */
-      updateUser: (updates) => {
-        set(state => ({
-          user: state.user ? { ...state.user, ...updates } : null,
-          emailVerificationRequired: updates.email_verified === true 
-            ? false 
-            : state.emailVerificationRequired,
-        }))
+      updateUser: (updates) => mergeUserUpdates(set, get, updates),
+
+      /**
+       * Update profile details from the settings screen
+       */
+      updateProfile: (updates) => mergeUserUpdates(set, get, updates),
+
+      /**
+       * Update the authenticated user's avatar
+       */
+      updateAvatar: async (payload) => {
+        try {
+          const response = await authApi.updateAvatar(payload)
+          const avatarUpdate = getAvatarUpdateFromResponse(response)
+
+          if (avatarUpdate) {
+            return mergeUserUpdates(set, get, avatarUpdate)
+          }
+
+          const refreshedUser = await get().refreshProfile()
+          return refreshedUser
+        } catch (error) {
+          throw error
+        }
+      },
+
+      /**
+       * Remove the authenticated user's avatar
+       */
+      removeAvatar: async () => {
+        try {
+          const response = await authApi.removeAvatar()
+          const avatarUpdate = getAvatarUpdateFromResponse(response) || { avatar_url: null }
+
+          return mergeUserUpdates(set, get, avatarUpdate)
+        } catch (error) {
+          throw error
+        }
       },
 
       /**
@@ -210,7 +400,7 @@ const useAuthStore = create(
           set({ loading: false })
           return response
         } catch (error) {
-          set({ loading: false, error: error.message })
+          set({ loading: false, error: getErrorMessage(error, 'Password change failed') })
           throw error
         }
       },
@@ -225,7 +415,7 @@ const useAuthStore = create(
           set({ loading: false })
           return response
         } catch (error) {
-          set({ loading: false, error: error.message })
+          set({ loading: false, error: getErrorMessage(error, 'Email change failed') })
           throw error
         }
       },
