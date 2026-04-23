@@ -39,7 +39,7 @@ export default function InvitationConfirmationView() {
         </div>
 
         {/* Card */}
-        <div className="glass-panel rounded-xl p-8 md:p-12 shadow-[40px_0_40px_-20px_rgba(0,0,0,0.06)]">
+        <div className="brutalist-card p-8 md:p-12">
           {isAccepted && (
             <>
               <div className="text-center mb-8">

@@ -92,7 +92,7 @@ export default function ResetPasswordView() {
             {config.app.name}
           </span>
         </div>
-        <div className="glass-panel rounded-xl p-8 md:p-12 shadow-[40px_0_40px_-20px_rgba(0,0,0,0.06)] text-center">
+        <div className="brutalist-card p-8 md:p-12 text-center">
           <div className={`w-16 h-16 rounded-full ${bgColor} flex items-center justify-center mx-auto mb-6`}>
             <span className={`material-symbols-outlined text-3xl ${iconColor}`}>{icon}</span>
           </div>
@@ -181,7 +181,7 @@ export default function ResetPasswordView() {
           </span>
         </div>
 
-        <div className="glass-panel rounded-xl p-8 md:p-12 shadow-[40px_0_40px_-20px_rgba(0,0,0,0.06)]">
+        <div className="brutalist-card p-8 md:p-12">
           <div className="text-center mb-8">
             <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mx-auto mb-4">
               <span className="material-symbols-outlined text-on-surface" style={{ fontVariationSettings: "'FILL' 1" }}>

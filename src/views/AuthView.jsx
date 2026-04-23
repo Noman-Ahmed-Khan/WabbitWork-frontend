@@ -81,6 +81,10 @@ export default function AuthView() {
     setFormData({ email: '', password: '', first_name: '', last_name: '' })
   }
 
+  const handleLogoClick = () => {
+    navigate('/', { replace: true })
+  }
+
   return (
     <div 
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-neutral-100 dark:bg-neutral-900"
@@ -90,8 +94,10 @@ export default function AuthView() {
       <BackgroundElements mode={mode} />
 
       {/* Corner Branding */}
-      <motion.div 
-        className="fixed top-6 left-6 z-50 flex flex-col"
+      <motion.button
+        type="button"
+        onClick={handleLogoClick}
+        className="fixed top-6 left-6 z-50 flex flex-col text-left cursor-pointer focus:outline-none"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.15, duration: 0.4 }}
@@ -102,7 +108,7 @@ export default function AuthView() {
         <span className="font-semibold text-[10px] tracking-[0.25em] uppercase text-neutral-400 dark:text-neutral-500">
           Brutalist Edition
         </span>
-      </motion.div>
+      </motion.button>
 
       {/* Theme Toggle */}
       <motion.button
