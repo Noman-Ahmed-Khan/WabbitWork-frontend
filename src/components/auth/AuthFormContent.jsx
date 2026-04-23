@@ -25,13 +25,13 @@ export default function AuthFormContent({
 }) {
   const [showPassword, setShowPassword] = useState(false)
 
-  const inputClasses = 'w-full h-10 bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-sm border border-black/8 dark:border-white/10 rounded-lg font-black text-xs tracking-wider focus:outline-none focus:ring-2 focus:ring-neutral-800 dark:focus:ring-white/80 focus:border-transparent transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-neutral-900 dark:text-white'
+  const inputClasses = 'w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] backdrop-blur-sm border border-black/8 dark:border-white/10 rounded-lg font-black text-xs tracking-wider focus:outline-none focus:ring-2 focus:ring-neutral-800 dark:focus:ring-white/80 focus:border-transparent transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 text-neutral-900 dark:text-white'
 
   return (
     <AnimatePresence mode="wait">
       <motion.form
         key={mode}
-        className="space-y-3"
+        className="space-y-3 pt-1"
         onSubmit={onSubmit}
         variants={formContainerVariants}
         initial="hidden"
