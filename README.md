@@ -470,8 +470,6 @@ The application implements a "Performance-First" architecture for its sophistica
 - **Resource Pooling**: Geometries and materials are cached and reused across the application.
 - **Reduced Motion Support**: Full compliance with `prefers-reduced-motion` media queries.
 
-For a deep dive into the technical implementation of these optimizations, see the [Optimization Report](OPTIMIZATION_REPORT.md).
-
 ### User Experience with Motion
 
 Animations serve functional purposes:
