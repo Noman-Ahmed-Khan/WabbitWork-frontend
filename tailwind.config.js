@@ -48,7 +48,7 @@ export default {
         "surface-dim": "var(--surface-dim)",
         "background": "var(--background)",
         "outline-variant": "var(--outline-variant)",
-        "surface-container-highest": "var(--surface-container-highest)",
+        "surface-container-highest": "rgb(var(--surface-container-highest) / <alpha-value>)",
         "secondary-fixed-dim": "var(--secondary-fixed-dim)",
         "primary": "var(--primary)",
         "on-surface-variant": "var(--on-surface-variant)",
