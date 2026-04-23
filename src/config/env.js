@@ -61,10 +61,6 @@ const config = {
   debugMode: parseBoolean(getEnvVar('VITE_DEBUG_MODE', 'false')),
 }
 
-// Log configuration in debug mode
-if (config.debugMode) {
-  console.log('App Configuration:', config)
-}
 
 // Validate required configurations
 if (!config.api.baseURL) {
