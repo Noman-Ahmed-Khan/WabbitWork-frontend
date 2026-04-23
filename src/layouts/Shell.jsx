@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import useAuthStore from '../stores/authStore'
 import SideNavBar from '../components/navigation/SideNavBar'
 import TopNavBar from '../components/navigation/TopNavBar'
-import Dock from '../components/navigation/Dock'
 import EmailVerificationBanner from '../components/auth/EmailVerificationBanner'
 import { pageVariants, shutterVariants } from '../animations/variants'
 
@@ -36,7 +35,7 @@ export default function Shell({ children }) {
         <TopNavBar />
 
         {/* Page Content */}
-        <main className="relative z-10 p-1 pb-20 md:pb-1">
+        <main className="relative z-10 p-1 pb-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -60,9 +59,6 @@ export default function Shell({ children }) {
             </motion.div>
           </AnimatePresence>
         </main>
-        
-        {/* Bottom Navigation (Mobile Only) */}
-        <Dock />
       </div>
     </div>
   )

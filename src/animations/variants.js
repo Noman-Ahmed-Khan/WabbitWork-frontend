@@ -254,40 +254,6 @@ export const pulseVariants = {
   },
 }
 
-// Dock icon animations
-export const dockIconVariants = {
-  rest: {
-    y: 0,
-  },
-  hover: {
-    y: -4,
-    transition: {
-      duration: 0.2,
-      ease: 'easeOut',
-    },
-  },
-  tap: {
-    y: 0,
-  },
-}
-
-// Active indicator for Dock
-export const dockIndicatorVariants = {
-  initial: { opacity: 0 },
-  animate: {
-    opacity: 1,
-    transition: {
-      duration: 0.2,
-    },
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      duration: 0.2,
-    },
-  },
-}
-
 // Success/Error animations
 export const successVariants = {
   initial: {
